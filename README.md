@@ -51,7 +51,7 @@ These loops run in parallel over a shared, evidence-backed parking inventory.
 
 ## Implementation foundation
 
-Phase 1 now starts with a formal **Parking Inventory Layer**.
+Phase 1 starts with a formal **Parking Inventory Layer**.
 
 ```text
 DATA SOURCES
@@ -74,6 +74,26 @@ PARKING INVENTORY LAYER ───────→ EVIDENCE / PROVENANCE
 Stable parking assets receive canonical `WB-PARK-*` identifiers. Live availability is stored separately as time-series observations so a changing space count never overwrites the permanent asset record.
 
 The first authoritative ingestion target is the Cork City Council real-time parking dataset. The Cork source registry, pilot boundary and machine-readable data contracts live under `config/` and `data_contracts/`.
+
+## Run the first Cork ingestion
+
+The first executable pipeline uses only the Python standard library.
+
+```bash
+python scripts/ingest_cork_parking.py
+```
+
+Run its unit tests with:
+
+```bash
+python -m unittest tests/test_ingest_cork_parking.py
+```
+
+The ingestion process preserves the raw source snapshot, validates source fields and quality rules, separates stable inventory from live observations, quarantines inconsistent records, and writes a run manifest with a SHA-256 evidence hash.
+
+Generated pilot data is written under `data/cork/` and excluded from Git.
+
+See [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md) for operational details and known limitations.
 
 ## Key design principle
 
@@ -141,7 +161,12 @@ WhiteBlock/
 ├── data_contracts/
 │   ├── parking_inventory.schema.json
 │   └── parking_observation.schema.json
+├── scripts/
+│   └── ingest_cork_parking.py
+├── tests/
+│   └── test_ingest_cork_parking.py
 └── docs/
+    ├── CORK_INGESTION_RUNBOOK.md
     ├── CORK_MVP.md
     ├── DATA_EVIDENCE_MODEL.md
     ├── DATA_SOURCES.md
@@ -155,6 +180,7 @@ WhiteBlock/
 ## Documentation
 
 - [Parking Inventory Layer](docs/PARKING_INVENTORY_LAYER.md)
+- [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md)
 - [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
 - [Cork MVP](docs/CORK_MVP.md)
 - [Data & Evidence Model](docs/DATA_EVIDENCE_MODEL.md)
@@ -165,9 +191,9 @@ WhiteBlock/
 
 ## Current status
 
-**Stage:** Cork inventory-layer implementation foundation.
+**Stage:** Cork inventory-layer implementation.
 
-The immediate objective is to ingest and reconcile the Cork authoritative baseline, create the first canonical `WB-PARK-*` dataset and establish measurable inventory quality before introducing recommendation ML, proprietary sensors or nationwide coverage.
+The repository now contains both the contracts and the first executable Cork ingestion pipeline. The next engineering objective is **persistent spatial storage + multi-source entity reconciliation** before imagery candidates or forecasting are allowed to depend on the canonical layer.
 
 ## Working brand
 
