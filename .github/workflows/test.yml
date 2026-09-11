@@ -1,0 +1,52 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgis:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: whiteblock
+          POSTGRES_USER: whiteblock
+          POSTGRES_PASSWORD: whiteblock_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U whiteblock -d whiteblock"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://whiteblock:whiteblock_test@localhost:5432/whiteblock
+      PGPASSWORD: whiteblock_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Apply database migrations
+        run: |
+          for migration in db/migrations/*.sql; do
+            echo "Applying ${migration}"
+            psql -h localhost -U whiteblock -d whiteblock -v ON_ERROR_STOP=1 -f "${migration}"
+          done
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -p 'test_*.py'
