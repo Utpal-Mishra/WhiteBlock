@@ -49,9 +49,34 @@ These loops run in parallel over a shared, evidence-backed parking inventory.
 - Identify when pricing, routing, reservations or shared/private capacity can solve pressure.
 - Recommend investigation of new supply only after existing capacity has been evaluated.
 
+## Application UI
+
+WHITEBLOCK now includes a responsive static application shell under `web/`.
+
+The UI carries the same product-family design language as the user's other projects: dark-green canvas, restrained elevated cards, high-contrast typography, green/lime active states and compact mobile navigation. WHITEBLOCK differentiates itself through white parking-line geometry, spatial-grid motifs, candidate outlines and evidence-aware map interactions.
+
+Primary views:
+
+- **Find** — destination-first parking search, filters, map and explainable recommendations.
+- **Discover** — supply discovery and change-detection workspace.
+- **Network** — parking-supply adequacy, demand and redistribution strategy.
+- **Evidence** — observed/inferred/predicted truth states, confidence and freshness.
+
+Run the prototype locally:
+
+```bash
+python -m http.server 8000 -d web
+```
+
+Then open `http://localhost:8000`.
+
+The current front end uses explicitly labelled demo values. It is not yet connected to the PostGIS spatial core.
+
+See [UI Design System](docs/UI_DESIGN_SYSTEM.md).
+
 ## Implementation foundation
 
-WHITEBLOCK now has a persistent **Parking Inventory + Spatial Reconciliation Layer**.
+WHITEBLOCK has a persistent **Parking Inventory + Spatial Reconciliation Layer**.
 
 ```text
 EXTERNAL SOURCES
@@ -80,7 +105,7 @@ Stable parking assets receive canonical `WB-PARK-*` identifiers. Live availabili
 
 Secondary sources are staged before they can affect canonical inventory. Exact source links are reused first; otherwise WHITEBLOCK uses conservative spatial/name/capacity reconciliation and sends ambiguous records to review.
 
-## Local development
+## Local backend development
 
 Copy the environment template and use a non-default password:
 
@@ -214,7 +239,7 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
                               ↓
                    DECISION / RECOMMENDATION
                               ↓
-               Driver App + B2B Intelligence
+              WHITEBLOCK Application + API
 ```
 
 ## Repository structure
@@ -226,6 +251,10 @@ WhiteBlock/
 ├── docker-compose.yml
 ├── .env.example
 ├── requirements.txt
+├── web/
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js
 ├── config/
 │   ├── cork_pilot.yaml
 │   └── cork_sources.yaml
@@ -234,9 +263,6 @@ WhiteBlock/
 │   └── parking_observation.schema.json
 ├── db/
 │   └── migrations/
-│       ├── 001_spatial_core.sql
-│       ├── 002_evidence_dedup.sql
-│       └── 003_source_record_dedup.sql
 ├── scripts/
 │   ├── db_common.py
 │   ├── ingest_cork_parking.py
@@ -245,8 +271,10 @@ WhiteBlock/
 │   ├── reconcile_source_records.py
 │   └── resolve_entity_match.py
 ├── tests/
+│   ├── test_db_integration.py
 │   ├── test_ingest_cork_parking.py
-│   └── test_reconciliation.py
+│   ├── test_reconciliation.py
+│   └── test_web_ui.py
 └── docs/
     ├── CORK_INGESTION_RUNBOOK.md
     ├── CORK_MVP.md
@@ -257,11 +285,13 @@ WhiteBlock/
     ├── PRODUCT_PRINCIPLES.md
     ├── ROADMAP.md
     ├── SPATIAL_STORAGE_RECONCILIATION.md
-    └── SYSTEM_ARCHITECTURE.md
+    ├── SYSTEM_ARCHITECTURE.md
+    └── UI_DESIGN_SYSTEM.md
 ```
 
 ## Documentation
 
+- [UI Design System](docs/UI_DESIGN_SYSTEM.md)
 - [Spatial Storage & Entity Reconciliation](docs/SPATIAL_STORAGE_RECONCILIATION.md)
 - [Parking Inventory Layer](docs/PARKING_INVENTORY_LAYER.md)
 - [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md)
@@ -275,11 +305,11 @@ WhiteBlock/
 
 ## Current status
 
-**Stage:** persistent Cork spatial-core implementation.
+**Stage:** Cork spatial core + first responsive application UI.
 
-WHITEBLOCK now has an authoritative Cork ingestion path, PostGIS-backed canonical inventory, historical observations, evidence storage, generic secondary-source staging and conservative entity reconciliation.
+WHITEBLOCK now has an authoritative Cork ingestion path, PostGIS-backed canonical inventory, historical observations, evidence storage, generic secondary-source staging, conservative entity reconciliation and a responsive driver/intelligence interface.
 
-The next engineering objective is to integrate the first real secondary geospatial source and measure reconciliation precision before imagery-derived candidates are allowed to influence the canonical inventory.
+The next engineering objective is to expose a read-only API from the spatial core and replace the front-end demo inventory with canonical parking locations and observations.
 
 ## Working brand
 
