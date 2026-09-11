@@ -1,0 +1,200 @@
+# WHITEBLOCK Decision Log
+
+This file records important project decisions so the architecture does not drift without an explicit reason.
+
+---
+
+## 2026-09-11 — Master brand
+
+**Decision:** Use **WHITEBLOCK** (singular) as the working master brand.
+
+**Why:**
+
+- distinctive enough to support a broader spatial-intelligence story;
+- not restricted to a parking-payment application;
+- can represent the platform/system rather than individual parking spaces;
+- allows `WhiteBlocks` to be used conceptually for individual spatial opportunities if useful later.
+
+**Caveat:** Complete formal trademark/company/domain clearance before commercial launch.
+
+---
+
+## 2026-09-11 — Canonical repository
+
+**Decision:** Use `Utpal-Mishra/WhiteBlock` as the canonical project repository.
+
+Repository:
+
+`https://github.com/Utpal-Mishra/WhiteBlock`
+
+---
+
+## 2026-09-11 — Product category
+
+**Decision:** Build WHITEBLOCK as **parking/spatial intelligence infrastructure**, not another parking-payment app.
+
+The first differentiator is decision intelligence:
+
+> where should a driver park for a specific trip, and how should the parking network use existing supply more effectively?
+
+---
+
+## 2026-09-11 — Ireland first, Cork first
+
+**Decision:** Start in Ireland with a controlled Cork proof of concept.
+
+**Why:**
+
+- manageable geography;
+- useful public/open parking data;
+- enough parking complexity to test the architecture;
+- enables learning before Dublin/national expansion.
+
+---
+
+## 2026-09-11 — Destination-first UX
+
+**Decision:** The primary consumer interaction starts with the destination/trip rather than a map of parking facilities.
+
+Core inputs:
+
+- destination;
+- ETA;
+- expected stay;
+- EV/accessibility needs;
+- cost/distance preference.
+
+---
+
+## 2026-09-11 — Two parallel intelligence loops
+
+**Decision:** Parking Supply Discovery and Parking Network Optimisation run in parallel.
+
+Discovery does not pause optimisation, and optimisation does not depend on discovering new land.
+
+---
+
+## 2026-09-11 — Imagery role
+
+**Decision:** Use appropriately licensed satellite/aerial/orthophoto imagery for **parking discovery, capacity estimation and change detection**, not as the core source for real-time vacancy.
+
+**Reason:** imagery capture cadence, resolution, cloud/occlusion and licensing make live individual-bay occupancy unreliable for the initial architecture.
+
+---
+
+## 2026-09-11 — No scraped proprietary map imagery
+
+**Decision:** Do not build computer-vision training/extraction around imagery whose licence prohibits machine analysis, storage or derivative geodata.
+
+Use open, government or appropriately licensed imagery sources.
+
+---
+
+## 2026-09-11 — Candidate before parking
+
+**Decision:** A newly detected physical parking-like area is a `PARKING_CANDIDATE`, not automatically a verified parking location.
+
+Required verification can include:
+
+- physical use;
+- access class;
+- ownership/land status where necessary;
+- parking rules;
+- public/private/restricted classification.
+
+---
+
+## 2026-09-11 — Confidence and evidence
+
+**Decision:** Store attribute-level evidence/confidence rather than one binary truth value for an entire location.
+
+Geometry, capacity, pricing, access and restrictions may each have different confidence.
+
+---
+
+## 2026-09-11 — Adaptive imagery cadence
+
+**Decision:** Do not mandate weekly nationwide imagery scans.
+
+Use adaptive cadence based on:
+
+- availability of fresh imagery;
+- rate of physical change;
+- parking pressure;
+- expected value of detecting change;
+- imagery cost.
+
+Monthly analysis may be appropriate for selected Cork pilot/high-change areas, while low-change areas can be checked less often.
+
+---
+
+## 2026-09-11 — Change detection
+
+**Decision:** Prioritise changed polygons between imagery periods rather than repeatedly processing every location at equal depth.
+
+The system should detect both **new supply** and **lost supply**.
+
+---
+
+## 2026-09-11 — Optimise before new construction
+
+**Decision:** New physical parking is a late-stage intervention.
+
+Prioritise:
+
+1. existing utilisation;
+2. demand redistribution;
+3. underused/private/shared capacity;
+4. temporary capacity;
+5. only then investigate new parking opportunities.
+
+---
+
+## 2026-09-11 — Payments later
+
+**Decision:** Do not build proprietary payment processing in the first MVP.
+
+Integrate/deep-link to existing operators where permitted. WHITEBLOCK should first prove its parking decision and intelligence advantage.
+
+---
+
+## 2026-09-11 — Sensors later
+
+**Decision:** Do not begin with proprietary city-wide sensors, ANPR or camera infrastructure.
+
+Use existing/open/operator data first and add physical sensing only where its incremental value is demonstrated.
+
+---
+
+## 2026-09-11 — B2B is a first-class future product
+
+**Decision:** Architect data so the same intelligence can support both drivers and organisations.
+
+Potential B2B users include councils, operators, hospitals, universities, airports, retail/property owners and event venues.
+
+Potential B2B outputs include:
+
+- occupancy/utilisation;
+- demand forecasts;
+- supply adequacy;
+- change detection;
+- underused capacity;
+- scenario/strategy recommendations.
+
+---
+
+## Future decisions to record
+
+Add dated entries when choosing or materially changing:
+
+- Cork pilot boundary;
+- primary map/geospatial provider;
+- imagery provider/licence;
+- database/hosting stack;
+- first production data sources;
+- prediction-model strategy;
+- recommendation-score design;
+- privacy/telemetry policy;
+- public API policy;
+- commercial model;
+- final trademark/domain decision.
