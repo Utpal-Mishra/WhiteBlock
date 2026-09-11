@@ -1,0 +1,291 @@
+# Parking Inventory Layer
+
+## Purpose
+
+The Parking Inventory Layer is the canonical spatial layer for WHITEBLOCK. It turns fragmented parking sources into one evidence-backed representation of parking supply that can be used by the recommendation, forecasting, discovery and optimisation engines.
+
+This layer is deliberately separated from live availability. A parking location is a relatively stable asset; availability is a time-varying observation attached to that asset.
+
+## Core responsibility
+
+The layer must answer:
+
+- what parking asset exists here;
+- what type of parking it is;
+- whether public use is verified;
+- who operates it;
+- what capacity is known or estimated;
+- which restrictions apply;
+- which accessibility/EV attributes are present;
+- when each field was last verified;
+- what evidence supports each important claim.
+
+## Canonical identifier
+
+Every verified or candidate asset receives a WHITEBLOCK identifier:
+
+```text
+WB-PARK-{COUNTRY}-{CITY}-{SEQUENCE}
+```
+
+Example:
+
+```text
+WB-PARK-IE-CORK-000001
+```
+
+Candidate opportunities use:
+
+```text
+WB-CAND-IE-CORK-{SEQUENCE}
+```
+
+The WHITEBLOCK ID is stable even when a source changes its own identifier.
+
+## Inventory object
+
+The canonical data contract is stored in:
+
+`data_contracts/parking_inventory.schema.json`
+
+Important field groups are:
+
+### Identity
+- `parking_id`
+- `name`
+- `source_ids`
+
+### Geometry
+- latitude / longitude
+- point or polygon geometry
+- entrance geometry when known
+
+### Classification
+- surface / multi-storey / underground / street / park-and-ride / private-shared / other
+- public / private / permit / customer / unknown access
+- verified / candidate / retired lifecycle status
+
+### Capacity
+- verified capacity
+- estimated capacity
+- accessible spaces
+- EV spaces
+- loading / set-down spaces where relevant
+
+### Rules
+- price text or structured tariff reference
+- opening hours
+- maximum stay
+- height restrictions
+- permit/restriction notes
+
+### Evidence
+- source type
+- source URL or source key
+- source timestamp
+- verification status
+- field confidence
+- freshness
+
+## Cork authoritative baseline
+
+The first authoritative feed is Cork City Council's open parking dataset.
+
+Current source characteristics:
+
+- publisher: Cork City Council;
+- purpose: real-time parking spaces for Cork City;
+- licence: Creative Commons Attribution;
+- resource id: `f4677dac-bb30-412e-95a8-d3c22134e3c0`;
+- access URL: `https://data.corkcity.ie/datastore/dump/f4677dac-bb30-412e-95a8-d3c22134e3c0`;
+- expected fields: `identifier`, `name`, `spaces`, `free_spaces`, `opening_times`, `height_restrictions`, `price`, `notes`, `latitude`, `longitude`, `date`.
+
+This source populates two WHITEBLOCK layers:
+
+1. relatively stable asset attributes into the Parking Inventory Layer;
+2. `free_spaces` and timestamp into the Parking Observation Layer.
+
+This prevents current occupancy from overwriting the permanent asset record.
+
+## Source-to-canonical mapping
+
+| Cork field | WHITEBLOCK target | Treatment |
+|---|---|---|
+| `identifier` | `source_ids.cork_city` | Preserve source identifier |
+| `name` | `name` | Direct mapping |
+| `spaces` | `capacity_verified` | Treat as authoritative capacity while source remains trusted |
+| `free_spaces` | observation `available_spaces` | Never store as static inventory |
+| `opening_times` | `opening_hours_raw` | Raw first; structured parsing later |
+| `height_restrictions` | `height_restriction_raw` | Raw first; parse cautiously |
+| `price` | `pricing_raw` | Raw first; structured tariff model later |
+| `notes` | `source_notes` | Preserve |
+| `latitude` | `location.latitude` | Validate range |
+| `longitude` | `location.longitude` | Validate range |
+| `date` | observation/source timestamp | Use for freshness |
+
+## Ingestion pipeline
+
+```text
+SOURCE
+  ↓
+FETCH
+  ↓
+RAW SNAPSHOT
+  ↓
+SCHEMA VALIDATION
+  ↓
+NORMALISATION
+  ↓
+ENTITY MATCHING
+  ↓
+FIELD-LEVEL EVIDENCE
+  ↓
+CANONICAL INVENTORY
+  ↓
+OBSERVATIONS / HISTORY
+```
+
+### Raw snapshot
+
+Never discard the fetched source payload. Each run should retain:
+
+- retrieval timestamp;
+- source identifier;
+- source URL/version;
+- content hash;
+- record count;
+- validation outcome.
+
+This makes later changes auditable.
+
+## Entity matching
+
+A new source record should not automatically create a duplicate parking asset.
+
+Matching order:
+
+1. exact source identifier already linked;
+2. spatial proximity + normalised name;
+3. spatial polygon overlap;
+4. operator + entrance/address evidence;
+5. manual review when ambiguous.
+
+The system should prefer a false non-match over an incorrect merge.
+
+## Truth states
+
+Every key value should be understood as one of:
+
+- **Observed** — directly supplied by a trusted source or verified ground observation;
+- **Inferred** — derived from imagery, geometry, repeated GPS patterns or model logic;
+- **Predicted** — future state generated by a forecasting model;
+- **Unverified** — plausible candidate awaiting sufficient evidence.
+
+A value must not silently move between these states.
+
+## Confidence
+
+Confidence is field-level where practical, not only record-level.
+
+Suggested initial scale:
+
+```text
+0.95–1.00  authoritative current source
+0.85–0.94  multiple consistent reliable sources
+0.70–0.84  strong inferred evidence
+0.50–0.69  plausible candidate
+<0.50      insufficient for user-facing recommendation
+```
+
+These thresholds are initial product rules and should be calibrated from pilot results.
+
+## Freshness
+
+Different fields age differently.
+
+Examples:
+
+- available spaces: minutes;
+- tariff/rules: days to months, but re-check when source changes;
+- capacity: months to years unless construction/change is detected;
+- imagery-derived geometry: tied to image capture date;
+- public-access status: revalidate periodically and after user/operator reports.
+
+Do not represent an old authoritative record as current merely because the source itself is authoritative.
+
+## Candidate promotion
+
+A discovery candidate must not become verified public parking merely because a paved area or parked vehicles are visible.
+
+Promotion requires sufficient evidence for:
+
+- physical parking use;
+- lawful/authorised access classification;
+- usable vehicle access;
+- current status;
+- restrictions where material to recommendation.
+
+Lifecycle:
+
+```text
+DETECTED
+  ↓
+CANDIDATE
+  ↓
+PHYSICAL PARKING CONFIRMED
+  ↓
+ACCESS CLASSIFIED
+  ↓
+RULES / OPERATOR CHECKED
+  ↓
+VERIFIED
+  ↓
+PUBLISHED
+```
+
+## Pilot boundary
+
+The Cork MVP should use a configurable pilot boundary rather than hard-coding geography into application logic. The initial configuration is stored in `config/cork_pilot.yaml` and may be refined once source coverage and ground-truth validation are reviewed.
+
+## Quality gates
+
+A run should fail or quarantine records when:
+
+- coordinates are missing or invalid;
+- available spaces exceed verified capacity without an explicit source explanation;
+- timestamps are malformed;
+- duplicate source IDs map to multiple canonical assets;
+- required provenance is missing;
+- a candidate is marked public without access evidence.
+
+Warnings rather than failures may be used for:
+
+- missing price;
+- unknown operator;
+- unstructured opening hours;
+- capacity not supplied;
+- stale but still useful geometry.
+
+## Outputs
+
+The inventory layer should eventually expose:
+
+- canonical GeoJSON/API response for map clients;
+- relational/spatial table for analytics;
+- observation history for forecasting;
+- evidence/provenance endpoint;
+- unresolved candidate queue for validation;
+- change log for added, modified, merged and retired assets.
+
+## Initial implementation order
+
+1. Ingest Cork City Council parking feed.
+2. Split stable inventory fields from live observations.
+3. Assign `WB-PARK-*` IDs.
+4. Persist raw snapshots and provenance.
+5. Validate coordinates/capacity/timestamps.
+6. Add OpenStreetMap matching as a secondary source.
+7. Add accessible/EV/rule layers as independent evidence.
+8. Introduce imagery-derived candidates only after the baseline inventory is measurable.
+
+This layer becomes the source of truth consumed by every higher WHITEBLOCK capability.
