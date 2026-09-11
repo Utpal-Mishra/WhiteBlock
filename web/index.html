@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynlyqap48+6K0Kp5cChM2NvKzKjY=" crossorigin="" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./search.css" />
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -31,14 +32,14 @@
       </nav>
 
       <div class="sidebar-foot">
-        <div class="pilot-card"><span class="status-dot"></span><div><strong>Cork Pilot</strong><small>Prototype layer</small></div></div>
+        <div class="pilot-card"><span class="status-dot"></span><div><strong>Cork Pilot</strong><small>National search enabled</small></div></div>
         <button class="icon-button" type="button" aria-label="Settings">⚙</button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <div><p class="eyebrow">Ireland · Cork pilot</p><h1 id="view-title">Find the best place to park.</h1></div>
+        <div><p class="eyebrow">Ireland · Cork intelligence pilot</p><h1 id="view-title">Find the best place to park.</h1></div>
         <div class="top-actions">
           <div class="mode-switch" aria-label="Application mode">
             <button type="button" class="mode active" data-mode="driver">Driver</button>
@@ -50,11 +51,19 @@
 
       <section class="view active" id="view-find" data-view-panel="find">
         <div class="search-panel surface">
-          <div class="search-main"><span class="search-icon">⌕</span><div><label for="destination">Destination</label><input id="destination" type="text" placeholder="Where are you going?" value="Cork City Centre" /></div></div>
+          <div class="search-main">
+            <span class="search-icon">⌕</span>
+            <div class="destination-field">
+              <label for="destination">Destination</label>
+              <input id="destination" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="destination-suggestions" aria-expanded="false" placeholder="Search an address, landmark or place in Ireland" value="Cork City Centre" />
+              <div id="destination-suggestions" class="address-suggestions" role="listbox" aria-label="Address suggestions" hidden></div>
+            </div>
+          </div>
           <div class="search-field"><label for="arrival">Arrive</label><input id="arrival" type="time" value="18:30" /></div>
           <div class="search-field"><label for="duration">Stay</label><select id="duration"><option>1 hour</option><option selected>2 hours</option><option>3 hours</option><option>4+ hours</option></select></div>
           <button class="primary-button" id="search-button" type="button">Find parking <span>→</span></button>
         </div>
+        <div class="search-support-row"><span>Address suggestions cover the Republic of Ireland.</span><span>Parking recommendations currently use the Cork pilot dataset.</span></div>
 
         <div class="quick-filters" aria-label="Parking filters">
           <button class="chip active" type="button" data-filter="best">Best overall</button>
@@ -65,21 +74,28 @@
         </div>
 
         <div class="kpi-grid">
-          <article class="kpi surface"><span>Coverage</span><strong>87%</strong><small>pilot inventory mapped</small></article>
-          <article class="kpi surface"><span>Available now</span><strong>214</strong><small>observed + estimated</small></article>
-          <article class="kpi surface"><span>Avg. confidence</span><strong>92%</strong><small>verified sources</small></article>
-          <article class="kpi surface accent-kpi"><span>Supply pressure</span><strong>Moderate</strong><small>next 60 minutes</small></article>
+          <article class="kpi surface"><span>Coverage</span><strong id="kpi-coverage-value">87%</strong><small id="kpi-coverage-copy">Cork pilot inventory mapped</small></article>
+          <article class="kpi surface"><span>Available now</span><strong id="kpi-availability-value">214</strong><small id="kpi-availability-copy">observed + estimated</small></article>
+          <article class="kpi surface"><span>Avg. confidence</span><strong id="kpi-confidence-value">92%</strong><small id="kpi-confidence-copy">verified pilot sources</small></article>
+          <article class="kpi surface accent-kpi"><span>Supply pressure</span><strong id="kpi-pressure-value">Moderate</strong><small id="kpi-pressure-copy">next 60 minutes</small></article>
         </div>
 
         <div class="find-grid">
           <section class="map-card surface">
-            <div class="card-head map-head"><div><p class="eyebrow">Spatial layer</p><h2>Parking around your destination</h2></div><div class="legend"><span><i class="dot available"></i>Available</span><span><i class="dot pressure"></i>Pressure</span></div></div>
+            <div class="card-head map-head">
+              <div><p class="eyebrow">Spatial layer</p><h2 id="map-title">Parking around your destination</h2></div>
+              <div class="map-head-actions">
+                <div class="legend"><span><i class="dot available"></i>Pilot</span><span><i class="dot pressure"></i>Planned</span></div>
+                <button id="ireland-overview-button" class="map-scope-button" type="button">Ireland overview</button>
+              </div>
+            </div>
             <div id="map" aria-label="Parking map"></div>
-            <div class="map-overlay"><span class="status-dot"></span><div><strong>Live inventory</strong><small>Prototype / demo values</small></div></div>
+            <div class="map-overlay"><span class="status-dot"></span><div><strong id="map-status-title">Cork pilot intelligence</strong><small id="map-status-copy">Prototype / demo values</small></div></div>
           </section>
 
           <section class="results-panel">
             <div class="results-head"><div><p class="eyebrow">Recommended</p><h2>Best options</h2></div><span class="result-count">4 found</span></div>
+            <div id="coverage-message" class="coverage-message surface" hidden></div>
             <div id="parking-list" class="parking-list"></div>
           </section>
         </div>

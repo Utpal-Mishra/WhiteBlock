@@ -8,7 +8,7 @@ WEB = ROOT / "web"
 
 class WhiteBlockWebUITests(unittest.TestCase):
     def test_frontend_files_exist(self):
-        for filename in ("index.html", "styles.css", "app.js"):
+        for filename in ("index.html", "styles.css", "search.css", "app.js"):
             self.assertTrue((WEB / filename).exists(), f"Missing web/{filename}")
 
     def test_core_views_are_present(self):
@@ -27,6 +27,18 @@ class WhiteBlockWebUITests(unittest.TestCase):
     def test_demo_data_is_explicitly_labelled(self):
         html = (WEB / "index.html").read_text(encoding="utf-8").lower()
         self.assertIn("prototype / demo values", html)
+        self.assertIn("parking recommendations currently use the cork pilot dataset", html)
+
+    def test_ireland_address_autocomplete_contract(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        js = (WEB / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="destination-suggestions"', html)
+        self.assertIn('aria-autocomplete="list"', html)
+        self.assertIn('id="ireland-overview-button"', html)
+        self.assertIn("https://photon.komoot.io/api/", js)
+        self.assertIn('code === "IE"', js)
+        self.assertIn("IRELAND_BOUNDS", js)
+        self.assertIn("isInCorkPilot", js)
 
 
 if __name__ == "__main__":
