@@ -1,0 +1,17 @@
+# WHITEBLOCK generated data
+/data/cork/raw/
+/data/cork/curated/
+/data/cork/manifests/
+/data/cork/latest_run.json
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
