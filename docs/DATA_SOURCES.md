@@ -1,6 +1,8 @@
 # WHITEBLOCK Data Source Register
 
-This register tracks candidate data sources, what they can support, and the validation/licensing questions that must be resolved before production use.
+This register tracks data sources, what they support, and the validation/licensing questions that must be resolved before production use.
+
+Machine-readable Cork source configuration is stored in `config/cork_sources.yaml`.
 
 ## 1. Source classes
 
@@ -16,26 +18,57 @@ WHITEBLOCK should prefer sources in this order where practical:
 
 No single source class is sufficient for every parking attribute.
 
-## 2. Cork / Ireland starter sources
+## 2. Cork source — approved for baseline implementation
 
-### Cork local-authority parking data
+### Cork City Council Real Time Parking Spaces
 
-Potential uses:
+**Status:** `APPROVED_FOR_PILOT`
 
-- known parking locations;
-- car-park capacity/availability where published;
-- parking zones;
-- accessible parking;
-- tariffs/rules where available.
+- Publisher: Cork City Council
+- Resource ID: `f4677dac-bb30-412e-95a8-d3c22134e3c0`
+- Access URL: `https://data.corkcity.ie/datastore/dump/f4677dac-bb30-412e-95a8-d3c22134e3c0`
+- Licence: Creative Commons Attribution
+- Role: authoritative parking inventory baseline + live observation source
 
-Required checks:
+Current expected schema:
 
-- exact endpoint/data format;
-- update cadence;
-- licence/attribution;
-- geographic coverage;
-- field stability;
-- historical availability.
+```text
+identifier
+name
+spaces
+free_spaces
+opening_times
+height_restrictions
+price
+notes
+latitude
+longitude
+date
+```
+
+WHITEBLOCK treatment:
+
+- `spaces` → stable capacity attribute;
+- `free_spaces` → time-series observation;
+- `date` → source/observation timestamp;
+- location fields → canonical spatial point after validation;
+- textual rules/pricing → preserve raw value before structured parsing.
+
+Do not infer source freshness from ingestion time alone. Compare the source-provided timestamp with retrieval time.
+
+### Cork City Centre Parking Map
+
+**Status:** `REFERENCE`
+
+Official map page:
+
+`https://www.corkcity.ie/en/council-services/services/parking-services/i-need-a-city-centre-car-park/cork-city-centre-parking-map/`
+
+Officially represented categories include real-time available spaces, city-centre car parks, set-down areas, disabled parking, disc parking retailers and the Black Ash route.
+
+Use the map as an official reference and source-discovery aid. Do not scrape proprietary/base map tiles or assume every displayed layer has machine-readable reuse rights.
+
+## 3. Secondary Cork / Ireland starter sources
 
 ### National / Irish open data portals
 
@@ -71,6 +104,8 @@ Important:
 
 ### OpenStreetMap
 
+**Pilot role:** secondary inventory + geometry + entity matching.
+
 Potential uses:
 
 - parking polygons;
@@ -87,37 +122,25 @@ Required checks:
 - contributor freshness;
 - avoid treating missing OSM data as evidence that parking does not exist.
 
-## 3. Dynamic contextual data
+Official/verified council or operator evidence should not be silently overwritten by an OSM conflict.
+
+## 4. Dynamic contextual data
 
 Potential future categories:
 
 ### Traffic
 
-Supports:
-
-- arrival ETA;
-- driving-time comparison;
-- congestion-aware parking recommendations.
+Supports arrival ETA, driving-time comparison and congestion-aware recommendations.
 
 ### Events
 
-Supports:
-
-- stadium/venue parking pressure;
-- abnormal demand forecasting;
-- temporary routing strategies.
+Supports venue parking pressure, abnormal demand forecasting and temporary routing strategies.
 
 ### Weather
 
-Supports:
+Supports demand forecasting and walking-cost/preferences. Weather should be retained only if it demonstrates predictive value.
 
-- demand forecasting;
-- walking-cost/preferences;
-- model context.
-
-Weather should be used as a feature only if it demonstrates predictive value.
-
-## 4. Operator integrations
+## 5. Operator integrations
 
 Future operator feeds may provide:
 
@@ -144,7 +167,7 @@ SLA/status
 attribution requirement
 ```
 
-## 5. User/geolocation evidence
+## 6. User/geolocation evidence
 
 Potential uses:
 
@@ -154,17 +177,9 @@ Potential uses:
 - search-time estimation;
 - recommendation feedback.
 
-Production use requires privacy-by-design review including:
+Production use requires privacy-by-design review including consent, aggregation, minimisation, retention, re-identification risk, user controls and lawful basis.
 
-- consent;
-- aggregation;
-- minimisation;
-- retention;
-- re-identification risk;
-- user controls;
-- lawful basis.
-
-## 6. Imagery restrictions
+## 7. Imagery restrictions
 
 Do not use a map/imagery provider for computer vision, bulk extraction or dataset creation merely because images are visible in a consumer map.
 
@@ -178,7 +193,7 @@ Before use, document:
 - geographic/use limitations;
 - commercial-use terms.
 
-## 7. Source-quality metadata
+## 8. Source-quality metadata
 
 Every integrated source should have a registry entry containing:
 
@@ -200,11 +215,12 @@ Suggested `production_status` values:
 
 - RESEARCH_ONLY
 - VALIDATING
+- APPROVED_FOR_PILOT
 - APPROVED
 - DEGRADED
 - RETIRED
 
-## 8. Data-source acceptance checklist
+## 9. Data-source acceptance checklist
 
 Before marking a source `APPROVED`:
 
@@ -219,15 +235,13 @@ Before marking a source `APPROVED`:
 - [ ] conflicts with other sources are handled;
 - [ ] evidence records can reference the source.
 
-## 9. Next data-research task
+## 10. Next source integrations
 
-For the Cork MVP, convert this register from source categories into an executable inventory containing:
+After the Cork authoritative feed is running reliably:
 
-- exact dataset/API URL;
-- licence;
-- sample schema;
-- refresh cadence;
-- access method;
-- expected parking attributes;
-- known limitations;
-- ingestion priority.
+1. reconcile OpenStreetMap parking geometry;
+2. identify structured accessible-parking sources;
+3. identify EV bay/charger sources without conflating chargers with public parking access;
+4. structure tariffs/rules;
+5. add licensed imagery only for supply discovery/change detection;
+6. add traffic/events/weather only when the core inventory is reliable.
