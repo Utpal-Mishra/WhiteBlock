@@ -106,6 +106,7 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
 - [Cork MVP](docs/CORK_MVP.md)
 - [Data & Evidence Model](docs/DATA_EVIDENCE_MODEL.md)
 - [Product Principles](docs/PRODUCT_PRINCIPLES.md)
+- [Data Source Register](docs/DATA_SOURCES.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Decision Log](docs/DECISIONS.md)
 
