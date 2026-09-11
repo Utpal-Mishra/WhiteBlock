@@ -1,0 +1,125 @@
+version: 1
+city: Cork
+country: IE
+
+sources:
+  - key: cork_city_parking_live
+    name: Cork City Council - Real Time Parking Spaces
+    publisher: Cork City Council
+    role:
+      - authoritative_inventory
+      - live_observation
+    format: csv
+    access_url: https://data.corkcity.ie/datastore/dump/f4677dac-bb30-412e-95a8-d3c22134e3c0
+    resource_id: f4677dac-bb30-412e-95a8-d3c22134e3c0
+    licence: Creative Commons Attribution
+    expected_fields:
+      - identifier
+      - name
+      - spaces
+      - free_spaces
+      - opening_times
+      - height_restrictions
+      - price
+      - notes
+      - latitude
+      - longitude
+      - date
+    field_mapping:
+      identifier: source_ids.cork_city
+      name: name
+      spaces: capacity_verified
+      opening_times: opening_hours_raw
+      height_restrictions: height_restriction_raw
+      price: pricing_raw
+      notes: source_notes
+      latitude: location.latitude
+      longitude: location.longitude
+      date: observation.observed_at
+      free_spaces: observation.available_spaces
+    refresh_policy:
+      mode: poll
+      target_interval_minutes: 5
+      note: "Target cadence for WHITEBLOCK ingestion; actual source freshness must be measured from the source timestamp."
+    quality_rules:
+      - latitude_and_longitude_required
+      - spaces_non_negative
+      - free_spaces_non_negative
+      - quarantine_if_free_spaces_exceeds_capacity
+      - source_timestamp_required_for_live_observation
+    provenance:
+      default_truth_state: observed
+      inventory_confidence: 0.98
+      observation_confidence: 0.98
+
+  - key: cork_city_parking_map
+    name: Cork City Centre Parking Map
+    publisher: Cork City Council
+    role:
+      - reference
+      - category_validation
+    access_url: https://www.corkcity.ie/en/council-services/services/parking-services/i-need-a-city-centre-car-park/cork-city-centre-parking-map/
+    expected_categories:
+      - real_time_available_spaces
+      - city_centre_car_parks
+      - set_down_areas
+      - disabled_parking
+      - disc_parking_retailers
+      - black_ash_route
+    ingestion: manual_or_structured_source_only
+    note: "Do not scrape map tiles. Use this page as an official reference and locate lawful structured sources for individual layers."
+
+  - key: openstreetmap_cork
+    name: OpenStreetMap Cork Parking Baseline
+    publisher: OpenStreetMap contributors
+    role:
+      - secondary_inventory
+      - geometry
+      - entity_matching
+    licence: ODbL
+    ingestion: overpass_or_approved_extract
+    target_features:
+      - amenity=parking
+      - amenity=parking_entrance
+      - parking=surface
+      - parking=multi-storey
+      - parking=underground
+      - parking=street_side
+      - capacity
+      - access
+      - fee
+      - opening_hours
+    provenance:
+      default_truth_state: observed
+      default_confidence: 0.80
+    note: "Do not allow OSM to override a fresher authoritative source without explicit conflict resolution."
+
+future_sources:
+  - accessible_parking
+  - ev_charging_and_ev_bays
+  - parking_rules_and_tariffs
+  - road_and_walk_network
+  - licensed_aerial_orthophoto
+  - traffic
+  - events
+  - weather
+  - consented_aggregated_geolocation
+
+source_priority:
+  stable_asset_fields:
+    - authoritative_operator_or_council
+    - verified_ground_evidence
+    - open_geospatial_source
+    - imagery_inference
+    - user_report
+  live_availability:
+    - authoritative_live_feed
+    - operator_api
+    - verified_sensor_or_count
+    - model_prediction
+
+rules:
+  - "Never treat aerial imagery as live availability."
+  - "Never publish candidate parking as public until access is verified."
+  - "Preserve raw payloads and source timestamps for auditability."
+  - "Store conflicting evidence rather than silently overwriting it."

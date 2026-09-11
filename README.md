@@ -12,12 +12,12 @@ Most parking tools answer only part of the journey: where a car park is, how to 
 
 > **Where should I park for this trip, will space likely be available when I arrive, am I allowed to park there, and is existing parking supply being used efficiently?**
 
-WHITEBLOCK therefore separates two core problems:
+WHITEBLOCK separates two core problems:
 
 1. **Parking Supply Discovery** — identify known, unknown, underused, changed or potentially convertible parking supply.
 2. **Parking Network Optimisation** — predict demand and availability, rank options and improve utilisation of existing supply before recommending new physical capacity.
 
-These loops run in parallel.
+These loops run in parallel over a shared, evidence-backed parking inventory.
 
 ## Core capabilities
 
@@ -49,6 +49,32 @@ These loops run in parallel.
 - Identify when pricing, routing, reservations or shared/private capacity can solve pressure.
 - Recommend investigation of new supply only after existing capacity has been evaluated.
 
+## Implementation foundation
+
+Phase 1 now starts with a formal **Parking Inventory Layer**.
+
+```text
+DATA SOURCES
+    ↓
+RAW SNAPSHOTS
+    ↓
+NORMALISATION + ENTITY MATCHING
+    ↓
+PARKING INVENTORY LAYER ───────→ EVIDENCE / PROVENANCE
+    │
+    ├── stable parking asset attributes
+    │
+    └── PARKING OBSERVATION LAYER
+             ↓
+       live + historical state
+             ↓
+   FORECASTING / RECOMMENDATION / OPTIMISATION
+```
+
+Stable parking assets receive canonical `WB-PARK-*` identifiers. Live availability is stored separately as time-series observations so a changing space count never overwrites the permanent asset record.
+
+The first authoritative ingestion target is the Cork City Council real-time parking dataset. The Cork source registry, pilot boundary and machine-readable data contracts live under `config/` and `data_contracts/`.
+
 ## Key design principle
 
 **Physical parking detection is not the same as legal/public parking availability.**
@@ -65,6 +91,8 @@ Use Cork as the first controlled test market because it offers a manageable geog
 The first pilot should prove that WHITEBLOCK can:
 
 - consolidate known parking inventory;
+- maintain a repeatable authoritative ingestion process;
+- separate stable assets from live observations;
 - identify missing or underrepresented parking assets;
 - estimate useful capacity attributes;
 - predict parking pressure and availability where data permits;
@@ -93,6 +121,8 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
             │                                   │
             └─────────────────┬─────────────────┘
                               ↓
+                    PARKING INVENTORY LAYER
+                              ↓
                     PARKING KNOWLEDGE GRAPH
                               ↓
                    DECISION / RECOMMENDATION
@@ -100,8 +130,31 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
                Driver App + B2B Intelligence
 ```
 
+## Repository structure
+
+```text
+WhiteBlock/
+├── README.md
+├── config/
+│   ├── cork_pilot.yaml
+│   └── cork_sources.yaml
+├── data_contracts/
+│   ├── parking_inventory.schema.json
+│   └── parking_observation.schema.json
+└── docs/
+    ├── CORK_MVP.md
+    ├── DATA_EVIDENCE_MODEL.md
+    ├── DATA_SOURCES.md
+    ├── DECISIONS.md
+    ├── PARKING_INVENTORY_LAYER.md
+    ├── PRODUCT_PRINCIPLES.md
+    ├── ROADMAP.md
+    └── SYSTEM_ARCHITECTURE.md
+```
+
 ## Documentation
 
+- [Parking Inventory Layer](docs/PARKING_INVENTORY_LAYER.md)
 - [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
 - [Cork MVP](docs/CORK_MVP.md)
 - [Data & Evidence Model](docs/DATA_EVIDENCE_MODEL.md)
@@ -112,9 +165,9 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
 
 ## Current status
 
-**Stage:** concept definition / architecture foundation.
+**Stage:** Cork inventory-layer implementation foundation.
 
-The immediate objective is to build a data-first Cork MVP before introducing payment infrastructure, proprietary sensors or nationwide coverage.
+The immediate objective is to ingest and reconcile the Cork authoritative baseline, create the first canonical `WB-PARK-*` dataset and establish measurable inventory quality before introducing recommendation ML, proprietary sensors or nationwide coverage.
 
 ## Working brand
 

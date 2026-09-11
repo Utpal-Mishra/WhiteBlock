@@ -1,0 +1,58 @@
+version: 1
+pilot_id: WB-PILOT-IE-CORK-CENTRAL-001
+name: Cork Central Parking Inventory Pilot
+status: provisional
+
+purpose: >-
+  Establish the first measurable WHITEBLOCK inventory and observation layer across a compact,
+  parking-complex central Cork area before city-wide expansion.
+
+boundary:
+  type: bbox
+  crs: EPSG:4326
+  north: 51.9070
+  south: 51.8910
+  east: -8.4620
+  west: -8.4900
+  note: >-
+    Provisional engineering boundary of roughly 3-4 km2. Refine after confirming complete source
+    coverage, walking-network continuity, representative parking types and validation feasibility.
+
+include_if_intersects_boundary:
+  - public_off_street_car_parks
+  - on_street_parking_where_structured_data_exists
+  - park_and_ride_relevant_to_city_centre_journeys
+  - accessible_parking
+  - ev_parking
+  - private_or_customer_parking_for_classification_only
+  - set_down_and_loading_assets_for_rule_context
+
+initial_outputs:
+  - canonical_parking_inventory
+  - live_parking_observations
+  - source_and_evidence_ledger
+  - unresolved_candidate_queue
+  - inventory_quality_report
+
+minimum_quality_metrics:
+  authoritative_records_ingested_pct: 100
+  records_with_valid_coordinates_pct: 99
+  records_with_provenance_pct: 100
+  duplicate_canonical_asset_rate_max_pct: 1
+  public_candidate_without_access_evidence_pct: 0
+
+inventory_refresh:
+  stable_asset_reconciliation: daily
+  live_observation_target_minutes: 5
+  source_metadata_review: monthly
+  candidate_revalidation: monthly
+  imagery_change_detection: when_fresh_licensed_imagery_available
+
+expansion_gate:
+  requirements:
+    - "Core authoritative feed is ingested repeatably."
+    - "Entity matching and deduplication have been manually audited."
+    - "Inventory completeness can be measured against ground truth."
+    - "Evidence/confidence states are visible and traceable."
+    - "At least one secondary geospatial source is reconciled."
+  next_scope: Cork City wider coverage
