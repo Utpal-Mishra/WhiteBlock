@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://whiteblock.local/schemas/parking_observation.schema.json",
+  "title": "WHITEBLOCK Parking Observation",
+  "type": "object",
+  "required": [
+    "parking_id",
+    "observed_at",
+    "source_key",
+    "truth_state"
+  ],
+  "properties": {
+    "parking_id": {
+      "type": "string",
+      "pattern": "^WB-PARK-[A-Z]{2}-[A-Z0-9_-]+-[0-9]{6}$"
+    },
+    "observed_at": {"type": "string", "format": "date-time"},
+    "retrieved_at": {"type": ["string", "null"], "format": "date-time"},
+    "available_spaces": {"type": ["integer", "null"], "minimum": 0},
+    "occupied_spaces": {"type": ["integer", "null"], "minimum": 0},
+    "capacity_at_observation": {"type": ["integer", "null"], "minimum": 0},
+    "occupancy_ratio": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "source_key": {"type": "string", "minLength": 1},
+    "source_record_id": {"type": ["string", "integer", "null"]},
+    "truth_state": {
+      "type": "string",
+      "enum": ["observed", "inferred", "predicted", "unverified"]
+    },
+    "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "model_version": {"type": ["string", "null"]},
+    "raw_snapshot_ref": {"type": ["string", "null"]},
+    "quality_flags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"truth_state": {"const": "predicted"}},
+        "required": ["truth_state"]
+      },
+      "then": {"required": ["model_version"]}
+    }
+  ],
+  "additionalProperties": true
+}
