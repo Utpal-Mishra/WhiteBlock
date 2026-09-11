@@ -6,6 +6,22 @@ Prove that WHITEBLOCK can create a trustworthy, useful parking-intelligence laye
 
 The MVP should validate the data model, discovery workflow, recommendation logic and evidence framework before geographic expansion.
 
+## Phase 1 foundation — Parking Inventory Layer
+
+Before recommendation or forecasting work, WHITEBLOCK must establish a canonical parking inventory and observation history.
+
+Implementation artefacts:
+
+- `docs/PARKING_INVENTORY_LAYER.md` — layer behaviour and quality rules;
+- `config/cork_sources.yaml` — executable source registry;
+- `config/cork_pilot.yaml` — provisional Cork pilot geography and quality gates;
+- `data_contracts/parking_inventory.schema.json` — stable asset contract;
+- `data_contracts/parking_observation.schema.json` — live/historical observation contract.
+
+The first authoritative source is Cork City Council's real-time parking feed. Stable fields such as location and capacity populate the inventory, while `free_spaces` and its source timestamp populate the observation layer.
+
+A changing live count must never overwrite the canonical parking asset itself.
+
 ## Pilot scope
 
 Start with a controlled Cork City area of roughly **2–4 km²** containing a useful mix of:
@@ -18,7 +34,7 @@ Start with a controlled Cork City area of roughly **2–4 km²** containing a us
 - high-demand destinations;
 - areas where public datasets are incomplete.
 
-The exact boundary should be selected based on data availability and parking complexity rather than size alone.
+The current provisional engineering boundary is defined in `config/cork_pilot.yaml`. It should be refined based on data availability and parking complexity rather than size alone.
 
 ## MVP user question
 
@@ -60,6 +76,32 @@ Initial sources should prioritise lawful/open or appropriately licensed data, in
 Do not build the MVP around scraped proprietary map imagery.
 
 ## MVP workstreams
+
+### 0. Inventory ingestion and reconciliation
+
+Build the canonical `WB-PARK-*` dataset first.
+
+```text
+Cork authoritative feed
+        +
+secondary geospatial sources
+        ↓
+raw snapshots
+        ↓
+schema validation
+        ↓
+normalisation
+        ↓
+entity matching
+        ↓
+canonical parking assets
+        +
+live observations
+        ↓
+quality + evidence report
+```
+
+Required checks include valid coordinates, source timestamps, duplicate detection, capacity consistency and complete provenance.
 
 ### 1. Known parking inventory
 
@@ -154,6 +196,8 @@ verified parking locations captured
 actual verified locations in pilot
 ```
 
+Operational quality gates for the initial layer are defined in `config/cork_pilot.yaml`, including provenance completeness, coordinate validity and duplicate-rate controls.
+
 ### Discovery
 
 - candidate precision;
@@ -203,14 +247,16 @@ Values below 1 indicate potential pressure; the metric must be interpreted by ti
 
 ## MVP deliverables
 
-1. Cork pilot parking dataset.
+1. Cork pilot parking dataset with canonical `WB-PARK-*` IDs.
 2. Parking Knowledge Graph/spatial schema.
-3. Interactive pilot map.
-4. Destination-first recommendation prototype.
-5. Supply-discovery experiment with validation results.
-6. Initial availability baseline where data allows.
-7. Evidence/confidence UI.
-8. Evaluation report documenting errors and limitations.
+3. Historical observation table for authoritative availability data.
+4. Source/evidence ledger and quality report.
+5. Interactive pilot map.
+6. Destination-first recommendation prototype.
+7. Supply-discovery experiment with validation results.
+8. Initial availability baseline where data allows.
+9. Evidence/confidence UI.
+10. Evaluation report documenting errors and limitations.
 
 ## Go/no-go criteria for expansion
 
