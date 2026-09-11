@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07110D" />
+  <meta name="description" content="WHITEBLOCK parking and spatial intelligence interface." />
+  <title>WHITEBLOCK — Spatial Intelligence for Better Parking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynlyKxMZcKw0cIFQY9zA9jLkP2I=" crossorigin="" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <a class="brand" href="#" aria-label="WHITEBLOCK home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-copy"><strong>WHITEBLOCK</strong><small>Spatial Intelligence</small></span>
+      </a>
+
+      <nav class="side-nav">
+        <button class="nav-item active" data-view="find" type="button">
+          <span class="nav-icon">⌖</span><span>Find</span>
+        </button>
+        <button class="nav-item" data-view="discover" type="button">
+          <span class="nav-icon">◇</span><span>Discover</span>
+        </button>
+        <button class="nav-item" data-view="network" type="button">
+          <span class="nav-icon">⌁</span><span>Network</span>
+        </button>
+        <button class="nav-item" data-view="evidence" type="button">
+          <span class="nav-icon">◎</span><span>Evidence</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="pilot-card">
+          <span class="status-dot"></span>
+          <div><strong>Cork Pilot</strong><small>Prototype layer</small></div>
+        </div>
+        <button class="icon-button" type="button" aria-label="Settings">⚙</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Ireland · Cork pilot</p>
+          <h1 id="view-title">Find the best place to park.</h1>
+        </div>
+        <div class="top-actions">
+          <div class="mode-switch" aria-label="Application mode">
+            <button type="button" class="mode active" data-mode="driver">Driver</button>
+            <button type="button" class="mode" data-mode="intelligence">Intelligence</button>
+          </div>
+          <button class="profile" type="button" aria-label="User profile">UM</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-find" data-view-panel="find">
+        <div class="search-panel surface">
+          <div class="search-main">
+            <span class="search-icon">⌕</span>
+            <div>
+              <label for="destination">Destination</label>
+              <input id="destination" type="text" placeholder="Where are you going?" value="Cork City Centre" />
+            </div>
+          </div>
+          <div class="search-field">
+            <label for="arrival">Arrive</label>
+            <input id="arrival" type="time" value="18:30" />
+          </div>
+          <div class="search-field">
+            <label for="duration">Stay</label>
+            <select id="duration">
+              <option>1 hour</option><option selected>2 hours</option><option>3 hours</option><option>4+ hours</option>
+            </select>
+          </div>
+          <button class="primary-button" id="search-button" type="button">Find parking <span>→</span></button>
+        </div>
+
+        <div class="quick-filters" aria-label="Parking filters">
+          <button class="chip active" type="button" data-filter="best">Best overall</button>
+          <button class="chip" type="button" data-filter="closest">Closest</button>
+          <button class="chip" type="button" data-filter="cheapest">Lowest cost</button>
+          <button class="chip" type="button" data-filter="accessible">Accessible</button>
+          <button class="chip" type="button" data-filter="ev">EV</button>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi surface"><span>Coverage</span><strong>87%</strong><small>pilot inventory mapped</small></article>
+          <article class="kpi surface"><span>Available now</span><strong>214</strong><small>observed + estimated</small></article>
+          <article class="kpi surface"><span>Avg. confidence</span><strong>92%</strong><small>verified sources</small></article>
+          <article class="kpi surface accent-kpi"><span>Supply pressure</span><strong>Moderate</strong><small>next 60 minutes</small></article>
+        </div>
+
+        <div class="find-grid">
+          <section class="map-card surface">
+            <div class="card-head map-head">
+              <div><p class="eyebrow">Spatial layer</p><h2>Parking around your destination</h2></div>
+              <div class="legend"><span><i class="dot available"></i>Available</span><span><i class="dot pressure"></i>Pressure</span></div>
+            </div>
+            <div id="map" aria-label="Parking map"></div>
+            <div class="map-overlay">
+              <span class="status-dot"></span>
+              <div><strong>Live inventory</strong><small>Prototype / demo values</small></div>
+            </div>
+          </section>
+
+          <section class="results-panel">
+            <div class="results-head">
+              <div><p class="eyebrow">Recommended</p><h2>Best options</h2></div>
+              <span class="result-count">4 found</span>
+            </div>
+            <div id="parking-list" class="parking-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-discover" data-view-panel="discover">
+        <div class="section-intro">
+          <div><p class="eyebrow">Supply Discovery Engine</p><h2>Find what the city is overlooking.</h2></div>
+          <span class="prototype-badge">Research layer</span>
+        </div>
+        <div class="discovery-grid">
+          <article class="surface discovery-hero">
+            <div class="block-visual" aria-hidden="true">
+              <span class="parking-line line-a"></span><span class="parking-line line-b"></span><span class="parking-line line-c"></span>
+              <span class="candidate candidate-a"></span><span class="candidate candidate-b"></span>
+            </div>
+            <div class="discovery-copy">
+              <p class="eyebrow">Change detection</p>
+              <h3>2 candidate WhiteBlocks identified</h3>
+              <p>Potential parking-like geometry detected in the latest comparison window. Neither candidate is public-facing until access and legal use are verified.</p>
+              <button class="secondary-button" type="button">Review candidates</button>
+            </div>
+          </article>
+          <article class="surface metric-card"><span>New candidates</span><strong>2</strong><small>awaiting verification</small></article>
+          <article class="surface metric-card"><span>Lost supply</span><strong>0</strong><small>material changes detected</small></article>
+          <article class="surface metric-card"><span>Underused capacity</span><strong>146</strong><small>estimated spaces</small></article>
+          <article class="surface metric-card"><span>Imagery freshness</span><strong>31d</strong><small>pilot research source</small></article>
+        </div>
+      </section>
+
+      <section class="view" id="view-network" data-view-panel="network">
+        <div class="section-intro">
+          <div><p class="eyebrow">Network Optimisation</p><h2>Use existing capacity before creating more.</h2></div>
+          <span class="prototype-badge">Strategy view</span>
+        </div>
+        <div class="network-grid">
+          <article class="surface network-score">
+            <p class="eyebrow">Parking Supply Adequacy</p>
+            <div class="score-ring"><strong>0.84</strong><span>PSA</span></div>
+            <h3>Moderate pressure</h3>
+            <p>Projected demand is higher than effective supply in parts of the pilot, but redistribution opportunities remain.</p>
+          </article>
+          <article class="surface flow-card">
+            <div class="card-head"><div><p class="eyebrow">Opportunity</p><h3>Redistribute demand</h3></div><span class="confidence">High confidence</span></div>
+            <div class="flow-row"><span>Central A</span><div class="bar"><i style="width:96%"></i></div><b>96%</b></div>
+            <div class="flow-arrow">↓ redirect 12–18%</div>
+            <div class="flow-row"><span>River Quarter</span><div class="bar low"><i style="width:43%"></i></div><b>43%</b></div>
+            <p class="insight">Recommendation: route price-flexible drivers toward River Quarter before considering additional supply.</p>
+          </article>
+          <article class="surface mini-chart-card"><p class="eyebrow">Forecast</p><h3>Demand · next 6h</h3><div class="sparkline" aria-label="Demand forecast"><i style="height:40%"></i><i style="height:52%"></i><i style="height:68%"></i><i style="height:86%"></i><i style="height:72%"></i><i style="height:58%"></i><i style="height:44%"></i><i style="height:35%"></i></div><small>Peak expected around 19:00</small></article>
+        </div>
+      </section>
+
+      <section class="view" id="view-evidence" data-view-panel="evidence">
+        <div class="section-intro">
+          <div><p class="eyebrow">Evidence layer</p><h2>Every parking fact should be explainable.</h2></div>
+          <span class="prototype-badge">Audit view</span>
+        </div>
+        <div class="evidence-table surface">
+          <div class="evidence-row evidence-header"><span>Asset</span><span>Attribute</span><span>Truth state</span><span>Confidence</span><span>Freshness</span></div>
+          <div class="evidence-row"><span><b>WB-PARK-000021</b><small>City Centre West</small></span><span>Capacity · 420</span><span><i class="truth observed"></i>Observed</span><span>98%</span><span>18 min</span></div>
+          <div class="evidence-row"><span><b>WB-PARK-000034</b><small>River Quarter</small></span><span>Available · 74</span><span><i class="truth predicted"></i>Predicted</span><span>88%</span><span>5 min</span></div>
+          <div class="evidence-row"><span><b>WB-CAND-000002</b><small>North Quay candidate</small></span><span>Physical parking</span><span><i class="truth inferred"></i>Inferred</span><span>76%</span><span>31 d</span></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <button class="mobile-nav-item active" data-view="find" type="button"><span>⌖</span><small>Find</small></button>
+      <button class="mobile-nav-item" data-view="discover" type="button"><span>◇</span><small>Discover</small></button>
+      <button class="mobile-nav-item" data-view="network" type="button"><span>⌁</span><small>Network</small></button>
+      <button class="mobile-nav-item" data-view="evidence" type="button"><span>◎</span><small>Evidence</small></button>
+    </nav>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./app.js"></script>
+</body>
+</html>
