@@ -51,49 +51,114 @@ These loops run in parallel over a shared, evidence-backed parking inventory.
 
 ## Implementation foundation
 
-Phase 1 starts with a formal **Parking Inventory Layer**.
+WHITEBLOCK now has a persistent **Parking Inventory + Spatial Reconciliation Layer**.
 
 ```text
-DATA SOURCES
-    ↓
-RAW SNAPSHOTS
-    ↓
-NORMALISATION + ENTITY MATCHING
-    ↓
-PARKING INVENTORY LAYER ───────→ EVIDENCE / PROVENANCE
-    │
-    ├── stable parking asset attributes
-    │
-    └── PARKING OBSERVATION LAYER
-             ↓
-       live + historical state
-             ↓
-   FORECASTING / RECOMMENDATION / OPTIMISATION
+EXTERNAL SOURCES
+      ↓
+RAW SNAPSHOTS / SOURCE STAGING
+      ↓
+NORMALISATION
+      ↓
+ENTITY RECONCILIATION ─────────→ REVIEW QUEUE
+      ↓
+POSTGIS SPATIAL CORE
+      ├── parking_location
+      ├── parking_observation
+      ├── parking_evidence
+      ├── parking_source_link
+      ├── source_record
+      ├── entity_match_candidate
+      └── parking_candidate
+      ↓
+PARKING KNOWLEDGE GRAPH
+      ↓
+FORECASTING / RECOMMENDATION / OPTIMISATION
 ```
 
-Stable parking assets receive canonical `WB-PARK-*` identifiers. Live availability is stored separately as time-series observations so a changing space count never overwrites the permanent asset record.
+Stable parking assets receive canonical `WB-PARK-*` identifiers. Live availability is stored separately as time-series observations so changing occupancy never overwrites the permanent asset record.
 
-The first authoritative ingestion target is the Cork City Council real-time parking dataset. The Cork source registry, pilot boundary and machine-readable data contracts live under `config/` and `data_contracts/`.
+Secondary sources are staged before they can affect canonical inventory. Exact source links are reused first; otherwise WHITEBLOCK uses conservative spatial/name/capacity reconciliation and sends ambiguous records to review.
 
-## Run the first Cork ingestion
+## Local development
 
-The first executable pipeline uses only the Python standard library.
+Copy the environment template and use a non-default password:
+
+```bash
+cp .env.example .env
+```
+
+Install the database client dependency and start PostGIS:
+
+```bash
+make install
+make db-up
+```
+
+Run the Cork ingestion and persist it:
+
+```bash
+make ingest
+make load
+```
+
+Run tests:
+
+```bash
+make test
+```
+
+The Docker development database applies migrations from `db/migrations/` when its volume is first created.
+
+See [Spatial Storage & Entity Reconciliation](docs/SPATIAL_STORAGE_RECONCILIATION.md) for the schema, matching policy, staging contract and review workflow.
+
+## Cork authoritative baseline
+
+The first authoritative ingestion target is the Cork City Council real-time parking dataset.
 
 ```bash
 python scripts/ingest_cork_parking.py
-```
-
-Run its unit tests with:
-
-```bash
-python -m unittest tests/test_ingest_cork_parking.py
+python scripts/load_cork_to_postgis.py
 ```
 
 The ingestion process preserves the raw source snapshot, validates source fields and quality rules, separates stable inventory from live observations, quarantines inconsistent records, and writes a run manifest with a SHA-256 evidence hash.
 
 Generated pilot data is written under `data/cork/` and excluded from Git.
 
-See [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md) for operational details and known limitations.
+See [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md).
+
+## Secondary-source reconciliation
+
+Normalize a secondary parking dataset into JSON/JSONL records containing at minimum:
+
+```text
+external_id
+name
+latitude
+longitude
+```
+
+Stage it:
+
+```bash
+python scripts/stage_source_records.py --source-key osm_parking --input data/osm_parking.jsonl
+```
+
+Reconcile it:
+
+```bash
+python scripts/reconcile_source_records.py --source-key osm_parking
+```
+
+A fuzzy match auto-links only when the score, name similarity, spatial distance and best-vs-second margin all pass conservative gates. Otherwise the record remains reviewable.
+
+Manual confirmation example:
+
+```bash
+python scripts/resolve_entity_match.py confirm \
+  --staging-id 123 \
+  --parking-id WB-PARK-IE-CORK-000012
+```
 
 ## Key design principle
 
@@ -112,6 +177,8 @@ The first pilot should prove that WHITEBLOCK can:
 
 - consolidate known parking inventory;
 - maintain a repeatable authoritative ingestion process;
+- persist a spatial source of truth;
+- reconcile multiple datasets without unsafe duplicate merges;
 - separate stable assets from live observations;
 - identify missing or underrepresented parking assets;
 - estimate useful capacity attributes;
@@ -141,7 +208,7 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
             │                                   │
             └─────────────────┬─────────────────┘
                               ↓
-                    PARKING INVENTORY LAYER
+               POSTGIS PARKING INVENTORY LAYER
                               ↓
                     PARKING KNOWLEDGE GRAPH
                               ↓
@@ -155,16 +222,31 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
 ```text
 WhiteBlock/
 ├── README.md
+├── Makefile
+├── docker-compose.yml
+├── .env.example
+├── requirements.txt
 ├── config/
 │   ├── cork_pilot.yaml
 │   └── cork_sources.yaml
 ├── data_contracts/
 │   ├── parking_inventory.schema.json
 │   └── parking_observation.schema.json
+├── db/
+│   └── migrations/
+│       ├── 001_spatial_core.sql
+│       ├── 002_evidence_dedup.sql
+│       └── 003_source_record_dedup.sql
 ├── scripts/
-│   └── ingest_cork_parking.py
+│   ├── db_common.py
+│   ├── ingest_cork_parking.py
+│   ├── load_cork_to_postgis.py
+│   ├── stage_source_records.py
+│   ├── reconcile_source_records.py
+│   └── resolve_entity_match.py
 ├── tests/
-│   └── test_ingest_cork_parking.py
+│   ├── test_ingest_cork_parking.py
+│   └── test_reconciliation.py
 └── docs/
     ├── CORK_INGESTION_RUNBOOK.md
     ├── CORK_MVP.md
@@ -174,11 +256,13 @@ WhiteBlock/
     ├── PARKING_INVENTORY_LAYER.md
     ├── PRODUCT_PRINCIPLES.md
     ├── ROADMAP.md
+    ├── SPATIAL_STORAGE_RECONCILIATION.md
     └── SYSTEM_ARCHITECTURE.md
 ```
 
 ## Documentation
 
+- [Spatial Storage & Entity Reconciliation](docs/SPATIAL_STORAGE_RECONCILIATION.md)
 - [Parking Inventory Layer](docs/PARKING_INVENTORY_LAYER.md)
 - [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md)
 - [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
@@ -191,9 +275,11 @@ WhiteBlock/
 
 ## Current status
 
-**Stage:** Cork inventory-layer implementation.
+**Stage:** persistent Cork spatial-core implementation.
 
-The repository now contains both the contracts and the first executable Cork ingestion pipeline. The next engineering objective is **persistent spatial storage + multi-source entity reconciliation** before imagery candidates or forecasting are allowed to depend on the canonical layer.
+WHITEBLOCK now has an authoritative Cork ingestion path, PostGIS-backed canonical inventory, historical observations, evidence storage, generic secondary-source staging and conservative entity reconciliation.
+
+The next engineering objective is to integrate the first real secondary geospatial source and measure reconciliation precision before imagery-derived candidates are allowed to influence the canonical inventory.
 
 ## Working brand
 
