@@ -7,7 +7,8 @@ Run the Cork ingestion first:
 Then:
     python scripts/load_cork_to_postgis.py
 
-The loader is idempotent for canonical assets, exact source links, and observations.
+The loader is idempotent for canonical assets, exact source links, observations,
+and evidence records.
 """
 
 from __future__ import annotations
@@ -172,6 +173,7 @@ def load_assets(cur, assets: Iterable[Dict[str, Any]]) -> int:
                   %(source_timestamp)s, %(retrieved_at)s, %(truth_state)s,
                   %(confidence)s, %(payload)s::jsonb
                 )
+                ON CONFLICT DO NOTHING
                 """,
                 {
                     "parking_id": asset["parking_id"],
@@ -214,8 +216,11 @@ def load_observations(cur, observations: Iterable[Dict[str, Any]]) -> int:
               raw_snapshot_ref = EXCLUDED.raw_snapshot_ref,
               quality_flags = EXCLUDED.quality_flags
             """,
-            {**obs, "source_record_id": str(obs.get("source_record_id")) if obs.get("source_record_id") is not None else None,
-             "quality_flags": json.dumps(obs.get("quality_flags") or [])},
+            {
+                **obs,
+                "source_record_id": str(obs.get("source_record_id")) if obs.get("source_record_id") is not None else None,
+                "quality_flags": json.dumps(obs.get("quality_flags") or []),
+            },
         )
         count += 1
     return count
