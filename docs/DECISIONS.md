@@ -74,6 +74,53 @@ Discovery does not pause optimisation, and optimisation does not depend on disco
 
 ---
 
+## 2026-09-11 — PostGIS spatial system of record
+
+**Decision:** Use **PostgreSQL + PostGIS** as the persistent spatial core for the pilot architecture.
+
+**Why:**
+
+- canonical parking assets need durable relational identity;
+- parking discovery and reconciliation require spatial indexes, distance queries and later polygon operations;
+- observation history, evidence and source links need transactional consistency;
+- PostgreSQL provides a practical path from local Docker development to managed production hosting.
+
+The file-based Cork ingestion remains a reproducible raw/curated boundary; PostGIS becomes the durable downstream source of truth.
+
+---
+
+## 2026-09-11 — Source staging before canonical mutation
+
+**Decision:** Secondary datasets must enter a `source_record` staging layer before they can change the canonical parking inventory.
+
+**Reason:** A source record can be stale, duplicated, private, poorly geocoded or simply refer to an existing parking asset under another name. Ingestion alone is not evidence that a new canonical location should exist.
+
+---
+
+## 2026-09-11 — Conservative entity reconciliation
+
+**Decision:** Prefer **false non-matches over false merges**.
+
+Initial fuzzy reconciliation combines:
+
+- normalized-name similarity;
+- spatial proximity;
+- capacity similarity when available.
+
+A fuzzy match may auto-link only when it passes high score/name/proximity thresholds **and** has a clear margin over the second-best candidate. Ambiguous records remain reviewable.
+
+Exact durable source links always take precedence over fuzzy matching on subsequent runs.
+
+---
+
+## 2026-09-11 — Identity and field truth are separate
+
+**Decision:** Entity reconciliation answers only whether two records describe the same physical parking asset. It does not automatically decide which source's capacity, price, restrictions or access classification should win.
+
+Field values continue to use provenance, confidence, freshness and source priority.
+
+---
+
 ## 2026-09-11 — Imagery role
 
 **Decision:** Use appropriately licensed satellite/aerial/orthophoto imagery for **parking discovery, capacity estimation and change detection**, not as the core source for real-time vacancy.
@@ -190,8 +237,8 @@ Add dated entries when choosing or materially changing:
 - Cork pilot boundary;
 - primary map/geospatial provider;
 - imagery provider/licence;
-- database/hosting stack;
-- first production data sources;
+- production database/hosting provider;
+- first secondary production data source;
 - prediction-model strategy;
 - recommendation-score design;
 - privacy/telemetry policy;
