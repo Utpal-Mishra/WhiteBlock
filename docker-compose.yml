@@ -1,0 +1,22 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: whiteblock-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-whiteblock}
+      POSTGRES_USER: ${POSTGRES_USER:-whiteblock}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-whiteblock_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - whiteblock_postgis_data:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-whiteblock} -d ${POSTGRES_DB:-whiteblock}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  whiteblock_postgis_data:

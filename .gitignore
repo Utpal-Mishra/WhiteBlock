@@ -4,6 +4,9 @@
 /data/cork/manifests/
 /data/cork/latest_run.json
 
+# Local environment / secrets
+.env
+
 # Python
 __pycache__/
 *.py[cod]
