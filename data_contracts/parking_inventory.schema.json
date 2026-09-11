@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://whiteblock.local/schemas/parking_inventory.schema.json",
+  "title": "WHITEBLOCK Parking Inventory Record",
+  "type": "object",
+  "required": [
+    "parking_id",
+    "name",
+    "location",
+    "parking_type",
+    "access_type",
+    "status",
+    "provenance"
+  ],
+  "properties": {
+    "parking_id": {
+      "type": "string",
+      "pattern": "^WB-PARK-[A-Z]{2}-[A-Z0-9_-]+-[0-9]{6}$"
+    },
+    "name": {"type": "string", "minLength": 1},
+    "source_ids": {
+      "type": "object",
+      "additionalProperties": {"type": ["string", "integer"]}
+    },
+    "location": {
+      "type": "object",
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "geometry": {"type": ["object", "null"]},
+        "entrance_geometry": {"type": ["object", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "parking_type": {
+      "type": "string",
+      "enum": ["surface", "multi_storey", "underground", "street", "park_and_ride", "private_shared", "other", "unknown"]
+    },
+    "access_type": {
+      "type": "string",
+      "enum": ["public", "private", "permit", "customer", "restricted", "unknown"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["verified", "candidate", "temporarily_closed", "retired"]
+    },
+    "operator": {"type": ["string", "null"]},
+    "capacity_verified": {"type": ["integer", "null"], "minimum": 0},
+    "capacity_estimated": {"type": ["integer", "null"], "minimum": 0},
+    "accessible_spaces": {"type": ["integer", "null"], "minimum": 0},
+    "ev_spaces": {"type": ["integer", "null"], "minimum": 0},
+    "opening_hours_raw": {"type": ["string", "null"]},
+    "height_restriction_raw": {"type": ["string", "null"]},
+    "pricing_raw": {"type": ["string", "null"]},
+    "maximum_stay_minutes": {"type": ["integer", "null"], "minimum": 0},
+    "source_notes": {"type": ["string", "null"]},
+    "field_confidence": {
+      "type": "object",
+      "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_type", "truth_state"],
+        "properties": {
+          "source_type": {"type": "string"},
+          "source_key": {"type": ["string", "null"]},
+          "source_url": {"type": ["string", "null"]},
+          "source_timestamp": {"type": ["string", "null"], "format": "date-time"},
+          "retrieved_at": {"type": ["string", "null"], "format": "date-time"},
+          "truth_state": {
+            "type": "string",
+            "enum": ["observed", "inferred", "predicted", "unverified"]
+          },
+          "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
