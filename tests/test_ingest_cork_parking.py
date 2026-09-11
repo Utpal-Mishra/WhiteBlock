@@ -1,11 +1,13 @@
 import importlib.util
 import pathlib
+import sys
 import unittest
 
 SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "ingest_cork_parking.py"
 spec = importlib.util.spec_from_file_location("ingest_cork_parking", SCRIPT)
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
+sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
