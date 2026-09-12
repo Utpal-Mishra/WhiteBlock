@@ -49,7 +49,9 @@ jobs:
           done
 
       - name: Check frontend JavaScript
-        run: node --check web/app.js
+        run: |
+          node --check web/app.js
+          node --check web/map-fix.js
 
       - name: Run tests
         run: python -m unittest discover -s tests -p 'test_*.py'
