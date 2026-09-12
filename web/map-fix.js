@@ -193,6 +193,10 @@
     });
     toolbar.appendChild(streetButton);
     mapEl.appendChild(toolbar);
+
+    // Keep taps/swipes on map controls from becoming map pan/zoom gestures.
+    L.DomEvent.disableClickPropagation(toolbar);
+    L.DomEvent.disableScrollPropagation(toolbar);
   }
 
   function createStateLegend() {
@@ -205,6 +209,7 @@
       <span><i class="moderate"></i>Moderate</span>
       <span><i class="pressure"></i>Pressure</span>`;
     mapEl.appendChild(legend);
+    L.DomEvent.disableClickPropagation(legend);
   }
 
   function repairMap() {
@@ -247,10 +252,13 @@
 
   function normalizeIrelandCoverageLabel() {
     const overviewButton = document.getElementById("ireland-overview-button");
-    if (overviewButton) overviewButton.textContent = "Ireland Coverage View";
+    if (overviewButton && overviewButton.textContent.trim() !== "Ireland Coverage View") {
+      overviewButton.textContent = "Ireland Coverage View";
+    }
 
     const status = document.getElementById("map-status-title");
-    if (status && status.textContent.trim().toLowerCase() === "ireland coverage view") {
+    const current = status?.textContent.trim() || "";
+    if (status && current.toLowerCase() === "ireland coverage view" && current !== "Ireland Coverage View") {
       status.textContent = "Ireland Coverage View";
     }
   }
