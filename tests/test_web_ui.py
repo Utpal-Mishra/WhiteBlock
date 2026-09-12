@@ -8,7 +8,7 @@ WEB = ROOT / "web"
 
 class WhiteBlockWebUITests(unittest.TestCase):
     def test_frontend_files_exist(self):
-        for filename in ("index.html", "styles.css", "search.css", "app.js"):
+        for filename in ("index.html", "styles.css", "search.css", "map-context.css", "app.js", "map-fix.js"):
             self.assertTrue((WEB / filename).exists(), f"Missing web/{filename}")
 
     def test_core_views_are_present(self):
@@ -35,10 +35,25 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn('id="destination-suggestions"', html)
         self.assertIn('aria-autocomplete="list"', html)
         self.assertIn('id="ireland-overview-button"', html)
+        self.assertIn("Ireland Coverage View", html)
         self.assertIn("https://photon.komoot.io/api/", js)
         self.assertIn('code === "IE"', js)
         self.assertIn("IRELAND_BOUNDS", js)
         self.assertIn("isInCorkPilot", js)
+
+    def test_map_context_layers_and_street_view_contract(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        js = (WEB / "map-fix.js").read_text(encoding="utf-8")
+        css = (WEB / "map-context.css").read_text(encoding="utf-8")
+        self.assertIn("map-context.css", html)
+        self.assertIn("World_Street_Map", js)
+        self.assertIn("World_Imagery", js)
+        self.assertIn("Street View", js)
+        self.assertIn("map_action=pano", js)
+        self.assertIn("ResizeObserver", js)
+        self.assertIn("invalidateSize", js)
+        self.assertIn("wb-map-layer-button", css)
+        self.assertIn("wb-map-satellite", css)
 
 
 if __name__ == "__main__":
