@@ -4,19 +4,27 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  background: #0b1712;
 }
 
+/* Keep Leaflet's tile pane geometrically simple. Applying filter/will-change to the
+   pane itself can trigger clipping/compositing gaps on some mobile/desktop GPUs. */
 #map .leaflet-tile-pane {
-  transition: filter 180ms ease;
-  will-change: transform, filter;
+  transition: none;
+  will-change: auto;
 }
 
-#map.wb-map-dark .leaflet-tile-pane {
+#map .leaflet-tile {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+#map.wb-map-dark .leaflet-tile {
   filter: grayscale(.72) invert(.88) hue-rotate(166deg) brightness(.62) contrast(1.18) saturate(.58);
 }
 
-#map.wb-map-street .leaflet-tile-pane,
-#map.wb-map-satellite .leaflet-tile-pane {
+#map.wb-map-street .leaflet-tile,
+#map.wb-map-satellite .leaflet-tile {
   filter: none;
 }
 
@@ -109,7 +117,7 @@
 }
 
 .wb-map-repairing::after {
-  content: "Refreshing map…";
+  content: "Loading map…";
   position: absolute;
   z-index: 900;
   left: 50%;
