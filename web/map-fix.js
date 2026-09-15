@@ -1,7 +1,8 @@
 // WHITEBLOCK prototype map adapter.
-// Provides keyless street/satellite basemaps, mobile resize repair, coloured parking context,
-// and an external Street View action. Production should use managed map/geocoding providers
-// with explicit SLA, caching, privacy and quota policies.
+// Provides keyless street/satellite basemaps, resilient tile loading, mobile resize repair,
+// coloured parking context, guidance assets and an external Street View action.
+// Production should use managed map/geocoding providers with explicit SLA, caching,
+// privacy, licensing and quota policies.
 
 (() => {
   if (typeof L === "undefined" || typeof state === "undefined" || !state.map) return;
@@ -10,34 +11,34 @@
   const mapEl = document.getElementById("map");
   if (!mapEl) return;
 
-  // The original app initialises a temporary basemap. Remove raster tile layers only;
-  // WHITEBLOCK markers, destination markers and coverage layers stay intact.
+  // Remove the temporary basemap created by app.js. Keep all vector/marker layers.
   map.eachLayer(layer => {
     if (layer instanceof L.TileLayer) map.removeLayer(layer);
   });
 
-  const tilePane = map.getPane("tilePane");
-  if (tilePane) tilePane.style.filter = "";
-
-  const ESRI_STREET = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+  const OSM = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const OSM_FALLBACK = "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png";
   const ESRI_IMAGERY = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
   const layerDefinitions = {
     dark: {
       label: "Dark",
-      url: ESRI_STREET,
+      url: OSM,
+      fallbackUrl: OSM_FALLBACK,
       className: "wb-map-dark",
-      attribution: "Tiles &copy; Esri"
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     },
     street: {
       label: "Street",
-      url: ESRI_STREET,
+      url: OSM,
+      fallbackUrl: OSM_FALLBACK,
       className: "wb-map-street",
-      attribution: "Tiles &copy; Esri"
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     },
     satellite: {
       label: "Satellite",
       url: ESRI_IMAGERY,
+      fallbackUrl: OSM,
       className: "wb-map-satellite",
       attribution: "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
@@ -48,22 +49,41 @@
   let parkingContextLayer = null;
   let destinationContextLayer = null;
   let repairTimer = null;
+  let resizeTimer = null;
+
+  function tileUrl(template, coords) {
+    if (!template || !coords) return null;
+    const subdomain = ["a", "b", "c"][Math.abs(coords.x + coords.y) % 3];
+    return template
+      .replace("{s}", subdomain)
+      .replace("{z}", String(coords.z))
+      .replace("{x}", String(coords.x))
+      .replace("{y}", String(coords.y));
+  }
 
   function buildTileLayer(definition) {
     const layer = L.tileLayer(definition.url, {
       maxZoom: 19,
       maxNativeZoom: 19,
       detectRetina: false,
-      updateWhenIdle: false,
-      updateWhenZooming: true,
-      updateInterval: 120,
-      keepBuffer: 5,
-      crossOrigin: true,
+      updateWhenIdle: true,
+      updateWhenZooming: false,
+      keepBuffer: 2,
+      noWrap: true,
       attribution: definition.attribution
     });
 
     layer.on("loading", () => mapEl.classList.add("wb-map-repairing"));
     layer.on("load", () => mapEl.classList.remove("wb-map-repairing"));
+    layer.on("tileerror", event => {
+      const tile = event.tile;
+      if (!tile || tile.dataset.wbFallbackAttempted === "true") return;
+      const fallback = tileUrl(definition.fallbackUrl, event.coords);
+      if (!fallback) return;
+      tile.dataset.wbFallbackAttempted = "true";
+      tile.src = fallback;
+    });
+
     return layer;
   }
 
@@ -75,6 +95,7 @@
   function activateLayer(key) {
     if (!layerDefinitions[key]) return;
     if (activeTileLayer) map.removeLayer(activeTileLayer);
+
     activeLayerKey = key;
     activeTileLayer = buildTileLayer(layerDefinitions[key]).addTo(map);
     activeTileLayer.bringToBack();
@@ -145,12 +166,8 @@
       ? isInCorkPilot(destination.lat, destination.lng)
       : true;
 
-    if (selected && inPilot) {
-      return { lat: selected.lat, lng: selected.lng, label: selected.name };
-    }
-    if (destination) {
-      return { lat: destination.lat, lng: destination.lng, label: destination.primary || destination.label || "Destination" };
-    }
+    if (selected && inPilot) return { lat: selected.lat, lng: selected.lng, label: selected.name };
+    if (destination) return { lat: destination.lat, lng: destination.lng, label: destination.primary || destination.label || "Destination" };
     return selected ? { lat: selected.lat, lng: selected.lng, label: selected.name } : null;
   }
 
@@ -194,7 +211,6 @@
     toolbar.appendChild(streetButton);
     mapEl.appendChild(toolbar);
 
-    // Keep taps/swipes on map controls from becoming map pan/zoom gestures.
     L.DomEvent.disableClickPropagation(toolbar);
     L.DomEvent.disableScrollPropagation(toolbar);
   }
@@ -214,15 +230,23 @@
 
   function repairMap() {
     if (!map || !mapEl.isConnected) return;
-    map.invalidateSize({ pan: false, debounceMoveend: true });
-    if (activeTileLayer && typeof activeTileLayer.redraw === "function") activeTileLayer.redraw();
+    window.requestAnimationFrame(() => {
+      map.invalidateSize({ pan: false, animate: false, debounceMoveend: true });
+    });
   }
 
   function scheduleMapRepair() {
     if (repairTimer) window.clearTimeout(repairTimer);
     repairMap();
-    [90, 260, 650].forEach(delay => window.setTimeout(repairMap, delay));
-    repairTimer = window.setTimeout(() => mapEl.classList.remove("wb-map-repairing"), 1000);
+    // Invalidate only; do not redraw the tile layer. Redraw repeatedly discards tiles
+    // while responsive layout is settling and causes visible patchwork on slow networks.
+    [100, 320].forEach(delay => window.setTimeout(repairMap, delay));
+    repairTimer = window.setTimeout(() => mapEl.classList.remove("wb-map-repairing"), 1200);
+  }
+
+  function scheduleResizeRepair() {
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(scheduleMapRepair, 120);
   }
 
   function fitRecommendationContext() {
@@ -317,18 +341,18 @@
     }, 120);
   });
 
-  window.addEventListener("resize", scheduleMapRepair, { passive: true });
+  window.addEventListener("resize", scheduleResizeRepair, { passive: true });
   window.addEventListener("orientationchange", () => window.setTimeout(scheduleMapRepair, 180), { passive: true });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) window.setTimeout(scheduleMapRepair, 100);
   });
 
   if (typeof ResizeObserver !== "undefined") {
-    const resizeObserver = new ResizeObserver(() => scheduleMapRepair());
+    const resizeObserver = new ResizeObserver(scheduleResizeRepair);
     resizeObserver.observe(mapEl);
   }
 
-  // Improve mobile tile fill/repaint behaviour.
+  // Avoid transform-heavy tile animations on mobile browsers.
   map.options.zoomAnimation = false;
   map.options.fadeAnimation = false;
 
