@@ -263,6 +263,24 @@
     }
   }
 
+  function loadGuidanceIntelligenceLayer() {
+    if (!document.querySelector('link[data-wb-guidance-style]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "./guidance-layer.css";
+      link.dataset.wbGuidanceStyle = "true";
+      document.head.appendChild(link);
+    }
+
+    if (!document.querySelector('script[data-wb-guidance-script]')) {
+      const script = document.createElement("script");
+      script.src = "./guidance-layer.js";
+      script.defer = true;
+      script.dataset.wbGuidanceScript = "true";
+      document.body.appendChild(script);
+    }
+  }
+
   const statusTitle = document.getElementById("map-status-title");
   if (statusTitle) {
     new MutationObserver(normalizeIrelandCoverageLabel).observe(statusTitle, { childList: true, characterData: true, subtree: true });
@@ -321,4 +339,5 @@
   activateLayer("dark");
   normalizeIrelandCoverageLabel();
   scheduleMapRepair();
+  loadGuidanceIntelligenceLayer();
 })();
