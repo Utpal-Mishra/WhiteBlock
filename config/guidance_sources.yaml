@@ -1,0 +1,70 @@
+version: 1
+
+sources:
+  dublin_vms_locations:
+    authority: Dublin City Council
+    geography: Dublin City
+    source_type: guidance_display_registry
+    status: active
+    format: GeoJSON
+    license: CC-BY-4.0
+    live_values: false
+    update_frequency: irregular
+    dataset_page: https://data.gov.ie/dataset/dublin-city-council-variable-message-signs
+    resource_url: https://data.smartdublin.ie/dataset/79851619-f51d-4799-99b3-6e5d20d26aa3/resource/ad0ca283-8780-42b3-959e-f92a13d564a9/download/dcc_variable_message_signs_4326.geojson
+    notes: >-
+      Official registry of 31 Variable Message Sign locations. Contains equipment id,
+      location name and coordinates. It does not expose the live text/value displayed
+      on each sign and must not be treated as a live parking-availability feed.
+
+  dublin_multistorey_availability:
+    authority: Dublin City Council
+    geography: Dublin City
+    source_type: parking_availability_feed
+    status: active
+    license: CC-BY-4.0
+    live_values: true
+    nominal_refresh_minutes: 5
+    dataset_page: https://data.gov.ie/dataset/multi-story-car-parking-space-availability
+    notes: >-
+      Official multi-storey car-park availability dataset. WHITEBLOCK should reconcile
+      this feed with VMS display readings when a direct display feed or lawful display
+      observation becomes available.
+
+  cork_parking_availability:
+    authority: Cork City Council
+    geography: Cork City
+    source_type: parking_availability_feed
+    status: active
+    license: Creative Commons Attribution
+    live_values: true
+    dataset_page: https://data.corkcity.ie/en_GB/dataset/parking/resource/f4677dac-bb30-412e-95a8-d3c22134e3c0
+    notes: >-
+      Existing WHITEBLOCK authoritative Cork baseline with total spaces, free spaces,
+      coordinates and timestamps. This is the preferred system-side observation source
+      for comparison with any future Cork roadside guidance-display feed.
+
+  cork_vms_locations:
+    authority: Cork City Council / operator partners
+    geography: Cork City
+    source_type: guidance_display_registry
+    status: research_required
+    live_values: unknown
+    notes: >-
+      No verified open VMS location/value feed is registered yet. Do not invent display
+      locations. Add a source only after an official council/operator dataset, permitted
+      observation source or field verification is identified.
+
+policy:
+  source_priority:
+    - official_system_feed
+    - operator_feed
+    - direct_display_feed
+    - lawful_camera_observation
+    - ocr_observation
+    - manual_verification
+  rules:
+    - A VMS location is not evidence of the text currently displayed.
+    - A displayed number is stored as its own observation and never overwrites the canonical parking feed.
+    - Display/API disagreement is preserved and measured rather than silently resolved.
+    - OCR-derived values are inferred observations and require confidence plus image/evidence provenance.
