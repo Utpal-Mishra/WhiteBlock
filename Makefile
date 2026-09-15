@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: install db-up db-down db-reset ingest load reconcile test
+.PHONY: install db-up db-down db-reset ingest load reconcile ingest-guidance test
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
@@ -23,6 +23,9 @@ load:
 
 reconcile:
 	$(PYTHON) scripts/reconcile_source_records.py
+
+ingest-guidance:
+	$(PYTHON) scripts/ingest_dublin_vms.py
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py'

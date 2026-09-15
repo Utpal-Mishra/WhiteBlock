@@ -19,12 +19,12 @@ Open `http://localhost:8000`.
 
 ## Ireland map behaviour
 
-The map now has two different geographic responsibilities:
+The map has two different geographic responsibilities:
 
 1. **Ireland destination layer** — the user can search for addresses, streets, landmarks, towns and other places across the Republic of Ireland and move the map to that destination.
 2. **Parking intelligence layer** — evidence-backed parking recommendations remain Cork-first until equivalent local datasets are connected in other regions.
 
-The `Ireland overview` control zooms to the national extent and shows the current rollout model:
+The **Ireland Coverage View** control zooms to the national extent and shows the current rollout model:
 
 - Cork — pilot intelligence live;
 - Dublin — next expansion;
@@ -49,10 +49,49 @@ The prototype queries the public Photon geocoder, using OpenStreetMap-derived pl
 
 The public Photon endpoint is appropriate for prototype evaluation, not a guaranteed production dependency. Before commercial scale, WHITEBLOCK should use a managed geocoding service or a self-hosted geocoder with defined availability, quota, privacy and support requirements.
 
+## Map context layers
+
+The map supports:
+
+- WHITEBLOCK dark street context;
+- full-colour street context;
+- satellite context;
+- Street View handoff for the selected destination/parking location;
+- availability halos for good/moderate/pressure states;
+- a 500 m destination-context radius;
+- mobile resize/orientation repair.
+
+## Parking Guidance Intelligence
+
+The map now loads a **Guidance** layer using the official Dublin City Council Variable Message Sign location registry.
+
+The source currently provides **display locations only**. It does not provide the live number/message shown on the sign. The UI explicitly states this in each sign popup.
+
+When available, the control shows the number of official sign locations loaded, for example:
+
+```text
+Guidance · 31
+```
+
+Selecting a guidance marker shows:
+
+- sign/location identity;
+- source status;
+- the fact that the live display value is not exposed by that source;
+- a link to the official dataset.
+
+If the remote registry cannot be loaded, WHITEBLOCK reports `Guidance · source unavailable` rather than substituting invented display locations.
+
+Future direct/operator/OCR/manual readings belong in the PostGIS Parking Guidance Intelligence layer and remain separate from canonical parking-system observations.
+
+See `docs/PARKING_GUIDANCE_INTELLIGENCE.md`.
+
 ## Data status
 
-The current parking interface uses explicitly labelled demo values. Production integration should replace `parkingData` in `app.js` with a read-only WHITEBLOCK API backed by the PostGIS spatial core.
+The current Cork parking interface uses explicitly labelled demo values. Production integration should replace `parkingData` in `app.js` with a read-only WHITEBLOCK API backed by the PostGIS spatial core.
+
+The Dublin VMS marker layer is based on the official open location registry, but its displayed parking counts/messages are **not** live because that registry does not expose them.
 
 ## Mapping
 
-The prototype uses Leaflet with a dark CARTO/OpenStreetMap basemap. Production map-provider, caching, attribution, geocoding and usage-policy requirements should be reviewed before commercial deployment.
+The prototype uses Leaflet with keyless Esri street/satellite basemaps and external public geocoding/data sources. Production map-provider, caching, attribution, geocoding, CORS, SLA and usage-policy requirements should be reviewed before commercial deployment.
