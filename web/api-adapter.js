@@ -13,6 +13,8 @@
   state.apiBaseUrl = apiBaseUrl || null;
   state.apiRequestController = null;
   state.apiRequestSequence = 0;
+  state.snapshotFallbackData = null;
+  state.snapshotFallbackMetadata = null;
 
   if (!apiBaseUrl) return;
 
@@ -96,6 +98,37 @@
     return `${apiBaseUrl}/v1/parking/nearby?${params.toString()}`;
   }
 
+  function captureSnapshotFallback() {
+    if (!parkingData.length || state.dataMode === "api") return;
+    state.snapshotFallbackData = parkingData.map(item => ({ ...item }));
+    state.snapshotFallbackMetadata = state.parkingSnapshot
+      ? JSON.parse(JSON.stringify(state.parkingSnapshot))
+      : null;
+  }
+
+  function restoreSnapshotFallback(previousData, previousSnapshot) {
+    const fallbackData = state.snapshotFallbackData?.length
+      ? state.snapshotFallbackData.map(item => ({ ...item }))
+      : previousData;
+    const fallbackMetadata = state.snapshotFallbackMetadata || previousSnapshot;
+
+    parkingData = fallbackData;
+    state.parkingSnapshot = fallbackMetadata;
+    state.dataMode = "snapshot-fallback";
+    state.dataStatus = fallbackData.length ? "ready" : "error";
+    const ranked = currentData();
+    state.selectedId = ranked[0]?.id || fallbackData[0]?.id || null;
+    rebuildMarkers();
+    setKpiMode(true);
+    renderParkingList();
+
+    if (fallbackData.length) {
+      setMapStatus("Cork official snapshot", "API unavailable · using the latest evidence-backed Pages snapshot");
+    } else {
+      setMapStatus("Parking data unavailable", "API and snapshot are currently unavailable");
+    }
+  }
+
   async function loadApiParking(destination, { initial = false } = {}) {
     if (!destination || !isInCorkPilot(destination.lat, destination.lng)) return;
 
@@ -160,17 +193,7 @@
       if (error.name === "AbortError") return;
       console.warn("WHITEBLOCK API unavailable; retaining snapshot fallback", error);
       if (sequence !== state.apiRequestSequence) return;
-
-      parkingData = previousData;
-      state.parkingSnapshot = previousSnapshot;
-      state.dataMode = "snapshot-fallback";
-      state.dataStatus = previousData.length ? "ready" : "error";
-      rebuildMarkers();
-      setKpiMode(true);
-      renderParkingList();
-      if (previousData.length) {
-        setMapStatus("Cork official snapshot", "API unavailable · using the latest evidence-backed Pages snapshot");
-      }
+      restoreSnapshotFallback(previousData, previousSnapshot);
     }
   }
 
@@ -186,11 +209,13 @@
   function requestInitialApiLoad() {
     if (initialRequested || !state.destination) return;
     initialRequested = true;
+    captureSnapshotFallback();
     loadApiParking(state.destination, { initial: true });
   }
 
   document.addEventListener("whiteblock:data-ready", event => {
     if (event.detail?.mode === "api") return;
+    captureSnapshotFallback();
     requestInitialApiLoad();
   }, { once: true });
 
