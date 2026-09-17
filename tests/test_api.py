@@ -10,6 +10,7 @@ from api.app import freshness_score, nearby_parking, parking_evidence
 
 
 TEST_PARKING_ID = "WB-TEST-API-001"
+TEST_CUSTOMER_ID = "WB-TEST-API-CUSTOMER"
 
 
 class WhiteBlockApiTests(unittest.TestCase):
@@ -21,24 +22,42 @@ class WhiteBlockApiTests(unittest.TestCase):
 
         with psycopg.connect(database_url) as connection:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM parking_evidence WHERE parking_id = %s", (TEST_PARKING_ID,))
-                cursor.execute("DELETE FROM parking_observation WHERE parking_id = %s", (TEST_PARKING_ID,))
-                cursor.execute("DELETE FROM parking_location WHERE parking_id = %s", (TEST_PARKING_ID,))
+                for parking_id in (TEST_PARKING_ID, TEST_CUSTOMER_ID):
+                    cursor.execute("DELETE FROM parking_evidence WHERE parking_id = %s", (parking_id,))
+                    cursor.execute("DELETE FROM parking_observation WHERE parking_id = %s", (parking_id,))
+                    cursor.execute("DELETE FROM parking_location WHERE parking_id = %s", (parking_id,))
+
                 cursor.execute(
                     """
                     INSERT INTO parking_location (
                       parking_id, name, geom, parking_type, access_type, lifecycle_status,
                       capacity_verified, opening_hours_raw, height_restriction_raw, pricing_raw,
-                      last_verified_at
+                      maximum_stay_minutes, last_verified_at
                     ) VALUES (
                       %s,
                       'WHITEBLOCK API Test Parking',
                       ST_SetSRID(ST_MakePoint(-8.4750, 51.8980), 4326),
                       'surface', 'public', 'verified',
-                      100, '24/7', '2.0 m', '€2.50/hour', now()
+                      100, '24/7', '2.0 m', '€2.50/hour', 240, now()
                     )
                     """,
                     (TEST_PARKING_ID,),
+                )
+                cursor.execute(
+                    """
+                    INSERT INTO parking_location (
+                      parking_id, name, geom, parking_type, access_type, lifecycle_status,
+                      capacity_verified, opening_hours_raw, pricing_raw,
+                      maximum_stay_minutes, last_verified_at
+                    ) VALUES (
+                      %s,
+                      'WHITEBLOCK Customer Parking',
+                      ST_SetSRID(ST_MakePoint(-8.4760, 51.8984), 4326),
+                      'surface', 'customer', 'verified',
+                      60, 'Daily 08:00-22:00', 'Free for customers', 120, now()
+                    )
+                    """,
+                    (TEST_CUSTOMER_ID,),
                 )
                 cursor.execute(
                     """
@@ -49,6 +68,16 @@ class WhiteBlockApiTests(unittest.TestCase):
                     ) VALUES (%s, now(), now(), 40, 60, 100, 0.6, 'test_api', 'observed', 0.98)
                     """,
                     (TEST_PARKING_ID,),
+                )
+                cursor.execute(
+                    """
+                    INSERT INTO parking_observation (
+                      parking_id, observed_at, retrieved_at, available_spaces,
+                      occupied_spaces, capacity_at_observation, occupancy_ratio,
+                      source_key, truth_state, confidence
+                    ) VALUES (%s, now(), now(), 20, 40, 60, 0.6667, 'test_api', 'observed', 0.96)
+                    """,
+                    (TEST_CUSTOMER_ID,),
                 )
                 cursor.execute(
                     """
@@ -71,9 +100,10 @@ class WhiteBlockApiTests(unittest.TestCase):
             return
         with psycopg.connect(database_url) as connection:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM parking_evidence WHERE parking_id = %s", (TEST_PARKING_ID,))
-                cursor.execute("DELETE FROM parking_observation WHERE parking_id = %s", (TEST_PARKING_ID,))
-                cursor.execute("DELETE FROM parking_location WHERE parking_id = %s", (TEST_PARKING_ID,))
+                for parking_id in (TEST_PARKING_ID, TEST_CUSTOMER_ID):
+                    cursor.execute("DELETE FROM parking_evidence WHERE parking_id = %s", (parking_id,))
+                    cursor.execute("DELETE FROM parking_observation WHERE parking_id = %s", (parking_id,))
+                    cursor.execute("DELETE FROM parking_location WHERE parking_id = %s", (parking_id,))
             connection.commit()
 
     def test_freshness_score_is_high_for_current_observation(self):
@@ -92,9 +122,23 @@ class WhiteBlockApiTests(unittest.TestCase):
         self.assertLess(record.distance_m, 500)
         self.assertEqual(record.available_spaces, 40)
         self.assertEqual(record.capacity, 100)
+        self.assertEqual(record.maximum_stay_minutes, 240)
         self.assertGreater(record.confidence.score, 0.90)
         self.assertEqual(record.truth_state, "observed")
         self.assertGreaterEqual(record.evidence_count, 1)
+
+    def test_customer_parking_is_visible_without_private_restricted_access(self):
+        response = nearby_parking(
+            lat=51.8985,
+            lng=-8.4756,
+            radius_km=2.0,
+            limit=20,
+            include_restricted=False,
+        )
+        record = next(item for item in response.locations if item.parking_id == TEST_CUSTOMER_ID)
+        self.assertEqual(record.access_type, "customer")
+        self.assertEqual(record.maximum_stay_minutes, 120)
+        self.assertEqual(record.opening_hours_raw, "Daily 08:00-22:00")
 
     def test_evidence_endpoint_returns_provenance(self):
         response = parking_evidence(TEST_PARKING_ID)
