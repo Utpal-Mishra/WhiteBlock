@@ -46,6 +46,7 @@
       ev: numeric(record.ev_spaces) > 0 ? true : null,
       pricingRaw: record.pricing_raw || null,
       openingHoursRaw: record.opening_hours_raw || null,
+      maxStayMinutes: numeric(record.maximum_stay_minutes),
       heightRestrictionRaw: record.height_restriction_raw || null,
       observedAt: record.observed_at || null,
       retrievedAt: record.retrieved_at || null,
