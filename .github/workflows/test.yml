@@ -51,6 +51,7 @@ jobs:
       - name: Check frontend JavaScript
         run: |
           node --check web/app.js
+          node --check web/live-data.js
           node --check web/map-fix.js
 
       - name: Run tests
