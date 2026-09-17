@@ -12,7 +12,7 @@ from psycopg.rows import dict_row
 from pydantic import BaseModel, Field
 
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.2.0"
 DEFAULT_CORS_ORIGINS = [
     "https://utpal-mishra.github.io",
     "http://localhost:8000",
@@ -81,6 +81,7 @@ class ParkingResult(BaseModel):
     confidence: Confidence
     pricing_raw: Optional[str] = None
     opening_hours_raw: Optional[str] = None
+    maximum_stay_minutes: Optional[int] = Field(default=None, ge=0)
     height_restriction_raw: Optional[str] = None
     accessible_spaces: Optional[int] = None
     ev_spaces: Optional[int] = None
@@ -89,7 +90,7 @@ class ParkingResult(BaseModel):
 
 
 class NearbyResponse(BaseModel):
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
     generated_at: datetime
     origin: dict[str, float]
     radius_km: float
@@ -148,7 +149,7 @@ def completeness_score(row: dict[str, Any]) -> float:
         row.get("capacity") is not None,
         bool(row.get("opening_hours_raw")),
         bool(row.get("pricing_raw")),
-        bool(row.get("height_restriction_raw")),
+        row.get("maximum_stay_minutes") is not None,
         row.get("access_type") not in (None, "unknown"),
     ]
     return sum(1 for check in checks if check) / len(checks)
@@ -195,6 +196,7 @@ def row_to_parking_result(row: dict[str, Any], now: datetime) -> ParkingResult:
         confidence=composite_confidence(row, now),
         pricing_raw=row.get("pricing_raw"),
         opening_hours_raw=row.get("opening_hours_raw"),
+        maximum_stay_minutes=row.get("maximum_stay_minutes"),
         height_restriction_raw=row.get("height_restriction_raw"),
         accessible_spaces=row.get("accessible_spaces"),
         ev_spaces=row.get("ev_spaces"),
@@ -226,6 +228,7 @@ SELECT
   o.source_key,
   p.pricing_raw,
   p.opening_hours_raw,
+  p.maximum_stay_minutes,
   p.height_restriction_raw,
   p.accessible_spaces,
   p.ev_spaces,
@@ -243,7 +246,7 @@ LEFT JOIN LATERAL (
   WHERE e.parking_id = p.parking_id
 ) ev ON TRUE
 WHERE p.lifecycle_status IN ('verified', 'published')
-  AND (%(include_restricted)s OR p.access_type IN ('public', 'unknown'))
+  AND (%(include_restricted)s OR p.access_type IN ('public', 'customer', 'unknown'))
   AND ST_DWithin(p.geom::geography, origin.geog, %(radius_m)s)
 ORDER BY distance_m ASC, p.parking_id ASC
 LIMIT %(limit)s
