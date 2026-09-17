@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
@@ -147,6 +146,7 @@ def build_snapshot(input_dir: Path) -> Dict[str, Any]:
                 "name": asset.get("name") or parking_id,
                 "latitude": lat,
                 "longitude": lng,
+                "parking_type": asset.get("parking_type"),
                 "access_type": asset.get("access_type"),
                 "status": asset.get("status"),
                 "capacity": capacity,
@@ -159,6 +159,7 @@ def build_snapshot(input_dir: Path) -> Dict[str, Any]:
                 "confidence": confidence,
                 "pricing_raw": asset.get("pricing_raw"),
                 "opening_hours_raw": asset.get("opening_hours_raw"),
+                "maximum_stay_minutes": asset.get("maximum_stay_minutes"),
                 "height_restriction_raw": asset.get("height_restriction_raw"),
                 "accessible_spaces": asset.get("accessible_spaces"),
                 "ev_spaces": asset.get("ev_spaces"),
@@ -171,7 +172,7 @@ def build_snapshot(input_dir: Path) -> Dict[str, Any]:
     capacity_values = [item["capacity"] for item in locations if isinstance(item.get("capacity"), int)]
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": generated_at.isoformat().replace("+00:00", "Z"),
         "source": {
             "key": manifest.get("source_key"),
