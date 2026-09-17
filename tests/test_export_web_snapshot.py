@@ -1,7 +1,6 @@
 import json
 import tempfile
 import unittest
-from datetime import datetime, timezone
 from pathlib import Path
 
 from scripts.export_web_snapshot import build_snapshot
@@ -19,14 +18,16 @@ class ExportWebSnapshotTests(unittest.TestCase):
                     "parking_id": "WB-PARK-IE-CORK-000001",
                     "name": "Example Car Park",
                     "location": {"latitude": 51.90, "longitude": -8.47},
-                    "access_type": "public",
+                    "parking_type": "surface",
+                    "access_type": "customer",
                     "status": "verified",
                     "capacity_verified": 100,
                     "accessible_spaces": None,
                     "ev_spaces": None,
-                    "opening_hours_raw": "24 hours",
+                    "opening_hours_raw": "Daily 08:00-22:00",
+                    "maximum_stay_minutes": 120,
                     "height_restriction_raw": "2.0m",
-                    "pricing_raw": "€2.50 per hour",
+                    "pricing_raw": "Free for customers",
                     "source_notes": "official record",
                     "provenance": [{"confidence": 0.98}],
                 }
@@ -61,12 +62,18 @@ class ExportWebSnapshotTests(unittest.TestCase):
             (root / "latest_run.json").write_text(json.dumps(manifest), encoding="utf-8")
 
             snapshot = build_snapshot(root)
+            record = snapshot["locations"][0]
+            self.assertEqual(snapshot["schema_version"], "1.1")
             self.assertEqual(snapshot["summary"]["locations"], 1)
-            self.assertEqual(snapshot["locations"][0]["available_spaces"], 35)
-            self.assertEqual(snapshot["locations"][0]["capacity"], 100)
-            self.assertEqual(snapshot["locations"][0]["pricing_raw"], "€2.50 per hour")
-            self.assertIn("basis", snapshot["locations"][0]["confidence"])
-            self.assertGreater(snapshot["locations"][0]["confidence"]["score"], 0)
+            self.assertEqual(record["available_spaces"], 35)
+            self.assertEqual(record["capacity"], 100)
+            self.assertEqual(record["parking_type"], "surface")
+            self.assertEqual(record["access_type"], "customer")
+            self.assertEqual(record["opening_hours_raw"], "Daily 08:00-22:00")
+            self.assertEqual(record["maximum_stay_minutes"], 120)
+            self.assertEqual(record["pricing_raw"], "Free for customers")
+            self.assertIn("basis", record["confidence"])
+            self.assertGreater(record["confidence"]["score"], 0)
 
     def test_snapshot_does_not_expose_raw_snapshot_paths(self):
         with tempfile.TemporaryDirectory() as tmp:
