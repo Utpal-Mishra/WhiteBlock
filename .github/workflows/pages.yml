@@ -5,7 +5,11 @@ on:
     branches: [main]
     paths:
       - "web/**"
+      - "scripts/ingest_cork_parking.py"
+      - "scripts/export_web_snapshot.py"
       - ".github/workflows/pages.yml"
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,10 +28,31 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build latest Cork parking snapshot
+        run: |
+          python scripts/ingest_cork_parking.py --output-dir data/cork
+          python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("web/data/parking_snapshot.json")
+          data = json.loads(path.read_text())
+          locations = data.get("locations", [])
+          if not locations:
+              raise SystemExit("Parking snapshot contains no locations; refusing to deploy misleading empty data")
+          print(f"Validated browser snapshot with {len(locations)} locations")
+          PY
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
