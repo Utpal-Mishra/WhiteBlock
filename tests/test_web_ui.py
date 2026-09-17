@@ -8,7 +8,7 @@ WEB = ROOT / "web"
 
 class WhiteBlockWebUITests(unittest.TestCase):
     def test_frontend_files_exist(self):
-        for filename in ("index.html", "styles.css", "search.css", "map-context.css", "app.js", "map-fix.js"):
+        for filename in ("index.html", "styles.css", "search.css", "map-context.css", "app.js", "live-data.js", "map-fix.js"):
             self.assertTrue((WEB / filename).exists(), f"Missing web/{filename}")
 
     def test_core_views_are_present(self):
@@ -24,10 +24,27 @@ class WhiteBlockWebUITests(unittest.TestCase):
         for color in ("#07110D", "#0B1712", "#0E1D17", "#1E3229", "#EDF7F1", "#8FA39A", "#78E6AA", "#52D98D", "#C8F56B"):
             self.assertIn(color, css)
 
-    def test_demo_data_is_explicitly_labelled(self):
-        html = (WEB / "index.html").read_text(encoding="utf-8").lower()
-        self.assertIn("prototype / demo values", html)
-        self.assertIn("parking recommendations currently use the cork pilot dataset", html)
+    def test_find_view_does_not_ship_demo_parking_values(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        js = (WEB / "app.js").read_text(encoding="utf-8")
+        self.assertIn("let parkingData = [];", js)
+        self.assertNotIn("City Centre West", js)
+        self.assertNotIn("River Quarter", js)
+        self.assertNotIn("South Mall", js)
+        self.assertNotIn("North Gate", js)
+        self.assertIn("No demo availability values are used", html)
+        self.assertIn('<script src="./live-data.js"></script>', html)
+        self.assertNotIn(">214<", html)
+        self.assertNotIn(">92%<", html)
+
+    def test_live_snapshot_contract(self):
+        js = (WEB / "live-data.js").read_text(encoding="utf-8")
+        self.assertIn("./data/parking_snapshot.json", js)
+        self.assertIn("NEARBY_RADIUS_KM", js)
+        self.assertIn("confidenceBasis", js)
+        self.assertIn("source + freshness + completeness", js)
+        self.assertIn("No demo availability values are being substituted", js)
+        self.assertIn("whiteblock:data-ready", js)
 
     def test_ireland_address_autocomplete_contract(self):
         html = (WEB / "index.html").read_text(encoding="utf-8")
@@ -60,6 +77,7 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("invalidateSize", js)
         self.assertIn("focusSelectedParking", js)
         self.assertIn("renderCoverageTint", js)
+        self.assertIn("whiteblock:data-ready", js)
         self.assertNotIn("activeTileLayer.redraw", js)
         self.assertIn("wb-map-layer-button", css)
         self.assertIn("wb-map-satellite", css)
