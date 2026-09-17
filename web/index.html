@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./search.css" />
   <link rel="stylesheet" href="./map-context.css" />
+  <link rel="stylesheet" href="./discover.css" />
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -103,17 +104,36 @@
       </section>
 
       <section class="view" id="view-discover" data-view-panel="discover">
-        <div class="section-intro"><div><p class="eyebrow">Supply Discovery Engine</p><h2>Find what the city is overlooking.</h2></div><span class="prototype-badge">Research layer</span></div>
-        <div class="discovery-grid">
-          <article class="surface discovery-hero">
-            <div class="block-visual" aria-hidden="true"><span class="parking-line line-a"></span><span class="parking-line line-b"></span><span class="parking-line line-c"></span><span class="candidate candidate-a"></span><span class="candidate candidate-b"></span></div>
-            <div class="discovery-copy"><p class="eyebrow">Change detection</p><h3>2 candidate WhiteBlocks identified</h3><p>Potential parking-like geometry detected in the latest comparison window. Neither candidate is public-facing until access and legal use are verified.</p><button class="secondary-button" type="button">Review candidates</button></div>
-          </article>
-          <article class="surface metric-card"><span>New candidates</span><strong>2</strong><small>awaiting verification</small></article>
-          <article class="surface metric-card"><span>Lost supply</span><strong>0</strong><small>material changes detected</small></article>
-          <article class="surface metric-card"><span>Underused capacity</span><strong>146</strong><small>estimated spaces</small></article>
-          <article class="surface metric-card"><span>Imagery freshness</span><strong>31d</strong><small>pilot research source</small></article>
+        <div class="section-intro">
+          <div><p class="eyebrow">Supply Discovery Engine</p><h2>See what WHITEBLOCK has added to the parking inventory.</h2></div>
+          <span class="prototype-badge" id="discover-data-status">Loading inventory</span>
         </div>
+
+        <div class="discover-overview">
+          <article class="surface discover-overview-hero">
+            <div>
+              <p class="eyebrow">Current inventory coverage</p>
+              <h3><span id="discover-primary-region">Loading…</span> parking layer</h3>
+              <p>Track the regions and individual parking locations that have been ingested, verified and made available to WHITEBLOCK. This view represents inventory coverage—not a claim that the physical parking itself is newly built.</p>
+            </div>
+            <div class="discover-overview-foot"><strong id="discover-sync-value">Waiting for data</strong><span>Discover → verify → add to inventory</span></div>
+          </article>
+          <article class="surface discover-live-metric"><span>Regions added</span><strong id="discover-regions-value">—</strong><small>active inventory regions</small></article>
+          <article class="surface discover-live-metric"><span>Parking locations</span><strong id="discover-locations-value">—</strong><small>current canonical assets</small></article>
+          <article class="surface discover-live-metric"><span>Total capacity</span><strong id="discover-capacity-value">—</strong><small>spaces where published</small></article>
+          <article class="surface discover-live-metric"><span>Available now</span><strong id="discover-available-value">—</strong><small>latest reported availability</small></article>
+        </div>
+
+        <div class="discover-section-head">
+          <div><p class="eyebrow">Region coverage</p><h2>Regions in the parking knowledge layer</h2><p>Each region shows the inventory currently available to WHITEBLOCK and the source mode behind it.</p></div>
+        </div>
+        <div id="discover-region-list" class="discover-region-list"><div class="surface discover-empty">Loading region coverage…</div></div>
+
+        <div class="discover-section-head">
+          <div><p class="eyebrow">Parking inventory</p><h2>Locations added</h2><p>Every location below comes from the current evidence-backed parking inventory.</p></div>
+        </div>
+        <div id="discover-location-list" class="discover-location-list"><div class="surface discover-empty">Loading parking locations…</div></div>
+        <div class="discover-inventory-note"><strong>Important:</strong> “Added” means added to the WHITEBLOCK data inventory. A separately detected parking candidate should only appear as verified parking after access, legal use and evidence checks are complete.</div>
       </section>
 
       <section class="view" id="view-network" data-view-panel="network">
@@ -149,6 +169,7 @@
   <script src="./app.js"></script>
   <script src="./live-data.js"></script>
   <script src="./api-adapter.js"></script>
+  <script src="./discover.js"></script>
   <script src="./map-fix.js"></script>
 </body>
 </html>

@@ -53,6 +53,7 @@ jobs:
           node --check web/app.js
           node --check web/live-data.js
           node --check web/api-adapter.js
+          node --check web/discover.js
           node --check web/map-fix.js
           python -m compileall -q api scripts
 
