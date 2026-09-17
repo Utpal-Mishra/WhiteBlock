@@ -230,6 +230,34 @@ Potential B2B outputs include:
 
 ---
 
+## 2026-09-17 — API-first browser data delivery with evidence-backed fallback
+
+**Decision:** The browser should prefer a read-only WHITEBLOCK API backed by PostGIS when an API endpoint is configured. The public GitHub Pages deployment should retain the latest official Cork snapshot as a fallback rather than connecting directly to PostgreSQL or substituting demo values.
+
+**Why:**
+
+- GitHub Pages is static and must never contain database credentials;
+- destination-specific spatial queries belong in PostGIS/API rather than the browser;
+- the existing official Cork ingestion can still produce a safe deployment snapshot while backend hosting is being established;
+- API outages should degrade to recent evidence-backed data, not fabricated parking availability;
+- the same API contract can later support mobile apps, operator dashboards and other clients.
+
+**Data priority:**
+
+```text
+PostGIS API
+   ↓ unavailable
+Official build-time snapshot
+   ↓ unavailable
+No parking values shown
+```
+
+**Confidence:** Keep the API and snapshot confidence meaning aligned: source quality + freshness + field completeness.
+
+**Deployment boundary:** The API requires a container/server runtime and is not hosted by GitHub Pages. Once a backend is deployed, configure the Pages application using the `WHITEBLOCK_API_BASE_URL` repository variable.
+
+---
+
 ## Future decisions to record
 
 Add dated entries when choosing or materially changing:

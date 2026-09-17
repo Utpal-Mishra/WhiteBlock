@@ -54,6 +54,24 @@ jobs:
           print(f"Validated browser snapshot with {len(locations)} locations")
           PY
 
+      - name: Configure optional WHITEBLOCK API
+        env:
+          WHITEBLOCK_API_BASE_URL: ${{ vars.WHITEBLOCK_API_BASE_URL }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.getenv("WHITEBLOCK_API_BASE_URL", "").strip().rstrip("/") or None
+          config = {"apiBaseUrl": value}
+          Path("web/runtime-config.js").write_text(
+              "window.WHITEBLOCK_CONFIG = " + json.dumps(config, separators=(",", ":")) + ";\n",
+              encoding="utf-8",
+          )
+          print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
+          PY
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 

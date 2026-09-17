@@ -18,5 +18,20 @@ services:
       timeout: 5s
       retries: 10
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: whiteblock-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-whiteblock}:${POSTGRES_PASSWORD:-whiteblock_dev}@postgis:5432/${POSTGRES_DB:-whiteblock}
+      WHITEBLOCK_CORS_ORIGINS: ${WHITEBLOCK_CORS_ORIGINS:-https://utpal-mishra.github.io,http://localhost:8000,http://127.0.0.1:8000}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgis:
+        condition: service_healthy
+
 volumes:
   whiteblock_postgis_data:
