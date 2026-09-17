@@ -1,65 +1,4 @@
-const parkingData = [
-  {
-    id: "WB-PARK-IE-CORK-000021",
-    name: "City Centre West",
-    area: "Central Cork",
-    lat: 51.8977,
-    lng: -8.4757,
-    available: 68,
-    capacity: 420,
-    walk: 4,
-    price: 5.8,
-    confidence: 96,
-    accessible: true,
-    ev: true,
-    reason: "Strong availability with a short walk and current authoritative coverage."
-  },
-  {
-    id: "WB-PARK-IE-CORK-000034",
-    name: "River Quarter",
-    area: "North channel",
-    lat: 51.9011,
-    lng: -8.4702,
-    available: 74,
-    capacity: 172,
-    walk: 7,
-    price: 4.2,
-    confidence: 88,
-    accessible: true,
-    ev: false,
-    reason: "Lower utilisation makes this the strongest pressure-relief option in the demo network."
-  },
-  {
-    id: "WB-PARK-IE-CORK-000008",
-    name: "South Mall",
-    area: "South city centre",
-    lat: 51.8957,
-    lng: -8.4728,
-    available: 31,
-    capacity: 132,
-    walk: 3,
-    price: 6.4,
-    confidence: 93,
-    accessible: true,
-    ev: true,
-    reason: "Closest high-confidence option, but projected demand pressure is higher."
-  },
-  {
-    id: "WB-PARK-IE-CORK-000015",
-    name: "North Gate",
-    area: "North city centre",
-    lat: 51.9002,
-    lng: -8.4789,
-    available: 41,
-    capacity: 205,
-    walk: 9,
-    price: 3.6,
-    confidence: 90,
-    accessible: false,
-    ev: false,
-    reason: "Lowest estimated cost with moderate availability and a longer walk."
-  }
-];
+let parkingData = [];
 
 const IRELAND_BOUNDS = [[51.2, -11.0], [55.5, -5.3]];
 const CORK_CENTER = { lat: 51.8985, lng: -8.4756 };
@@ -90,7 +29,7 @@ const initialDestination = fallbackPlaces[0];
 
 const state = {
   filter: "best",
-  selectedId: parkingData[0].id,
+  selectedId: null,
   map: null,
   markers: new Map(),
   destination: initialDestination,
@@ -120,6 +59,7 @@ function escapeHtml(value) {
 }
 
 function availabilityLabel(item) {
+  if (item.available == null || item.capacity == null || item.capacity <= 0) return { text: "Unknown", marker: "marker-mid" };
   const ratio = item.available / item.capacity;
   if (ratio >= 0.25) return { text: "Good", marker: "marker-good" };
   if (ratio >= 0.12) return { text: "Moderate", marker: "marker-mid" };
@@ -127,17 +67,17 @@ function availabilityLabel(item) {
 }
 
 function score(item) {
-  const availability = item.available / item.capacity;
-  const walkPenalty = item.walk / 12;
-  const pricePenalty = item.price / 10;
-  const confidence = item.confidence / 100;
+  const availability = item.available != null && item.capacity > 0 ? item.available / item.capacity : 0;
+  const walkPenalty = (item.walk ?? 60) / 60;
+  const pricePenalty = item.price != null ? item.price / 10 : 0;
+  const confidence = (item.confidence ?? 0) / 100;
   return availability * 0.42 + confidence * 0.3 - walkPenalty * 0.18 - pricePenalty * 0.1;
 }
 
 function currentData() {
   let data = [...parkingData];
-  if (state.filter === "closest") data.sort((a, b) => a.walk - b.walk);
-  else if (state.filter === "cheapest") data.sort((a, b) => a.price - b.price);
+  if (state.filter === "closest") data.sort((a, b) => (a.walk ?? Infinity) - (b.walk ?? Infinity));
+  else if (state.filter === "cheapest") data.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
   else if (state.filter === "accessible") data = data.filter(item => item.accessible);
   else if (state.filter === "ev") data = data.filter(item => item.ev);
   else data.sort((a, b) => score(b) - score(a));
@@ -147,6 +87,7 @@ function currentData() {
 function parkingCard(item, index) {
   const availability = availabilityLabel(item);
   const selected = item.id === state.selectedId ? " selected" : "";
+  const price = item.price != null ? `€${Number(item.price).toFixed(2)}` : "—";
   return `
     <article class="parking-card surface${selected}" data-parking-id="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="View ${escapeHtml(item.name)} on map">
       <div class="parking-top">
@@ -154,20 +95,20 @@ function parkingCard(item, index) {
           <span class="rank">${String(index + 1).padStart(2, "0")}</span>
           <div class="parking-title">
             <h3>${escapeHtml(item.name)}</h3>
-            <small>${escapeHtml(item.area)} · ${escapeHtml(item.id.replace("WB-PARK-IE-CORK-", "WB-"))}</small>
+            <small>${escapeHtml(item.area || "Cork")} · ${escapeHtml(item.id.replace("WB-PARK-IE-CORK-", "WB-"))}</small>
           </div>
         </div>
         <div class="availability">
           <strong>${availability.text}</strong>
-          <small>${item.available} spaces</small>
+          <small>${item.available != null ? `${item.available} spaces` : "availability unknown"}</small>
         </div>
       </div>
       <div class="parking-meta">
-        <span>Walk<b>${item.walk} min</b></span>
-        <span>Est. cost<b>€${item.price.toFixed(2)}</b></span>
-        <span>Confidence<b>${item.confidence}%</b></span>
+        <span>Walk<b>${item.walk != null ? `${item.walk} min` : "—"}</b></span>
+        <span>Est. cost<b>${price}</b></span>
+        <span>Confidence<b>${item.confidence ?? "—"}%</b></span>
       </div>
-      <p class="reason"><strong>Why:</strong> ${escapeHtml(item.reason)}</p>
+      <p class="reason"><strong>Why:</strong> ${escapeHtml(item.reason || "Evidence-backed parking record")}</p>
     </article>`;
 }
 
@@ -187,7 +128,7 @@ function renderParkingList() {
       coverageMessage.innerHTML = `
         <span class="coverage-kicker">Destination found</span>
         <h3>${escapeHtml(state.destination.primary || state.destination.label)}</h3>
-        <p>WHITEBLOCK can locate this destination on the Ireland map, but evidence-backed parking recommendations are currently connected only for the Cork pilot. This avoids presenting Cork demo inventory as if it were local to your selected address.</p>
+        <p>WHITEBLOCK can locate this destination on the Ireland map, but evidence-backed parking recommendations are currently connected only for the Cork pilot.</p>
         <button type="button" id="return-cork-button">View Cork pilot</button>`;
       document.getElementById("return-cork-button")?.addEventListener("click", () => selectAddressSuggestion(initialDestination, { runRanking: true }));
     }
@@ -213,7 +154,7 @@ function renderParkingList() {
 
 function markerHtml(item) {
   const availability = availabilityLabel(item);
-  return `<div class="map-marker ${availability.marker}"><strong>${item.available}</strong></div>`;
+  return `<div class="map-marker ${availability.marker}"><strong>${item.available != null ? Math.round(item.available) : "?"}</strong></div>`;
 }
 
 function destinationIcon() {
@@ -260,10 +201,10 @@ function setMapStatus(title, copy) {
 
 function setKpiMode(inPilot) {
   const values = inPilot ? {
-    coverage: ["87%", "Cork pilot inventory mapped"],
-    availability: ["214", "observed + estimated"],
-    confidence: ["92%", "verified pilot sources"],
-    pressure: ["Moderate", "next 60 minutes"]
+    coverage: ["—", "loading Cork parking inventory"],
+    availability: ["—", "loading latest observations"],
+    confidence: ["—", "calculating evidence confidence"],
+    pressure: ["—", "awaiting observation data"]
   } : {
     coverage: ["Ireland", "destination search enabled"],
     availability: ["—", "parking feed not connected here yet"],
@@ -287,9 +228,9 @@ function initMap() {
   }
 
   state.map = L.map("map", { zoomControl: true, attributionControl: true }).setView([CORK_CENTER.lat, CORK_CENTER.lng], 14);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    maxZoom: 20,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(state.map);
 
   parkingData.forEach(item => {
@@ -300,7 +241,7 @@ function initMap() {
       iconAnchor: [17, 30]
     });
     const marker = L.marker([item.lat, item.lng], { icon }).addTo(state.map);
-    marker.bindTooltip(`${item.name} · ${item.available} spaces`, {
+    marker.bindTooltip(`${item.name} · ${item.available ?? "?"} spaces`, {
       direction: "top",
       offset: [0, -22],
       className: "wb-tooltip"
@@ -556,7 +497,7 @@ function applyDestinationContext({ runRanking = false } = {}) {
   }
 
   if (inPilot) {
-    setMapStatus("Cork pilot intelligence", "Destination search + pilot parking recommendations");
+    setMapStatus("Cork parking intelligence", state.dataStatus === "ready" ? "Official parking snapshot ranked for this destination" : "Loading official parking data");
   } else {
     setMapStatus("Ireland destination search", "Parking intelligence for this area is not connected yet");
   }
@@ -634,7 +575,7 @@ function showIrelandOverview() {
   state.map.fitBounds(IRELAND_BOUNDS, { padding: [18, 18] });
   const mapTitle = document.getElementById("map-title");
   if (mapTitle) mapTitle.textContent = "WHITEBLOCK across Ireland";
-  setMapStatus("Ireland coverage view", "Cork pilot · Dublin next · Galway/Limerick/Waterford planned");
+  setMapStatus("Ireland Coverage View", "Cork pilot · Dublin next · Galway/Limerick/Waterford planned");
 }
 
 function initAddressSearch() {
