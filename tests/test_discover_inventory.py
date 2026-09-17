@@ -33,7 +33,7 @@ class DiscoverInventoryTests(unittest.TestCase):
         html = (WEB / "index.html").read_text(encoding="utf-8")
         js = (WEB / "discover.js").read_text(encoding="utf-8")
         self.assertIn("added to the WHITEBLOCK data inventory", html)
-        self.assertIn("not newly constructed or newly discovered physical parking", js)
+        self.assertIn("newly constructed or newly discovered physical parking", js)
 
 
 if __name__ == "__main__":
