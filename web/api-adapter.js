@@ -16,11 +16,37 @@
   state.snapshotFallbackData = null;
   state.snapshotFallbackMetadata = null;
 
-  if (!apiBaseUrl) return;
-
   function numeric(value) {
     return Number.isFinite(Number(value)) ? Number(value) : null;
   }
+
+  function hydrateSnapshotRuleFields() {
+    const locations = state.parkingSnapshot?.locations;
+    if (!Array.isArray(locations) || !locations.length || !Array.isArray(parkingData)) return false;
+
+    const byId = new Map(locations.map(record => [record.parking_id, record]));
+    let changed = false;
+    parkingData.forEach(item => {
+      const source = byId.get(item.id);
+      if (!source) return;
+      item.accessType = source.access_type || item.accessType || "unknown";
+      item.parkingType = source.parking_type || item.parkingType || "unknown";
+      item.maxStayMinutes = numeric(source.maximum_stay_minutes);
+      item.openingHoursRaw = source.opening_hours_raw || item.openingHoursRaw || null;
+      changed = true;
+    });
+    return changed;
+  }
+
+  function refreshSnapshotRules(event) {
+    if (event?.detail?.mode === "api") return;
+    if (hydrateSnapshotRuleFields()) window.WBSessionRules?.refresh?.();
+  }
+
+  document.addEventListener("whiteblock:data-ready", refreshSnapshotRules);
+  refreshSnapshotRules();
+
+  if (!apiBaseUrl) return;
 
   function priceNumber(raw) {
     if (!raw) return null;
@@ -117,6 +143,7 @@
     state.parkingSnapshot = fallbackMetadata;
     state.dataMode = "snapshot-fallback";
     state.dataStatus = fallbackData.length ? "ready" : "error";
+    hydrateSnapshotRuleFields();
     const ranked = currentData();
     state.selectedId = ranked[0]?.id || fallbackData[0]?.id || null;
     rebuildMarkers();
