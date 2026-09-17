@@ -1,0 +1,148 @@
+.parking-rule-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:12px;
+}
+
+.parking-rule-chip {
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:0 9px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(7,17,13,.42);
+  color:var(--muted);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+
+.parking-rule-chip.access-customer {
+  border-color:rgba(241,196,107,.28);
+  color:var(--amber);
+  background:rgba(241,196,107,.06);
+}
+
+.parking-rule-chip.access-public,
+.parking-rule-chip.rule-fit.good {
+  border-color:rgba(120,230,170,.25);
+  color:var(--green);
+  background:rgba(120,230,170,.055);
+}
+
+.parking-rule-chip.rule-fit.near {
+  border-color:rgba(241,196,107,.35);
+  color:var(--amber);
+  background:rgba(241,196,107,.075);
+}
+
+.parking-rule-chip.rule-fit.blocked {
+  border-color:rgba(240,139,126,.30);
+  color:var(--danger);
+  background:rgba(240,139,126,.06);
+}
+
+.parking-card-near-limit {
+  border-color:rgba(241,196,107,.23);
+}
+
+.parking-card-ineligible {
+  opacity:.74;
+  border-color:rgba(240,139,126,.16);
+}
+
+.parking-card-ineligible:hover,
+.parking-card-ineligible.selected {
+  opacity:.94;
+  border-color:rgba(240,139,126,.32);
+}
+
+.parking-card-ineligible .rank {
+  color:var(--danger);
+  border-color:rgba(240,139,126,.18);
+  background:rgba(240,139,126,.07);
+}
+
+.parking-card-ineligible .availability strong {
+  color:var(--danger);
+}
+
+.parking-customer-warning {
+  margin:10px 0 0;
+  padding:9px 10px;
+  border-radius:10px;
+  border:1px solid rgba(241,196,107,.16);
+  background:rgba(241,196,107,.045);
+  color:var(--amber);
+  font-size:9px;
+  line-height:1.45;
+}
+
+.parking-ineligible-section {
+  margin-top:14px;
+  border:1px solid rgba(240,139,126,.14);
+  border-radius:16px;
+  background:rgba(11,23,18,.58);
+  overflow:hidden;
+}
+
+.parking-ineligible-section summary {
+  list-style:none;
+  cursor:pointer;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:3px 10px;
+  align-items:center;
+  padding:13px 14px;
+  color:var(--text);
+  font-size:11px;
+  font-weight:700;
+}
+
+.parking-ineligible-section summary::-webkit-details-marker { display:none; }
+.parking-ineligible-section summary::after {
+  content:"+";
+  grid-column:2;
+  grid-row:1/3;
+  color:var(--muted);
+  font-size:18px;
+  font-weight:500;
+}
+.parking-ineligible-section[open] summary::after { content:"−"; }
+.parking-ineligible-section summary b {
+  display:inline-grid;
+  place-items:center;
+  min-width:24px;
+  height:24px;
+  border-radius:999px;
+  color:var(--danger);
+  background:rgba(240,139,126,.07);
+  border:1px solid rgba(240,139,126,.15);
+}
+.parking-ineligible-section summary small {
+  grid-column:1;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:500;
+}
+
+.parking-ineligible-list {
+  display:grid;
+  gap:9px;
+  padding:0 10px 10px;
+}
+
+.marker-ineligible {
+  background:#46534d;
+  border-color:rgba(240,139,126,.46);
+  opacity:.76;
+}
+.marker-ineligible strong { color:#f8dfdb; }
+
+@media (max-width: 520px) {
+  .parking-rule-row { gap:5px; }
+  .parking-rule-chip { min-height:24px; padding:0 8px; font-size:8px; }
+  .parking-ineligible-section summary { padding:12px; }
+}
