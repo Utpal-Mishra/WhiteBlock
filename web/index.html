@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./search.css" />
   <link rel="stylesheet" href="./map-context.css" />
   <link rel="stylesheet" href="./discover.css" />
+  <link rel="stylesheet" href="./session-rules.css" />
 </head>
 <body>
   <div class="ambient ambient-one"></div>
@@ -62,10 +63,10 @@
             </div>
           </div>
           <div class="search-field"><label for="arrival">Arrive</label><input id="arrival" type="time" value="18:30" /></div>
-          <div class="search-field"><label for="duration">Stay</label><select id="duration"><option>1 hour</option><option selected>2 hours</option><option>3 hours</option><option>4+ hours</option></select></div>
+          <div class="search-field"><label for="duration">Stay</label><select id="duration"><option value="60">1 hour</option><option value="120" selected>2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option><option value="360">6 hours</option><option value="480">8 hours</option></select></div>
           <button class="primary-button" id="search-button" type="button">Find parking <span>→</span></button>
         </div>
-        <div class="search-support-row"><span>Address suggestions cover the Republic of Ireland.</span><span>Cork recommendations use the latest published official parking snapshot.</span></div>
+        <div class="search-support-row"><span>Address suggestions cover the Republic of Ireland.</span><span>Stay and access rules are applied before parking options are ranked.</span></div>
 
         <div class="quick-filters" aria-label="Parking filters">
           <button class="chip active" type="button" data-filter="best">Best overall</button>
@@ -76,7 +77,7 @@
         </div>
 
         <div class="kpi-grid">
-          <article class="kpi surface"><span>Nearby assets</span><strong id="kpi-coverage-value">—</strong><small id="kpi-coverage-copy">loading official Cork inventory</small></article>
+          <article class="kpi surface"><span>Eligible nearby</span><strong id="kpi-coverage-value">—</strong><small id="kpi-coverage-copy">loading official Cork inventory</small></article>
           <article class="kpi surface"><span>Available now</span><strong id="kpi-availability-value">—</strong><small id="kpi-availability-copy">loading latest observations</small></article>
           <article class="kpi surface"><span>Avg. confidence</span><strong id="kpi-confidence-value">—</strong><small id="kpi-confidence-copy">calculating evidence confidence</small></article>
           <article class="kpi surface accent-kpi"><span>Supply pressure</span><strong id="kpi-pressure-value">—</strong><small id="kpi-pressure-copy">awaiting observation data</small></article>
@@ -99,6 +100,7 @@
             <div class="results-head"><div><p class="eyebrow">Recommended</p><h2>Best options</h2></div><span class="result-count">Loading</span></div>
             <div id="coverage-message" class="coverage-message surface" hidden></div>
             <div id="parking-list" class="parking-list"></div>
+            <div id="parking-ineligible"></div>
           </section>
         </div>
       </section>
@@ -168,6 +170,7 @@
   <script src="./runtime-config.js"></script>
   <script src="./app.js"></script>
   <script src="./live-data.js"></script>
+  <script src="./session-rules.js"></script>
   <script src="./api-adapter.js"></script>
   <script src="./discover.js"></script>
   <script src="./map-fix.js"></script>
