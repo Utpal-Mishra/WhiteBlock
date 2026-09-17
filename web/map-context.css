@@ -7,8 +7,9 @@
   background: #0b1712;
 }
 
-/* Keep Leaflet's tile pane geometrically simple. Applying filter/will-change to the
-   pane itself can trigger clipping/compositing gaps on some mobile/desktop GPUs. */
+/* Keep Leaflet's tile pane geometrically simple. Filters/transforms on individual
+   tiles can create visible seams or black gaps on mobile GPUs, so production-facing
+   colour layers remain unfiltered. */
 #map .leaflet-tile-pane {
   transition: none;
   will-change: auto;
@@ -16,14 +17,10 @@
 
 #map .leaflet-tile {
   backface-visibility: hidden;
-  transform: translateZ(0);
-}
-
-#map.wb-map-dark .leaflet-tile {
-  filter: grayscale(.72) invert(.88) hue-rotate(166deg) brightness(.62) contrast(1.18) saturate(.58);
 }
 
 #map.wb-map-street .leaflet-tile,
+#map.wb-map-terrain .leaflet-tile,
 #map.wb-map-satellite .leaflet-tile {
   filter: none;
 }
@@ -60,9 +57,12 @@
 }
 
 .wb-map-layer-button:hover,
-.wb-street-view-button:hover {
+.wb-street-view-button:hover,
+.wb-map-layer-button:focus-visible,
+.wb-street-view-button:focus-visible {
   color: #EDF7F1;
   background: rgba(120, 230, 170, .07);
+  outline: 1px solid rgba(120, 230, 170, .38);
 }
 
 .wb-map-layer-button.active {
@@ -112,7 +112,8 @@
 .wb-map-state-legend .moderate { background: #C8F56B; }
 .wb-map-state-legend .pressure { background: #F1C46B; }
 
-.wb-context-halo {
+.wb-context-halo,
+.wb-coverage-tint {
   pointer-events: none;
 }
 
@@ -136,8 +137,8 @@
   .wb-map-toolbar {
     top: 8px;
     right: 8px;
-    left: auto;
-    max-width: calc(100% - 52px);
+    left: 48px;
+    max-width: calc(100% - 56px);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -146,7 +147,7 @@
 
   .wb-map-layer-button,
   .wb-street-view-button {
-    min-height: 32px;
+    min-height: 34px;
     padding: 0 9px;
     font-size: 9px;
   }
@@ -161,9 +162,10 @@
 
 @media (max-width: 520px) {
   .wb-map-toolbar {
+    left: 44px;
     right: 7px;
     top: 7px;
-    max-width: calc(100% - 48px);
+    max-width: calc(100% - 51px);
   }
 
   .wb-map-state-legend {
