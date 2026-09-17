@@ -8,7 +8,17 @@ WEB = ROOT / "web"
 
 class WhiteBlockWebUITests(unittest.TestCase):
     def test_frontend_files_exist(self):
-        for filename in ("index.html", "styles.css", "search.css", "map-context.css", "app.js", "live-data.js", "map-fix.js"):
+        for filename in (
+            "index.html",
+            "styles.css",
+            "search.css",
+            "map-context.css",
+            "runtime-config.js",
+            "app.js",
+            "live-data.js",
+            "api-adapter.js",
+            "map-fix.js",
+        ):
             self.assertTrue((WEB / filename).exists(), f"Missing web/{filename}")
 
     def test_core_views_are_present(self):
@@ -45,6 +55,18 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("source + freshness + completeness", js)
         self.assertIn("No demo availability values are being substituted", js)
         self.assertIn("whiteblock:data-ready", js)
+
+    def test_api_first_contract(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        config = (WEB / "runtime-config.js").read_text(encoding="utf-8")
+        adapter = (WEB / "api-adapter.js").read_text(encoding="utf-8")
+        self.assertIn('<script src="./runtime-config.js"></script>', html)
+        self.assertIn('<script src="./api-adapter.js"></script>', html)
+        self.assertIn("apiBaseUrl", config)
+        self.assertIn("/v1/parking/nearby", adapter)
+        self.assertIn("snapshot-fallback", adapter)
+        self.assertIn("include_restricted", adapter)
+        self.assertIn("whiteblock:data-ready", adapter)
 
     def test_ireland_address_autocomplete_contract(self):
         html = (WEB / "index.html").read_text(encoding="utf-8")
