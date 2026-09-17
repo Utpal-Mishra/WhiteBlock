@@ -48,11 +48,13 @@ jobs:
             psql -h localhost -U whiteblock -d whiteblock -v ON_ERROR_STOP=1 -f "${migration}"
           done
 
-      - name: Check frontend JavaScript
+      - name: Check application syntax
         run: |
           node --check web/app.js
           node --check web/live-data.js
+          node --check web/api-adapter.js
           node --check web/map-fix.js
+          python -m compileall -q api scripts
 
       - name: Run tests
         run: python -m unittest discover -s tests -p 'test_*.py'
