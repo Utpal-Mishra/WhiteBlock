@@ -1,8 +1,8 @@
 // WHITEBLOCK prototype map adapter.
-// Provides keyless street/satellite basemaps, resilient tile loading, mobile resize repair,
-// coloured parking context, guidance assets and an external Street View action.
-// Production should use managed map/geocoding providers with explicit SLA, caching,
-// privacy, licensing and quota policies.
+// Adds keyless colour basemaps, parking/coverage context, mobile resize repair,
+// recommendation-aware camera behaviour and an external Google Street View action.
+// Production should move to managed map/geocoding providers with explicit SLA,
+// caching, privacy, licensing and quota policies.
 
 (() => {
   if (typeof L === "undefined" || typeof state === "undefined" || !state.map) return;
@@ -11,43 +11,60 @@
   const mapEl = document.getElementById("map");
   if (!mapEl) return;
 
-  // Remove the temporary basemap created by app.js. Keep all vector/marker layers.
+  function ensureContextStyles() {
+    if (document.querySelector('link[data-wb-map-context]')) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./map-context.css";
+    link.dataset.wbMapContext = "true";
+    document.head.appendChild(link);
+  }
+
+  ensureContextStyles();
+
+  // app.js creates a temporary basemap so the map can initialise by itself. Replace
+  // it with the WHITEBLOCK layer system while keeping markers/vectors untouched.
   map.eachLayer(layer => {
     if (layer instanceof L.TileLayer) map.removeLayer(layer);
   });
 
   const OSM = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-  const OSM_FALLBACK = "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png";
+  const OSM_FALLBACK = "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png";
+  const OPENTOPO = "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png";
   const ESRI_IMAGERY = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
   const layerDefinitions = {
-    dark: {
-      label: "Dark",
-      url: OSM,
-      fallbackUrl: OSM_FALLBACK,
-      className: "wb-map-dark",
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    },
     street: {
       label: "Street",
       url: OSM,
       fallbackUrl: OSM_FALLBACK,
       className: "wb-map-street",
+      maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    },
+    terrain: {
+      label: "Terrain",
+      url: OPENTOPO,
+      fallbackUrl: OSM,
+      className: "wb-map-terrain",
+      maxZoom: 17,
+      attribution: 'Map data &copy; OpenStreetMap contributors, SRTM | Map style &copy; OpenTopoMap'
     },
     satellite: {
       label: "Satellite",
       url: ESRI_IMAGERY,
       fallbackUrl: OSM,
       className: "wb-map-satellite",
+      maxZoom: 19,
       attribution: "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
   };
 
-  let activeLayerKey = "dark";
+  let activeLayerKey = "street";
   let activeTileLayer = null;
   let parkingContextLayer = null;
   let destinationContextLayer = null;
+  let coverageTintLayer = null;
   let repairTimer = null;
   let resizeTimer = null;
 
@@ -63,13 +80,12 @@
 
   function buildTileLayer(definition) {
     const layer = L.tileLayer(definition.url, {
-      maxZoom: 19,
-      maxNativeZoom: 19,
+      maxZoom: definition.maxZoom || 19,
+      maxNativeZoom: definition.maxZoom || 19,
       detectRetina: false,
-      updateWhenIdle: true,
+      updateWhenIdle: false,
       updateWhenZooming: false,
-      keepBuffer: 2,
-      noWrap: true,
+      keepBuffer: 4,
       attribution: definition.attribution
     });
 
@@ -127,10 +143,10 @@
       L.circle([item.lat, item.lng], {
         radius: 180,
         color: colour,
-        weight: 1,
-        opacity: 0.55,
+        weight: 1.2,
+        opacity: 0.72,
         fillColor: colour,
-        fillOpacity: 0.10,
+        fillOpacity: 0.13,
         className: "wb-context-halo",
         interactive: false
       }).addTo(parkingContextLayer);
@@ -146,12 +162,46 @@
       radius: 500,
       color: "#78E6AA",
       dashArray: "6 7",
-      weight: 1.2,
-      opacity: 0.65,
+      weight: 1.4,
+      opacity: 0.75,
       fillColor: "#78E6AA",
-      fillOpacity: 0.035,
+      fillOpacity: 0.04,
       interactive: false
     }).addTo(destinationContextLayer);
+  }
+
+  function clearCoverageTint() {
+    if (coverageTintLayer) {
+      map.removeLayer(coverageTintLayer);
+      coverageTintLayer = null;
+    }
+  }
+
+  function renderCoverageTint() {
+    clearCoverageTint();
+    if (typeof coverageAreas === "undefined") return;
+
+    coverageTintLayer = L.layerGroup().addTo(map);
+    const colours = {
+      live: "#52D98D",
+      next: "#C8F56B",
+      planned: "#F1C46B"
+    };
+
+    coverageAreas.forEach(area => {
+      const colour = colours[area.status] || "#8FA39A";
+      const radius = area.status === "live" ? 26000 : 18000;
+      L.circle([area.lat, area.lng], {
+        radius,
+        color: colour,
+        weight: 1.3,
+        opacity: 0.72,
+        fillColor: colour,
+        fillOpacity: area.status === "live" ? 0.10 : 0.055,
+        className: "wb-coverage-tint",
+        interactive: false
+      }).addTo(coverageTintLayer);
+    });
   }
 
   function selectedParking() {
@@ -203,7 +253,7 @@
     streetButton.type = "button";
     streetButton.className = "wb-street-view-button";
     streetButton.textContent = "Street View ↗";
-    streetButton.title = "Open Google Street View near the selected location";
+    streetButton.title = "Open Street View near the selected parking location or destination";
     streetButton.addEventListener("click", event => {
       event.stopPropagation();
       openStreetView();
@@ -238,10 +288,8 @@
   function scheduleMapRepair() {
     if (repairTimer) window.clearTimeout(repairTimer);
     repairMap();
-    // Invalidate only; do not redraw the tile layer. Redraw repeatedly discards tiles
-    // while responsive layout is settling and causes visible patchwork on slow networks.
-    [100, 320].forEach(delay => window.setTimeout(repairMap, delay));
-    repairTimer = window.setTimeout(() => mapEl.classList.remove("wb-map-repairing"), 1200);
+    [90, 260, 700].forEach(delay => window.setTimeout(repairMap, delay));
+    repairTimer = window.setTimeout(() => mapEl.classList.remove("wb-map-repairing"), 1400);
   }
 
   function scheduleResizeRepair() {
@@ -250,26 +298,28 @@
   }
 
   function fitRecommendationContext() {
+    clearCoverageTint();
     const destination = state.destination || null;
     const inPilot = destination && typeof isInCorkPilot === "function"
       ? isInCorkPilot(destination.lat, destination.lng)
       : true;
 
     if (destination && !inPilot) {
-      map.flyTo([destination.lat, destination.lng], 15, { duration: 0.55 });
+      map.flyTo([destination.lat, destination.lng], 15, { duration: 0.5 });
       return;
     }
 
     if (typeof parkingData === "undefined" || !parkingData.length) return;
     const points = parkingData.map(item => [item.lat, item.lng]);
     if (destination) points.push([destination.lat, destination.lng]);
-    map.fitBounds(L.latLngBounds(points), { padding: [34, 34], maxZoom: 15, animate: true });
+    map.fitBounds(L.latLngBounds(points), { padding: [32, 32], maxZoom: 15, animate: true });
   }
 
   function focusSelectedParking() {
     const selected = selectedParking();
     if (!selected) return;
-    map.flyTo([selected.lat, selected.lng], 17, { duration: 0.45 });
+    clearCoverageTint();
+    map.flyTo([selected.lat, selected.lng], 16, { duration: 0.4 });
     refreshDestinationContext();
     scheduleMapRepair();
   }
@@ -312,7 +362,10 @@
 
   document.addEventListener("click", event => {
     const parkingCard = event.target.closest?.(".parking-card");
-    if (parkingCard) window.setTimeout(focusSelectedParking, 60);
+    if (parkingCard) {
+      window.setTimeout(focusSelectedParking, 70);
+      return;
+    }
 
     if (event.target.closest?.("#search-button") || event.target.closest?.("#destination-suggestions")) {
       window.setTimeout(() => {
@@ -324,12 +377,13 @@
 
     if (event.target.closest?.("#ireland-overview-button")) {
       window.setTimeout(() => {
+        renderCoverageTint();
         if (typeof IRELAND_BOUNDS !== "undefined") {
-          map.fitBounds(IRELAND_BOUNDS, { padding: [18, 18], maxZoom: 7, animate: true });
+          map.fitBounds(IRELAND_BOUNDS, { padding: [22, 22], maxZoom: 7, animate: true });
         }
         normalizeIrelandCoverageLabel();
         scheduleMapRepair();
-      }, 40);
+      }, 50);
     }
   });
 
@@ -338,7 +392,7 @@
       refreshDestinationContext();
       fitRecommendationContext();
       scheduleMapRepair();
-    }, 120);
+    }, 140);
   });
 
   window.addEventListener("resize", scheduleResizeRepair, { passive: true });
@@ -352,7 +406,6 @@
     resizeObserver.observe(mapEl);
   }
 
-  // Avoid transform-heavy tile animations on mobile browsers.
   map.options.zoomAnimation = false;
   map.options.fadeAnimation = false;
 
@@ -360,7 +413,7 @@
   createStateLegend();
   refreshParkingContext();
   refreshDestinationContext();
-  activateLayer("dark");
+  activateLayer("street");
   normalizeIrelandCoverageLabel();
   scheduleMapRepair();
   loadGuidanceIntelligenceLayer();
