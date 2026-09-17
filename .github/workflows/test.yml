@@ -52,6 +52,7 @@ jobs:
         run: |
           node --check web/app.js
           node --check web/live-data.js
+          node --check web/session-rules.js
           node --check web/api-adapter.js
           node --check web/discover.js
           node --check web/map-fix.js
