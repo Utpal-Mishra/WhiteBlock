@@ -22,8 +22,6 @@
 
   ensureContextStyles();
 
-  // app.js creates a temporary basemap so the map can initialise by itself. Replace
-  // it with the WHITEBLOCK layer system while keeping markers/vectors untouched.
   map.eachLayer(layer => {
     if (layer instanceof L.TileLayer) map.removeLayer(layer);
   });
@@ -127,7 +125,8 @@
   }
 
   function statusColour(item) {
-    const ratio = item.capacity ? item.available / item.capacity : 0;
+    if (item.available == null || item.capacity == null || item.capacity <= 0) return "#8FA39A";
+    const ratio = item.available / item.capacity;
     if (ratio >= 0.25) return "#52D98D";
     if (ratio >= 0.12) return "#C8F56B";
     return "#F1C46B";
@@ -139,6 +138,7 @@
 
     if (typeof parkingData === "undefined") return;
     parkingData.forEach(item => {
+      if (!Number.isFinite(item.lat) || !Number.isFinite(item.lng)) return;
       const colour = statusColour(item);
       L.circle([item.lat, item.lng], {
         radius: 180,
@@ -385,6 +385,13 @@
         scheduleMapRepair();
       }, 50);
     }
+  });
+
+  document.addEventListener("whiteblock:data-ready", () => {
+    refreshParkingContext();
+    refreshDestinationContext();
+    fitRecommendationContext();
+    scheduleMapRepair();
   });
 
   document.getElementById("destination")?.addEventListener("change", () => {
