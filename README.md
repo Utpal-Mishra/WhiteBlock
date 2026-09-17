@@ -51,18 +51,30 @@ These loops run in parallel over a shared, evidence-backed parking inventory.
 
 ## Application UI
 
-WHITEBLOCK now includes a responsive static application shell under `web/`.
+WHITEBLOCK includes a responsive driver/intelligence application under `web/`.
 
-The UI carries the same product-family design language as the user's other projects: dark-green canvas, restrained elevated cards, high-contrast typography, green/lime active states and compact mobile navigation. WHITEBLOCK differentiates itself through white parking-line geometry, spatial-grid motifs, candidate outlines and evidence-aware map interactions.
+The Find experience no longer ships hard-coded parking locations, availability or confidence values. The public GitHub Pages deployment builds an evidence-backed Cork snapshot from the official ingestion pipeline before every deployment and on an hourly schedule. The browser ranks nearby assets relative to the selected destination and derives KPI values from the loaded evidence.
+
+The data priority is:
+
+```text
+PostGIS API (when configured)
+        ↓ fallback
+Build-time Cork official snapshot
+        ↓ fallback
+No parking values shown
+```
+
+WHITEBLOCK deliberately does **not** substitute demo parking values when a data source is unavailable.
 
 Primary views:
 
-- **Find** — destination-first parking search, filters, map and explainable recommendations.
+- **Find** — destination-first parking search, map layers, Street View handoff and evidence-backed nearby recommendations.
 - **Discover** — supply discovery and change-detection workspace.
 - **Network** — parking-supply adequacy, demand and redistribution strategy.
 - **Evidence** — observed/inferred/predicted truth states, confidence and freshness.
 
-Run the prototype locally:
+Run the frontend locally:
 
 ```bash
 python -m http.server 8000 -d web
@@ -70,9 +82,7 @@ python -m http.server 8000 -d web
 
 Then open `http://localhost:8000`.
 
-The current front end uses explicitly labelled demo values. It is not yet connected to the PostGIS spatial core.
-
-See [UI Design System](docs/UI_DESIGN_SYSTEM.md).
+See [UI Design System](docs/UI_DESIGN_SYSTEM.md) and [WHITEBLOCK API](docs/API.md).
 
 ## Implementation foundation
 
@@ -96,9 +106,9 @@ POSTGIS SPATIAL CORE
       ├── entity_match_candidate
       └── parking_candidate
       ↓
-PARKING KNOWLEDGE GRAPH
+READ-ONLY WHITEBLOCK API
       ↓
-FORECASTING / RECOMMENDATION / OPTIMISATION
+APPLICATION / SNAPSHOT FALLBACK
 ```
 
 Stable parking assets receive canonical `WB-PARK-*` identifiers. Live availability is stored separately as time-series observations so changing occupancy never overwrites the permanent asset record.
@@ -113,29 +123,31 @@ Copy the environment template and use a non-default password:
 cp .env.example .env
 ```
 
-Install the database client dependency and start PostGIS:
+Start PostGIS and the API together:
 
 ```bash
-make install
-make db-up
+docker compose up --build
 ```
 
-Run the Cork ingestion and persist it:
+The API is then available at:
 
-```bash
-make ingest
-make load
+```text
+http://localhost:8080
 ```
 
-Run tests:
+Health check:
 
-```bash
-make test
+```text
+GET http://localhost:8080/health
 ```
 
-The Docker development database applies migrations from `db/migrations/` when its volume is first created.
+Nearby parking query:
 
-See [Spatial Storage & Entity Reconciliation](docs/SPATIAL_STORAGE_RECONCILIATION.md) for the schema, matching policy, staging contract and review workflow.
+```text
+GET http://localhost:8080/v1/parking/nearby?lat=51.8985&lng=-8.4756&radius_km=5&limit=8
+```
+
+See [WHITEBLOCK API](docs/API.md) for the API contract and browser configuration.
 
 ## Cork authoritative baseline
 
@@ -148,7 +160,15 @@ python scripts/load_cork_to_postgis.py
 
 The ingestion process preserves the raw source snapshot, validates source fields and quality rules, separates stable inventory from live observations, quarantines inconsistent records, and writes a run manifest with a SHA-256 evidence hash.
 
-Generated pilot data is written under `data/cork/` and excluded from Git.
+For GitHub Pages, the deployment workflow additionally exports a browser-safe snapshot:
+
+```bash
+python scripts/export_web_snapshot.py \
+  --input-dir data/cork \
+  --output web/data/parking_snapshot.json
+```
+
+Generated pilot data is excluded from Git; the Pages artifact contains only the fields required by the UI.
 
 See [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md).
 
@@ -237,9 +257,9 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
                               ↓
                     PARKING KNOWLEDGE GRAPH
                               ↓
-                   DECISION / RECOMMENDATION
+                     WHITEBLOCK API
                               ↓
-              WHITEBLOCK Application + API
+           FIND / DISCOVER / NETWORK / EVIDENCE
 ```
 
 ## Repository structure
@@ -247,14 +267,19 @@ Dublin → Galway/Limerick/Waterford → national Ireland coverage → selected 
 ```text
 WhiteBlock/
 ├── README.md
-├── Makefile
+├── Dockerfile.api
 ├── docker-compose.yml
-├── .env.example
 ├── requirements.txt
+├── api/
+│   └── app.py
 ├── web/
 │   ├── index.html
-│   ├── styles.css
-│   └── app.js
+│   ├── app.js
+│   ├── live-data.js
+│   ├── api-adapter.js
+│   ├── runtime-config.js
+│   ├── map-fix.js
+│   └── styles.css
 ├── config/
 │   ├── cork_pilot.yaml
 │   └── cork_sources.yaml
@@ -264,18 +289,20 @@ WhiteBlock/
 ├── db/
 │   └── migrations/
 ├── scripts/
-│   ├── db_common.py
 │   ├── ingest_cork_parking.py
+│   ├── export_web_snapshot.py
 │   ├── load_cork_to_postgis.py
 │   ├── stage_source_records.py
 │   ├── reconcile_source_records.py
 │   └── resolve_entity_match.py
 ├── tests/
+│   ├── test_api.py
 │   ├── test_db_integration.py
 │   ├── test_ingest_cork_parking.py
 │   ├── test_reconciliation.py
 │   └── test_web_ui.py
 └── docs/
+    ├── API.md
     ├── CORK_INGESTION_RUNBOOK.md
     ├── CORK_MVP.md
     ├── DATA_EVIDENCE_MODEL.md
@@ -291,6 +318,7 @@ WhiteBlock/
 
 ## Documentation
 
+- [WHITEBLOCK API](docs/API.md)
 - [UI Design System](docs/UI_DESIGN_SYSTEM.md)
 - [Spatial Storage & Entity Reconciliation](docs/SPATIAL_STORAGE_RECONCILIATION.md)
 - [Parking Inventory Layer](docs/PARKING_INVENTORY_LAYER.md)
@@ -305,11 +333,23 @@ WhiteBlock/
 
 ## Current status
 
-**Stage:** Cork spatial core + first responsive application UI.
+**Stage:** Cork evidence-backed application + PostGIS API foundation.
 
-WHITEBLOCK now has an authoritative Cork ingestion path, PostGIS-backed canonical inventory, historical observations, evidence storage, generic secondary-source staging, conservative entity reconciliation and a responsive driver/intelligence interface.
+WHITEBLOCK now has:
 
-The next engineering objective is to expose a read-only API from the spatial core and replace the front-end demo inventory with canonical parking locations and observations.
+- authoritative Cork ingestion;
+- canonical PostGIS parking inventory;
+- historical observations and evidence storage;
+- conservative multi-source entity reconciliation;
+- hourly evidence-backed GitHub Pages snapshot generation;
+- destination-sensitive parking ranking with no hard-coded demo parking values;
+- a read-only PostGIS API for nearby parking and evidence;
+- browser API-first / snapshot-fallback behavior;
+- responsive driver/intelligence UI with national destination search.
+
+The public GitHub Pages application continues to use the snapshot until a container-hosted API URL is deployed and configured through the `WHITEBLOCK_API_BASE_URL` repository variable.
+
+The next data objective is to onboard and reconcile broader Cork parking inventory beyond the current authoritative live-feed subset, so searches in different parts of Cork have materially richer nearby supply rather than only the locations exposed by the live feed.
 
 ## Working brand
 
