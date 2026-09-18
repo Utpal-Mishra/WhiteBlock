@@ -1,8 +1,7 @@
-// WHITEBLOCK prototype map adapter.
-// Adds keyless colour basemaps, parking/coverage context, mobile resize repair,
-// recommendation-aware camera behaviour and an external Google Street View action.
-// Production should move to managed map/geocoding providers with explicit SLA,
-// caching, privacy, licensing and quota policies.
+// WHITEBLOCK map adapter.
+// Default Street view now mirrors XPLORE's stable architecture:
+// Leaflet owns the map/overlays while MapLibre + OpenFreeMap render the basemap.
+// Raster tiles remain only for explicit Terrain/Satellite modes and emergency fallback.
 
 (() => {
   if (typeof L === "undefined" || typeof state === "undefined" || !state.map) return;
@@ -11,117 +10,207 @@
   const mapEl = document.getElementById("map");
   if (!mapEl) return;
 
-  function ensureContextStyles() {
-    if (document.querySelector('link[data-wb-map-context]')) return;
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "./map-context.css";
-    link.dataset.wbMapContext = "true";
-    document.head.appendChild(link);
-  }
-
-  ensureContextStyles();
-
-  map.eachLayer(layer => {
-    if (layer instanceof L.TileLayer) map.removeLayer(layer);
-  });
+  const VECTOR_STYLE = "https://tiles.openfreemap.org/styles/dark";
+  const MAPLIBRE_CSS = "https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css";
+  const MAPLIBRE_JS = "https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js";
+  const LEAFLET_MAPLIBRE_JS = "https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js";
 
   const OSM = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-  const OSM_FALLBACK = "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png";
   const OPENTOPO = "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png";
   const ESRI_IMAGERY = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 
   const layerDefinitions = {
-    street: {
-      label: "Street",
-      url: OSM,
-      fallbackUrl: OSM_FALLBACK,
-      className: "wb-map-street",
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    },
+    street: { label: "Street", className: "wb-map-street", kind: "vector" },
     terrain: {
       label: "Terrain",
-      url: OPENTOPO,
-      fallbackUrl: OSM,
       className: "wb-map-terrain",
+      kind: "raster",
+      url: OPENTOPO,
       maxZoom: 17,
       attribution: 'Map data &copy; OpenStreetMap contributors, SRTM | Map style &copy; OpenTopoMap'
     },
     satellite: {
       label: "Satellite",
-      url: ESRI_IMAGERY,
-      fallbackUrl: OSM,
       className: "wb-map-satellite",
+      kind: "raster",
+      url: ESRI_IMAGERY,
       maxZoom: 19,
       attribution: "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
     }
   };
 
   let activeLayerKey = "street";
-  let activeTileLayer = null;
+  let activeBasemapLayer = null;
+  let vectorEnginePromise = null;
+  let vectorAttributionAdded = false;
   let parkingContextLayer = null;
   let destinationContextLayer = null;
   let coverageTintLayer = null;
   let repairTimer = null;
   let resizeTimer = null;
 
-  function tileUrl(template, coords) {
-    if (!template || !coords) return null;
-    const subdomain = ["a", "b", "c"][Math.abs(coords.x + coords.y) % 3];
-    return template
-      .replace("{s}", subdomain)
-      .replace("{z}", String(coords.z))
-      .replace("{x}", String(coords.x))
-      .replace("{y}", String(coords.y));
+  function ensureContextStyles() {
+    if (!document.querySelector('link[data-wb-map-context]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "./map-context.css";
+      link.dataset.wbMapContext = "true";
+      document.head.appendChild(link);
+    }
+
+    if (!document.getElementById("wb-maplibre-css")) {
+      const link = document.createElement("link");
+      link.id = "wb-maplibre-css";
+      link.rel = "stylesheet";
+      link.href = MAPLIBRE_CSS;
+      document.head.appendChild(link);
+    }
   }
 
-  function buildTileLayer(definition) {
-    const layer = L.tileLayer(definition.url, {
-      maxZoom: definition.maxZoom || 19,
-      maxNativeZoom: definition.maxZoom || 19,
-      detectRetina: false,
-      updateWhenIdle: false,
-      updateWhenZooming: false,
-      keepBuffer: 4,
-      attribution: definition.attribution
+  function loadScript(src, id) {
+    return new Promise((resolve, reject) => {
+      const existing = document.getElementById(id);
+      if (existing) {
+        if (existing.dataset.loaded === "true") return resolve();
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = id;
+      script.src = src;
+      script.async = true;
+      script.addEventListener("load", () => {
+        script.dataset.loaded = "true";
+        resolve();
+      }, { once: true });
+      script.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once: true });
+      document.head.appendChild(script);
     });
+  }
 
-    layer.on("loading", () => mapEl.classList.add("wb-map-repairing"));
-    layer.on("load", () => mapEl.classList.remove("wb-map-repairing"));
-    layer.on("tileerror", event => {
-      const tile = event.tile;
-      if (!tile || tile.dataset.wbFallbackAttempted === "true") return;
-      const fallback = tileUrl(definition.fallbackUrl, event.coords);
-      if (!fallback) return;
-      tile.dataset.wbFallbackAttempted = "true";
-      tile.src = fallback;
+  function ensureVectorEngine() {
+    if (typeof L.maplibreGL === "function") return Promise.resolve();
+    if (vectorEnginePromise) return vectorEnginePromise;
+
+    vectorEnginePromise = (async () => {
+      ensureContextStyles();
+      if (typeof window.maplibregl === "undefined") {
+        await loadScript(MAPLIBRE_JS, "wb-maplibre-js");
+      }
+      if (typeof L.maplibreGL !== "function") {
+        await loadScript(LEAFLET_MAPLIBRE_JS, "wb-leaflet-maplibre-js");
+      }
+      if (typeof L.maplibreGL !== "function") throw new Error("MapLibre Leaflet adapter unavailable");
+    })();
+
+    return vectorEnginePromise;
+  }
+
+  function removeBasemap() {
+    if (activeBasemapLayer && map.hasLayer(activeBasemapLayer)) {
+      map.removeLayer(activeBasemapLayer);
+    }
+    activeBasemapLayer = null;
+
+    // Remove only raster basemaps; parking markers, circles and guidance layers remain.
+    map.eachLayer(layer => {
+      if (layer instanceof L.TileLayer) map.removeLayer(layer);
     });
-
-    return layer;
   }
 
-  function applyMapTheme(key) {
-    Object.values(layerDefinitions).forEach(definition => mapEl.classList.remove(definition.className));
-    mapEl.classList.add(layerDefinitions[key].className);
-  }
-
-  function activateLayer(key) {
-    if (!layerDefinitions[key]) return;
-    if (activeTileLayer) map.removeLayer(activeTileLayer);
-
-    activeLayerKey = key;
-    activeTileLayer = buildTileLayer(layerDefinitions[key]).addTo(map);
-    activeTileLayer.bringToBack();
-    applyMapTheme(key);
-
+  function updateLayerButtons(key) {
     document.querySelectorAll(".wb-map-layer-button").forEach(button => {
       const active = button.dataset.layer === key;
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     });
+  }
 
+  function applyMapTheme(key) {
+    Object.values(layerDefinitions).forEach(definition => mapEl.classList.remove(definition.className));
+    mapEl.classList.add(layerDefinitions[key].className);
+    mapEl.classList.toggle("wb-map-vector", key === "street");
+  }
+
+  function addVectorAttribution() {
+    if (vectorAttributionAdded || !map.attributionControl) return;
+    map.attributionControl.addAttribution('&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · &copy; OpenStreetMap contributors');
+    vectorAttributionAdded = true;
+  }
+
+  function buildRasterLayer(definition) {
+    const layer = L.tileLayer(definition.url, {
+      maxZoom: definition.maxZoom || 19,
+      maxNativeZoom: definition.maxZoom || 19,
+      detectRetina: false,
+      updateWhenIdle: true,
+      updateWhenZooming: false,
+      keepBuffer: 1,
+      attribution: definition.attribution
+    });
+
+    layer.on("loading", () => mapEl.classList.add("wb-map-repairing"));
+    layer.on("load", () => mapEl.classList.remove("wb-map-repairing"));
+    return layer;
+  }
+
+  async function activateStreetVector() {
+    activeLayerKey = "street";
+    updateLayerButtons("street");
+    applyMapTheme("street");
+    mapEl.classList.add("wb-map-repairing");
+    removeBasemap();
+
+    try {
+      await ensureVectorEngine();
+      if (activeLayerKey !== "street") return;
+
+      activeBasemapLayer = L.maplibreGL({ style: VECTOR_STYLE });
+      activeBasemapLayer.addTo(map);
+      addVectorAttribution();
+      mapEl.dataset.basemapEngine = "vector";
+      mapEl.classList.remove("wb-map-repairing");
+      scheduleMapRepair();
+    } catch (error) {
+      console.warn("WHITEBLOCK vector basemap unavailable; using raster fallback.", error);
+      if (activeLayerKey !== "street") return;
+
+      activeBasemapLayer = L.tileLayer(OSM, {
+        maxZoom: 19,
+        detectRetina: false,
+        updateWhenIdle: true,
+        updateWhenZooming: false,
+        keepBuffer: 1,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      mapEl.dataset.basemapEngine = "raster-fallback";
+      mapEl.classList.remove("wb-map-repairing");
+      scheduleMapRepair();
+    }
+  }
+
+  function activateRasterLayer(key) {
+    const definition = layerDefinitions[key];
+    if (!definition || definition.kind !== "raster") return;
+
+    activeLayerKey = key;
+    removeBasemap();
+    activeBasemapLayer = buildRasterLayer(definition).addTo(map);
+    if (typeof activeBasemapLayer.bringToBack === "function") activeBasemapLayer.bringToBack();
+    updateLayerButtons(key);
+    applyMapTheme(key);
+    mapEl.dataset.basemapEngine = "raster";
     scheduleMapRepair();
+  }
+
+  function activateLayer(key) {
+    if (key === "street") {
+      void activateStreetVector();
+      return;
+    }
+    activateRasterLayer(key);
   }
 
   function statusColour(item) {
@@ -171,10 +260,9 @@
   }
 
   function clearCoverageTint() {
-    if (coverageTintLayer) {
-      map.removeLayer(coverageTintLayer);
-      coverageTintLayer = null;
-    }
+    if (!coverageTintLayer) return;
+    map.removeLayer(coverageTintLayer);
+    coverageTintLayer = null;
   }
 
   function renderCoverageTint() {
@@ -182,17 +270,12 @@
     if (typeof coverageAreas === "undefined") return;
 
     coverageTintLayer = L.layerGroup().addTo(map);
-    const colours = {
-      live: "#52D98D",
-      next: "#C8F56B",
-      planned: "#F1C46B"
-    };
+    const colours = { live: "#52D98D", next: "#C8F56B", planned: "#F1C46B" };
 
     coverageAreas.forEach(area => {
       const colour = colours[area.status] || "#8FA39A";
-      const radius = area.status === "live" ? 26000 : 18000;
       L.circle([area.lat, area.lng], {
-        radius,
+        radius: area.status === "live" ? 26000 : 18000,
         color: colour,
         weight: 1.3,
         opacity: 0.72,
@@ -243,6 +326,7 @@
       button.textContent = definition.label;
       button.setAttribute("aria-pressed", String(key === activeLayerKey));
       button.addEventListener("click", event => {
+        event.preventDefault();
         event.stopPropagation();
         activateLayer(key);
       });
@@ -255,6 +339,7 @@
     streetButton.textContent = "Street View ↗";
     streetButton.title = "Open Street View near the selected parking location or destination";
     streetButton.addEventListener("click", event => {
+      event.preventDefault();
       event.stopPropagation();
       openStreetView();
     });
@@ -278,18 +363,34 @@
     L.DomEvent.disableClickPropagation(legend);
   }
 
+  function resizeVectorCanvas() {
+    if (!activeBasemapLayer || activeLayerKey !== "street") return;
+    try {
+      if (typeof activeBasemapLayer.getMaplibreMap === "function") {
+        activeBasemapLayer.getMaplibreMap()?.resize?.();
+      } else if (activeBasemapLayer._glMap?.resize) {
+        activeBasemapLayer._glMap.resize();
+      }
+    } catch (error) {
+      console.debug("WHITEBLOCK vector resize skipped", error);
+    }
+  }
+
   function repairMap() {
     if (!map || !mapEl.isConnected) return;
     window.requestAnimationFrame(() => {
       map.invalidateSize({ pan: false, animate: false, debounceMoveend: true });
+      resizeVectorCanvas();
     });
   }
 
   function scheduleMapRepair() {
     if (repairTimer) window.clearTimeout(repairTimer);
     repairMap();
-    [90, 260, 700].forEach(delay => window.setTimeout(repairMap, delay));
-    repairTimer = window.setTimeout(() => mapEl.classList.remove("wb-map-repairing"), 1400);
+    repairTimer = window.setTimeout(() => {
+      repairMap();
+      mapEl.classList.remove("wb-map-repairing");
+    }, 180);
   }
 
   function scheduleResizeRepair() {
@@ -305,21 +406,24 @@
       : true;
 
     if (destination && !inPilot) {
-      map.flyTo([destination.lat, destination.lng], 15, { duration: 0.5 });
+      map.setView([destination.lat, destination.lng], 15, { animate: false });
       return;
     }
 
     if (typeof parkingData === "undefined" || !parkingData.length) return;
-    const points = parkingData.map(item => [item.lat, item.lng]);
+    const points = parkingData
+      .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))
+      .map(item => [item.lat, item.lng]);
     if (destination) points.push([destination.lat, destination.lng]);
-    map.fitBounds(L.latLngBounds(points), { padding: [32, 32], maxZoom: 15, animate: true });
+    if (!points.length) return;
+    map.fitBounds(L.latLngBounds(points), { padding: [32, 32], maxZoom: 15, animate: false });
   }
 
   function focusSelectedParking() {
     const selected = selectedParking();
     if (!selected) return;
     clearCoverageTint();
-    map.flyTo([selected.lat, selected.lng], 16, { duration: 0.4 });
+    map.setView([selected.lat, selected.lng], 16, { animate: false });
     refreshDestinationContext();
     scheduleMapRepair();
   }
@@ -357,7 +461,11 @@
 
   const statusTitle = document.getElementById("map-status-title");
   if (statusTitle) {
-    new MutationObserver(normalizeIrelandCoverageLabel).observe(statusTitle, { childList: true, characterData: true, subtree: true });
+    new MutationObserver(normalizeIrelandCoverageLabel).observe(statusTitle, {
+      childList: true,
+      characterData: true,
+      subtree: true
+    });
   }
 
   document.addEventListener("click", event => {
@@ -379,7 +487,7 @@
       window.setTimeout(() => {
         renderCoverageTint();
         if (typeof IRELAND_BOUNDS !== "undefined") {
-          map.fitBounds(IRELAND_BOUNDS, { padding: [22, 22], maxZoom: 7, animate: true });
+          map.fitBounds(IRELAND_BOUNDS, { padding: [22, 22], maxZoom: 7, animate: false });
         }
         normalizeIrelandCoverageLabel();
         scheduleMapRepair();
@@ -416,12 +524,12 @@
   map.options.zoomAnimation = false;
   map.options.fadeAnimation = false;
 
+  ensureContextStyles();
   createToolbar();
   createStateLegend();
   refreshParkingContext();
   refreshDestinationContext();
-  activateLayer("street");
   normalizeIrelandCoverageLabel();
-  scheduleMapRepair();
   loadGuidanceIntelligenceLayer();
+  void activateStreetVector();
 })();
