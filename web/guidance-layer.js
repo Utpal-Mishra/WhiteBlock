@@ -6,6 +6,14 @@
   if (typeof L === "undefined" || typeof state === "undefined" || !state.map) return;
 
   const map = state.map;
+
+  if (!document.querySelector('script[data-wb-tile-resilience]')) {
+    const resilienceScript = document.createElement("script");
+    resilienceScript.src = "./tile-resilience.js?v=20260918-1";
+    resilienceScript.dataset.wbTileResilience = "true";
+    document.body.appendChild(resilienceScript);
+  }
+
   const SOURCE_URL = "https://data.smartdublin.ie/dataset/79851619-f51d-4799-99b3-6e5d20d26aa3/resource/ad0ca283-8780-42b3-959e-f92a13d564a9/download/dcc_variable_message_signs_4326.geojson";
   const DATASET_URL = "https://data.gov.ie/dataset/dublin-city-council-variable-message-signs";
   const sourceLabel = "Dublin City Council VMS registry";
