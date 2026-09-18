@@ -26,7 +26,8 @@ class XploreMapStackContractTests(unittest.TestCase):
         self.assertIn("tiles.openfreemap.org/styles/dark", js)
         self.assertIn("L.maplibreGL", js)
         self.assertIn('kind: "vector"', js)
-        self.assertIn('data-basemap-engine', (WEB / "index.html").read_text(encoding="utf-8") if False else "data-basemap-engine")
+        self.assertIn('mapEl.dataset.basemapEngine = "vector"', js)
+        self.assertIn("vector basemap unavailable; using raster fallback", js)
 
 
 if __name__ == "__main__":
