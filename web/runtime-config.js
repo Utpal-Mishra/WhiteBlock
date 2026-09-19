@@ -31,14 +31,29 @@ function loadWhiteblockInventoryCoverage() {
   document.body.appendChild(script);
 }
 
+function loadWhiteblockKildareAttributes() {
+  const existing = document.querySelector('script[data-whiteblock-kildare-attributes]');
+  if (existing) {
+    loadWhiteblockInventoryCoverage();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './kildare-asset-enrichment.js?v=20260919-1';
+  script.defer = true;
+  script.dataset.whiteblockKildareAttributes = 'true';
+  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  document.body.appendChild(script);
+}
+
 // Multi-region parking inventory is loaded after the base application has defined
-// its Cork data contract. Inventory Coverage then reads both Cork and Kildare
-// regional inventories without changing the recommendation truth model.
+// its Cork data contract. Kildare attribute enrichment restores access/type/EV/
+// accessibility fields from the evidence snapshot, then Inventory Coverage reads
+// the complete regional inventories.
 window.addEventListener('DOMContentLoaded', () => {
   const existing = document.querySelector('script[data-whiteblock-region-network]');
   if (existing) {
-    if (typeof state !== 'undefined' && state.regionInventories) loadWhiteblockInventoryCoverage();
-    else existing.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+    if (typeof state !== 'undefined' && state.regionInventories) loadWhiteblockKildareAttributes();
+    else existing.addEventListener('load', loadWhiteblockKildareAttributes, { once: true });
     return;
   }
 
@@ -46,6 +61,6 @@ window.addEventListener('DOMContentLoaded', () => {
   script.src = './region-network.js?v=20260919-kildare1';
   script.defer = true;
   script.dataset.whiteblockRegionNetwork = 'true';
-  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  script.addEventListener('load', loadWhiteblockKildareAttributes, { once: true });
   document.body.appendChild(script);
 });
