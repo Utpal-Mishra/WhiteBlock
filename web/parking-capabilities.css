@@ -1,0 +1,29 @@
+.parking-capability-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:9px 0 2px;
+}
+
+.parking-capability-chip {
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(120,230,170,.16);
+  background:rgba(120,230,170,.055);
+  color:#cfe6da;
+  font:700 9px/1.1 "DM Sans", sans-serif;
+  letter-spacing:.01em;
+}
+
+.parking-capability-chip.accessible { color:#c8f56b; }
+.parking-capability-chip.ev { color:#78e6aa; }
+.parking-capability-chip.free { color:#78e6aa; border-color:rgba(120,230,170,.28); }
+.parking-capability-chip.weekend { color:#f1c46b; border-color:rgba(241,196,107,.22); background:rgba(241,196,107,.05); }
+
+@media (max-width:720px) {
+  .parking-capability-row { margin-top:8px; }
+  .parking-capability-chip { font-size:8.5px; }
+}
