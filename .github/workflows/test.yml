@@ -59,6 +59,7 @@ jobs:
           node --check web/map-fix.js
           node --check web/guidance-layer.js
           node --check web/tile-resilience.js
+          node --check web/parking-layout.js
           python -m compileall -q api scripts
 
       - name: Run tests
