@@ -60,6 +60,7 @@ jobs:
           node --check web/guidance-layer.js
           node --check web/tile-resilience.js
           node --check web/parking-layout.js
+          node --check web/region-network.js
           python -m compileall -q api scripts
 
       - name: Run tests

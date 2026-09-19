@@ -7,6 +7,7 @@ on:
       - "web/**"
       - "scripts/ingest_cork_parking.py"
       - "scripts/export_web_snapshot.py"
+      - "scripts/ingest_kildare_parking.py"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -28,7 +29,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
 
     steps:
       - name: Checkout
@@ -39,19 +40,25 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build latest Cork parking snapshot
+      - name: Build current Cork and Kildare parking snapshots
         run: |
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
+          python scripts/ingest_kildare_parking.py --output web/data/kildare_parking_snapshot.json
           python - <<'PY'
           import json
           from pathlib import Path
-          path = Path("web/data/parking_snapshot.json")
-          data = json.loads(path.read_text())
-          locations = data.get("locations", [])
-          if not locations:
-              raise SystemExit("Parking snapshot contains no locations; refusing to deploy misleading empty data")
-          print(f"Validated browser snapshot with {len(locations)} locations")
+
+          checks = [
+              ("Cork", Path("web/data/parking_snapshot.json")),
+              ("Kildare", Path("web/data/kildare_parking_snapshot.json")),
+          ]
+          for region, path in checks:
+              data = json.loads(path.read_text())
+              locations = data.get("locations", [])
+              if not locations:
+                  raise SystemExit(f"{region} parking snapshot contains no locations; refusing to deploy misleading empty data")
+              print(f"Validated {region} browser snapshot with {len(locations)} locations")
           PY
 
       - name: Configure optional WHITEBLOCK API
@@ -61,15 +68,25 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import re
           from pathlib import Path
 
           value = os.getenv("WHITEBLOCK_API_BASE_URL", "").strip().rstrip("/") or None
-          config = {"apiBaseUrl": value}
-          Path("web/runtime-config.js").write_text(
-              "window.WHITEBLOCK_CONFIG = " + json.dumps(config, separators=(",", ":")) + ";\n",
-              encoding="utf-8",
+          path = Path("web/runtime-config.js")
+          source = path.read_text(encoding="utf-8")
+          replacement = "window.WHITEBLOCK_CONFIG = " + json.dumps({"apiBaseUrl": value}, separators=(",", ":")) + ";"
+          source, count = re.subn(
+              r"window\.WHITEBLOCK_CONFIG\s*=\s*window\.WHITEBLOCK_CONFIG\s*\|\|\s*\{\s*apiBaseUrl:\s*null\s*\};",
+              replacement,
+              source,
+              count=1,
+              flags=re.MULTILINE,
           )
+          if count != 1:
+              raise SystemExit("Could not configure WHITEBLOCK runtime API block")
+          path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
+          print("WHITEBLOCK regional loader: Cork + Kildare")
           PY
 
       - name: Configure GitHub Pages
