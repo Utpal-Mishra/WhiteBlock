@@ -61,7 +61,7 @@ jobs:
               print(f"Validated {region} browser snapshot with {len(locations)} locations")
           PY
 
-      - name: Configure optional WHITEBLOCK API and regional loader
+      - name: Configure optional WHITEBLOCK API and UI loaders
         env:
           WHITEBLOCK_API_BASE_URL: ${{ vars.WHITEBLOCK_API_BASE_URL }}
         run: |
@@ -74,12 +74,28 @@ jobs:
           config = {"apiBaseUrl": value}
           runtime = "window.WHITEBLOCK_CONFIG = " + json.dumps(config, separators=(",", ":")) + ";\n"
           runtime += r'''
-window.addEventListener("DOMContentLoaded", () => {
-  if (document.querySelector("script[data-whiteblock-region-network]")) return;
-  const script = document.createElement("script");
-  script.src = "./region-network.js?v=20260919-kildare1";
+(() => {
+  if (!document.querySelector('link[data-whiteblock-session-controls]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = './session-controls.css?v=20260917-1';
+    style.dataset.whiteblockSessionControls = 'true';
+    document.head.appendChild(style);
+  }
+  if (!document.querySelector('script[data-whiteblock-session-controls]')) {
+    const script = document.createElement('script');
+    script.src = './session-controls.js?v=20260917-1';
+    script.async = false;
+    script.dataset.whiteblockSessionControls = 'true';
+    document.body.appendChild(script);
+  }
+})();
+window.addEventListener('DOMContentLoaded', () => {
+  if (document.querySelector('script[data-whiteblock-region-network]')) return;
+  const script = document.createElement('script');
+  script.src = './region-network.js?v=20260919-kildare1';
   script.defer = true;
-  script.dataset.whiteblockRegionNetwork = "true";
+  script.dataset.whiteblockRegionNetwork = 'true';
   document.body.appendChild(script);
 });
 '''
