@@ -1,0 +1,114 @@
+/* WHITEBLOCK mobile recommendation-card polish.
+   Prevent long parking names / canonical IDs from colliding with availability. */
+
+.parking-title {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.parking-rank {
+  flex: 1 1 auto;
+}
+
+.availability {
+  flex: 0 0 auto;
+  min-width: 78px;
+}
+
+@media (max-width: 640px) {
+  .parking-card {
+    padding: 15px 14px 18px;
+    overflow: hidden;
+  }
+
+  .parking-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .parking-rank {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+
+  .rank {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .parking-title h3 {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    font-size: clamp(18px, 5.4vw, 22px);
+    line-height: 1.16;
+    padding-right: 2px;
+  }
+
+  .parking-title small {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.35;
+  }
+
+  .availability {
+    width: max-content;
+    max-width: calc(100% - 44px);
+    min-width: 0;
+    margin-left: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 9px;
+    text-align: left;
+    border: 1px solid rgba(120, 230, 170, .16);
+    border-radius: 999px;
+    background: rgba(120, 230, 170, .05);
+  }
+
+  .availability strong {
+    display: inline;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: .02em;
+  }
+
+  .availability small {
+    display: inline;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .availability.availability-unreported {
+    border-color: rgba(143, 163, 154, .16);
+    background: rgba(143, 163, 154, .04);
+  }
+
+  .availability.availability-unreported strong {
+    color: var(--muted);
+  }
+
+  .availability.availability-unreported small {
+    display: none;
+  }
+
+  .parking-meta {
+    gap: 10px;
+  }
+
+  /* Allow the final result to scroll completely above the fixed mobile nav. */
+  .results-panel {
+    padding-bottom: 88px;
+  }
+}

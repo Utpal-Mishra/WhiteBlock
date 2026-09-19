@@ -20,6 +20,22 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
     script.dataset.whiteblockSessionControls = 'true';
     document.body.appendChild(script);
   }
+
+  if (!document.querySelector('link[data-whiteblock-mobile-result-cards]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = './mobile-result-cards.css?v=20260919-1';
+    style.dataset.whiteblockMobileResultCards = 'true';
+    document.head.appendChild(style);
+  }
+
+  if (!document.querySelector('script[data-whiteblock-result-card-polish]')) {
+    const script = document.createElement('script');
+    script.src = './result-card-polish.js?v=20260919-1';
+    script.defer = true;
+    script.dataset.whiteblockResultCardPolish = 'true';
+    document.body.appendChild(script);
+  }
 })();
 
 function loadWhiteblockInventoryCoverage() {
