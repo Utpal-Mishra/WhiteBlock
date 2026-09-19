@@ -8,6 +8,7 @@ on:
       - "scripts/ingest_cork_parking.py"
       - "scripts/export_web_snapshot.py"
       - "scripts/ingest_kildare_parking.py"
+      - "scripts/enrich_kildare_snapshot.py"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -45,6 +46,7 @@ jobs:
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
           python scripts/ingest_kildare_parking.py --output web/data/kildare_parking_snapshot.json
+          python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python - <<'PY'
           import json
           from pathlib import Path
@@ -59,6 +61,20 @@ jobs:
               if not locations:
                   raise SystemExit(f"{region} parking snapshot contains no locations; refusing to deploy misleading empty data")
               print(f"Validated {region} browser snapshot with {len(locations)} locations")
+
+          kildare = json.loads(Path("web/data/kildare_parking_snapshot.json").read_text())
+          ids = {item.get("parking_id") for item in kildare.get("locations", [])}
+          required = {
+              "WB-PARK-IE-KILDARE-KV-MAIN",
+              "WB-PARK-IE-KILDARE-MARKET-SQUARE",
+              "WB-PARK-IE-KILDARE-TOP-NOLAN",
+          }
+          missing = sorted(required - ids)
+          if missing:
+              raise SystemExit("Critical Kildare parking anchors missing: " + ", ".join(missing))
+          if not any((item.get("ev_spaces") or 0) > 0 for item in kildare.get("locations", [])):
+              raise SystemExit("Kildare snapshot contains no EV-enabled parking; refusing degraded deployment")
+          print("Validated critical Kildare Village/Town parking + EV coverage")
           PY
 
       - name: Configure optional WHITEBLOCK API
