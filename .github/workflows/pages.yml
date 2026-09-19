@@ -61,45 +61,30 @@ jobs:
               print(f"Validated {region} browser snapshot with {len(locations)} locations")
           PY
 
-      - name: Configure optional WHITEBLOCK API and UI loaders
+      - name: Configure optional WHITEBLOCK API
         env:
           WHITEBLOCK_API_BASE_URL: ${{ vars.WHITEBLOCK_API_BASE_URL }}
         run: |
           python - <<'PY'
           import json
           import os
+          import re
           from pathlib import Path
 
           value = os.getenv("WHITEBLOCK_API_BASE_URL", "").strip().rstrip("/") or None
-          config = {"apiBaseUrl": value}
-          runtime = "window.WHITEBLOCK_CONFIG = " + json.dumps(config, separators=(",", ":")) + ";\n"
-          runtime += r'''
-(() => {
-  if (!document.querySelector('link[data-whiteblock-session-controls]')) {
-    const style = document.createElement('link');
-    style.rel = 'stylesheet';
-    style.href = './session-controls.css?v=20260917-1';
-    style.dataset.whiteblockSessionControls = 'true';
-    document.head.appendChild(style);
-  }
-  if (!document.querySelector('script[data-whiteblock-session-controls]')) {
-    const script = document.createElement('script');
-    script.src = './session-controls.js?v=20260917-1';
-    script.async = false;
-    script.dataset.whiteblockSessionControls = 'true';
-    document.body.appendChild(script);
-  }
-})();
-window.addEventListener('DOMContentLoaded', () => {
-  if (document.querySelector('script[data-whiteblock-region-network]')) return;
-  const script = document.createElement('script');
-  script.src = './region-network.js?v=20260919-kildare1';
-  script.defer = true;
-  script.dataset.whiteblockRegionNetwork = 'true';
-  document.body.appendChild(script);
-});
-'''
-          Path("web/runtime-config.js").write_text(runtime, encoding="utf-8")
+          path = Path("web/runtime-config.js")
+          source = path.read_text(encoding="utf-8")
+          replacement = "window.WHITEBLOCK_CONFIG = " + json.dumps({"apiBaseUrl": value}, separators=(",", ":")) + ";"
+          source, count = re.subn(
+              r"window\.WHITEBLOCK_CONFIG\s*=\s*window\.WHITEBLOCK_CONFIG\s*\|\|\s*\{\s*apiBaseUrl:\s*null\s*\};",
+              replacement,
+              source,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          if count != 1:
+              raise SystemExit("Could not configure WHITEBLOCK runtime API block")
+          path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
           print("WHITEBLOCK regional loader: Cork + Kildare")
           PY
