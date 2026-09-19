@@ -1,1 +1,25 @@
-x
+#parking-layout-panel{position:absolute;inset:0;z-index:880;background:radial-gradient(circle at 50% 50%,rgba(18,51,39,.96),rgba(5,14,10,.98) 58%,#040b08 100%);display:none;overflow:hidden;color:#edf7f1}
+#parking-layout-panel.active{display:block}
+.parking-layout-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(120,230,170,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,230,170,.05) 1px,transparent 1px);background-size:42px 42px}
+.parking-layout-ring{position:absolute;left:50%;top:50%;border:1px dashed rgba(143,163,154,.24);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.parking-layout-ring.r1{width:26%;aspect-ratio:1}.parking-layout-ring.r2{width:52%;aspect-ratio:1}.parking-layout-ring.r3{width:78%;aspect-ratio:1}
+.parking-layout-ring span{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#8fa39a;background:#07110d;padding:2px 5px;border-radius:999px}
+.parking-layout-destination{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;border:2px solid #78e6aa;background:#0b1712;box-shadow:0 0 0 10px rgba(120,230,170,.08),0 0 32px rgba(120,230,170,.15)}
+.parking-layout-destination::after{content:"Destination";position:absolute;top:63px;white-space:nowrap;font:600 11px/1.2 'DM Sans',sans-serif;color:#edf7f1;background:rgba(7,17,13,.9);border:1px solid rgba(120,230,170,.2);padding:5px 8px;border-radius:999px}
+.parking-layout-destination span{font-size:22px;color:#78e6aa}
+.parking-layout-node{position:absolute;transform:translate(-50%,-50%);z-index:5;border:0;background:transparent;color:inherit;padding:0;cursor:pointer;text-align:left}
+.parking-layout-node-core{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font:700 13px/1 'Manrope',sans-serif;border:2px solid var(--node-color,#8fa39a);background:#0b1712;box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.parking-layout-node.selected .parking-layout-node-core{box-shadow:0 0 0 4px rgba(120,230,170,.18),0 8px 24px rgba(0,0,0,.35)}
+.parking-layout-node-label{position:absolute;left:50%;top:50px;transform:translateX(-50%);min-width:108px;max-width:150px;padding:7px 8px;border:1px solid rgba(143,163,154,.22);border-radius:12px;background:rgba(7,17,13,.93);backdrop-filter:blur(8px);text-align:center;pointer-events:none}
+.parking-layout-node-label strong{display:block;font-size:11px;line-height:1.2;color:#edf7f1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.parking-layout-node-label small{display:block;margin-top:3px;font-size:9px;color:#8fa39a;white-space:nowrap}
+.parking-layout-head{position:absolute;left:14px;right:14px;top:14px;z-index:8;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;pointer-events:none}
+.parking-layout-head div{pointer-events:auto;background:rgba(7,17,13,.88);border:1px solid rgba(120,230,170,.16);border-radius:14px;padding:10px 12px;backdrop-filter:blur(10px)}
+.parking-layout-head strong{display:block;font:700 12px/1.2 'Manrope',sans-serif}.parking-layout-head small{display:block;margin-top:4px;color:#8fa39a;font-size:10px}
+.parking-layout-foot{position:absolute;left:14px;right:14px;bottom:14px;z-index:7;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
+.parking-layout-foot span{font-size:10px;color:#8fa39a;background:rgba(7,17,13,.9);border:1px solid rgba(143,163,154,.18);padding:6px 8px;border-radius:999px}
+.wb-parking-layout-button{border:1px solid rgba(120,230,170,.25)!important;color:#78e6aa!important}
+.wb-parking-layout-button.active{background:linear-gradient(135deg,#c8f56b,#78e6aa)!important;color:#07110d!important;border-color:transparent!important}
+#map.layout-active .leaflet-pane,#map.layout-active .leaflet-control-container,#map.layout-active .maplibregl-canvas-container{visibility:hidden}
+#map.layout-active .wb-map-state-legend{display:none}
+@media(max-width:720px){.parking-layout-node-label{min-width:88px;max-width:108px;padding:5px 6px}.parking-layout-node-label strong{font-size:10px}.parking-layout-node-label small{font-size:8px}.parking-layout-head{top:68px}.parking-layout-foot{bottom:78px}.parking-layout-ring.r1{width:30%}.parking-layout-ring.r2{width:57%}.parking-layout-ring.r3{width:84%}}
