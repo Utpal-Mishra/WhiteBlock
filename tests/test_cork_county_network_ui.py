@@ -7,12 +7,12 @@ WEB = ROOT / "web"
 
 
 class CorkCountyNetworkUiTests(unittest.TestCase):
-    def test_runtime_loads_county_adapter_before_region_network(self):
+    def test_runtime_chains_county_adapter_before_region_network(self):
         source = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        county_pos = source.index("cork-county-network.js")
-        region_pos = source.index("region-network.js")
-        self.assertLess(county_pos, region_pos)
-        self.assertIn("loadWhiteblockCorkCountyNetwork", source)
+        self.assertIn("loadWhiteblockCorkCountyNetwork();", source)
+        self.assertIn("script.addEventListener('load', loadWhiteblockRegionNetwork, { once: true });", source)
+        self.assertIn("cork-county-network.js?v=20260921-1", source)
+        self.assertIn("region-network.js?v=20260921-corkcounty1", source)
 
     def test_county_adapter_exposes_major_hubs_and_snapshot(self):
         source = (WEB / "cork-county-network.js").read_text(encoding="utf-8")
