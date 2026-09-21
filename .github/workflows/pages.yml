@@ -6,6 +6,7 @@ on:
     paths:
       - "web/**"
       - "scripts/ingest_cork_parking.py"
+      - "scripts/ingest_cork_county_parking.py"
       - "scripts/export_web_snapshot.py"
       - "scripts/ingest_kildare_parking.py"
       - "scripts/enrich_kildare_snapshot.py"
@@ -41,10 +42,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build current Cork and Kildare parking snapshots
+      - name: Build current Cork City, County Cork and Kildare parking snapshots
         run: |
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
+          python scripts/ingest_cork_county_parking.py --output web/data/cork_county_parking_snapshot.json
           python scripts/ingest_kildare_parking.py --output web/data/kildare_parking_snapshot.json
           python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python - <<'PY'
@@ -52,7 +54,8 @@ jobs:
           from pathlib import Path
 
           checks = [
-              ("Cork", Path("web/data/parking_snapshot.json")),
+              ("Cork City live", Path("web/data/parking_snapshot.json")),
+              ("County Cork network", Path("web/data/cork_county_parking_snapshot.json")),
               ("Kildare", Path("web/data/kildare_parking_snapshot.json")),
           ]
           for region, path in checks:
@@ -61,6 +64,12 @@ jobs:
               if not locations:
                   raise SystemExit(f"{region} parking snapshot contains no locations; refusing to deploy misleading empty data")
               print(f"Validated {region} browser snapshot with {len(locations)} locations")
+
+          cork_county = json.loads(Path("web/data/cork_county_parking_snapshot.json").read_text())
+          polygon_count = cork_county.get("summary", {}).get("mapped_polygon_locations", 0) or 0
+          if polygon_count <= 0:
+              raise SystemExit("County Cork snapshot contains no mapped parking polygons; refusing degraded county deployment")
+          print(f"Validated County Cork mapped geometry for {polygon_count} parking locations")
 
           kildare = json.loads(Path("web/data/kildare_parking_snapshot.json").read_text())
           ids = {item.get("parking_id") for item in kildare.get("locations", [])}
@@ -102,7 +111,7 @@ jobs:
               raise SystemExit("Could not configure WHITEBLOCK runtime API block")
           path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
-          print("WHITEBLOCK regional loader: Cork + Kildare")
+          print("WHITEBLOCK regional loader: Cork City live + County Cork network + Kildare")
           PY
 
       - name: Configure GitHub Pages
