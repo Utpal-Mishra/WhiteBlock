@@ -38,6 +38,15 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
   }
 })();
 
+function loadWhiteblockMapEngineV2() {
+  if (document.querySelector('script[data-whiteblock-map-engine-v2]')) return;
+  const script = document.createElement('script');
+  script.src = './map-engine-v2.js?v=20260921-2';
+  script.async = false;
+  script.dataset.whiteblockMapEngineV2 = 'true';
+  document.body.appendChild(script);
+}
+
 function loadWhiteblockInventoryMapLayer() {
   if (document.querySelector('script[data-whiteblock-inventory-map]')) return;
   const script = document.createElement('script');
@@ -71,6 +80,13 @@ function loadWhiteblockKildareAttributes() {
   script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
   document.body.appendChild(script);
 }
+
+// Map engine v2 takes ownership only after the static Leaflet/MapLibre setup and
+// Parking Layout control have been created. It then removes legacy raster basemaps
+// and keeps every basemap below the parking/destination overlay panes.
+window.addEventListener('DOMContentLoaded', () => {
+  loadWhiteblockMapEngineV2();
+});
 
 // Multi-region parking inventory is loaded after the base application has defined
 // its Cork data contract. Kildare attribute enrichment restores access/type/EV/
