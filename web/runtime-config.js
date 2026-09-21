@@ -38,13 +38,24 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
   }
 })();
 
-function loadWhiteblockInventoryCoverage() {
-  if (document.querySelector('script[data-whiteblock-inventory-coverage]')) return;
+function loadWhiteblockInventoryMapLayer() {
+  if (document.querySelector('script[data-whiteblock-inventory-map]')) return;
   const script = document.createElement('script');
-  script.src = './inventory-coverage.js?v=20260919-kildare1';
+  script.src = './inventory-map-layer.js?v=20260921-1';
   script.defer = true;
-  script.dataset.whiteblockInventoryCoverage = 'true';
+  script.dataset.whiteblockInventoryMap = 'true';
   document.body.appendChild(script);
+}
+
+function loadWhiteblockInventoryCoverage() {
+  if (!document.querySelector('script[data-whiteblock-inventory-coverage]')) {
+    const script = document.createElement('script');
+    script.src = './inventory-coverage.js?v=20260919-kildare1';
+    script.defer = true;
+    script.dataset.whiteblockInventoryCoverage = 'true';
+    document.body.appendChild(script);
+  }
+  loadWhiteblockInventoryMapLayer();
 }
 
 function loadWhiteblockKildareAttributes() {
@@ -63,8 +74,8 @@ function loadWhiteblockKildareAttributes() {
 
 // Multi-region parking inventory is loaded after the base application has defined
 // its Cork data contract. Kildare attribute enrichment restores access/type/EV/
-// accessibility fields from the evidence snapshot, then Inventory Coverage reads
-// the complete regional inventories.
+// accessibility fields from the evidence snapshot. Inventory Coverage and the
+// clustered map layer then consume the complete connected inventory.
 window.addEventListener('DOMContentLoaded', () => {
   const existing = document.querySelector('script[data-whiteblock-region-network]');
   if (existing) {
