@@ -1,0 +1,1 @@
+This file records that parking geometry visibility is regression-tested through the MapLibre-native overlay contract.
