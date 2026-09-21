@@ -1,0 +1,1 @@
+Implementation note: the ranked parking overlay is intentionally MapLibre-native because the previous Leaflet-over-MapLibre pane stack was not reliable on Android Chrome.
