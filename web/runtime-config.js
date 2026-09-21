@@ -41,7 +41,10 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
 function loadWhiteblockMapEngineV2() {
   if (document.querySelector('script[data-whiteblock-map-engine-v2]')) return;
   const script = document.createElement('script');
-  script.src = './map-engine-v2.js?v=20260921-2';
+  // v3 implementation intentionally keeps the v2 filename so GitHub Pages and
+  // existing references stay compatible. The version query prevents stale mobile
+  // browsers from reusing the blank-canvas implementation.
+  script.src = './map-engine-v2.js?v=20260921-3';
   script.async = false;
   script.dataset.whiteblockMapEngineV2 = 'true';
   document.body.appendChild(script);
@@ -81,9 +84,9 @@ function loadWhiteblockKildareAttributes() {
   document.body.appendChild(script);
 }
 
-// Map engine v2 takes ownership only after the static Leaflet/MapLibre setup and
-// Parking Layout control have been created. It then removes legacy raster basemaps
-// and keeps every basemap below the parking/destination overlay panes.
+// The map engine is loaded after Leaflet/MapLibre and the base application have
+// initialised. It removes the legacy basemap and keeps one persistent MapLibre
+// instance for Street/Terrain/Satellite switching.
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockMapEngineV2();
 });
