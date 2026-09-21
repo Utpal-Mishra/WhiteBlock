@@ -39,18 +39,11 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
 })();
 
 function loadWhiteblockParkingGeometry() {
-  if (!document.querySelector('link[data-whiteblock-parking-geometry]')) {
-    const style = document.createElement('link');
-    style.rel = 'stylesheet';
-    style.href = './parking-geometry-layer.css?v=20260921-1';
-    style.dataset.whiteblockParkingGeometry = 'true';
-    document.head.appendChild(style);
-  }
-  if (document.querySelector('script[data-whiteblock-parking-geometry]')) return;
+  if (document.querySelector('script[data-whiteblock-parking-gl-overlay]')) return;
   const script = document.createElement('script');
-  script.src = './parking-geometry-layer.js?v=20260921-1';
+  script.src = './parking-gl-overlay.js?v=20260921-3';
   script.defer = true;
-  script.dataset.whiteblockParkingGeometry = 'true';
+  script.dataset.whiteblockParkingGlOverlay = 'true';
   document.body.appendChild(script);
 }
 
@@ -62,9 +55,6 @@ function loadWhiteblockMapEngineV2() {
     return;
   }
   const script = document.createElement('script');
-  // v3 implementation intentionally keeps the v2 filename so GitHub Pages and
-  // existing references stay compatible. The version query prevents stale mobile
-  // browsers from reusing the blank-canvas implementation.
   script.src = './map-engine-v2.js?v=20260921-3';
   script.async = false;
   script.dataset.whiteblockMapEngineV2 = 'true';
@@ -106,18 +96,10 @@ function loadWhiteblockKildareAttributes() {
   document.body.appendChild(script);
 }
 
-// The map engine is loaded after Leaflet/MapLibre and the base application have
-// initialised. It removes the legacy basemap and keeps one persistent MapLibre
-// instance for Street/Terrain/Satellite switching. Ranked parking geometry loads
-// immediately after it so every recommended result is spatially visible.
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockMapEngineV2();
 });
 
-// Multi-region parking inventory is loaded after the base application has defined
-// its Cork data contract. Kildare attribute enrichment restores access/type/EV/
-// accessibility fields from the evidence snapshot. Inventory Coverage and the
-// clustered map layer then consume the complete connected inventory.
 window.addEventListener('DOMContentLoaded', () => {
   const existing = document.querySelector('script[data-whiteblock-region-network]');
   if (existing) {
