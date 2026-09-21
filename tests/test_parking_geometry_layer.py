@@ -8,7 +8,7 @@ WEB = ROOT / "web"
 class ParkingGeometryLayerTests(unittest.TestCase):
     def test_runtime_loads_maplibre_geometry_overlay(self):
         runtime = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("parking-gl-overlay.js?v=20260921-2", runtime)
+        self.assertIn("parking-gl-overlay.js?v=20260921-3", runtime)
         self.assertIn("loadWhiteblockParkingGeometry", runtime)
         self.assertNotIn("parking-geometry-layer.js?v=20260921-1", runtime)
 
