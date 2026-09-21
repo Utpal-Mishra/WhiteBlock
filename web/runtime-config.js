@@ -44,7 +44,7 @@ function loadWhiteblockParkingGeometry() {
   // Parking geometry is rendered inside the same MapLibre canvas as the basemap.
   // This avoids Android/Chrome pane-stacking failures between Leaflet SVG layers
   // and the WebGL basemap.
-  script.src = './parking-gl-overlay.js?v=20260921-2';
+  script.src = './parking-gl-overlay.js?v=20260921-3';
   script.defer = true;
   script.dataset.whiteblockParkingGlOverlay = 'true';
   document.body.appendChild(script);
