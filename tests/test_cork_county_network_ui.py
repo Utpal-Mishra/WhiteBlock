@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,15 @@ class CorkCountyNetworkUiTests(unittest.TestCase):
         source = (WEB / "cork-county-network.js").read_text(encoding="utf-8")
         self.assertIn("available: null", source)
         self.assertIn("Mapped County Cork parking inventory", source)
+
+    def test_county_adapter_javascript_syntax(self):
+        result = subprocess.run(
+            ["node", "--check", str(WEB / "cork-county-network.js")],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":
