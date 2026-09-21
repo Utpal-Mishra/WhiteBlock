@@ -38,8 +38,29 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
   }
 })();
 
+function loadWhiteblockParkingGeometry() {
+  if (!document.querySelector('link[data-whiteblock-parking-geometry]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = './parking-geometry-layer.css?v=20260921-1';
+    style.dataset.whiteblockParkingGeometry = 'true';
+    document.head.appendChild(style);
+  }
+  if (document.querySelector('script[data-whiteblock-parking-geometry]')) return;
+  const script = document.createElement('script');
+  script.src = './parking-geometry-layer.js?v=20260921-1';
+  script.defer = true;
+  script.dataset.whiteblockParkingGeometry = 'true';
+  document.body.appendChild(script);
+}
+
 function loadWhiteblockMapEngineV2() {
-  if (document.querySelector('script[data-whiteblock-map-engine-v2]')) return;
+  const existing = document.querySelector('script[data-whiteblock-map-engine-v2]');
+  if (existing) {
+    if (window.__WHITEBLOCK_MAP_ENGINE_V3__) loadWhiteblockParkingGeometry();
+    else existing.addEventListener('load', loadWhiteblockParkingGeometry, { once: true });
+    return;
+  }
   const script = document.createElement('script');
   // v3 implementation intentionally keeps the v2 filename so GitHub Pages and
   // existing references stay compatible. The version query prevents stale mobile
@@ -47,6 +68,7 @@ function loadWhiteblockMapEngineV2() {
   script.src = './map-engine-v2.js?v=20260921-3';
   script.async = false;
   script.dataset.whiteblockMapEngineV2 = 'true';
+  script.addEventListener('load', loadWhiteblockParkingGeometry, { once: true });
   document.body.appendChild(script);
 }
 
@@ -86,7 +108,8 @@ function loadWhiteblockKildareAttributes() {
 
 // The map engine is loaded after Leaflet/MapLibre and the base application have
 // initialised. It removes the legacy basemap and keeps one persistent MapLibre
-// instance for Street/Terrain/Satellite switching.
+// instance for Street/Terrain/Satellite switching. Ranked parking geometry loads
+// immediately after it so every recommended result is spatially visible.
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockMapEngineV2();
 });
