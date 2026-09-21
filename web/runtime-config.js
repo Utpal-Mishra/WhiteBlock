@@ -74,7 +74,7 @@ function loadWhiteblockInventoryMapLayer() {
 function loadWhiteblockInventoryCoverage() {
   if (!document.querySelector('script[data-whiteblock-inventory-coverage]')) {
     const script = document.createElement('script');
-    script.src = './inventory-coverage.js?v=20260919-kildare1';
+    script.src = './inventory-coverage.js?v=20260921-corkcounty1';
     script.defer = true;
     script.dataset.whiteblockInventoryCoverage = 'true';
     document.body.appendChild(script);
@@ -96,22 +96,43 @@ function loadWhiteblockKildareAttributes() {
   document.body.appendChild(script);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  loadWhiteblockMapEngineV2();
-});
-
-window.addEventListener('DOMContentLoaded', () => {
+function loadWhiteblockRegionNetwork() {
   const existing = document.querySelector('script[data-whiteblock-region-network]');
   if (existing) {
     if (typeof state !== 'undefined' && state.regionInventories) loadWhiteblockKildareAttributes();
     else existing.addEventListener('load', loadWhiteblockKildareAttributes, { once: true });
     return;
   }
-
   const script = document.createElement('script');
-  script.src = './region-network.js?v=20260919-kildare1';
+  script.src = './region-network.js?v=20260921-corkcounty1';
   script.defer = true;
   script.dataset.whiteblockRegionNetwork = 'true';
   script.addEventListener('load', loadWhiteblockKildareAttributes, { once: true });
   document.body.appendChild(script);
+}
+
+function loadWhiteblockCorkCountyNetwork() {
+  const existing = document.querySelector('script[data-whiteblock-cork-county-network]');
+  if (existing) {
+    if (window.__WHITEBLOCK_CORK_COUNTY_NETWORK__) loadWhiteblockRegionNetwork();
+    else existing.addEventListener('load', loadWhiteblockRegionNetwork, { once: true });
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './cork-county-network.js?v=20260921-1';
+  script.defer = true;
+  script.dataset.whiteblockCorkCountyNetwork = 'true';
+  script.addEventListener('load', loadWhiteblockRegionNetwork, { once: true });
+  document.body.appendChild(script);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadWhiteblockMapEngineV2();
+});
+
+// Cork County extends the legacy Cork coverage gate before region-network.js
+// captures it. This lets the existing regional adapter treat all County Cork
+// destinations as connected while retaining Cork City live-data semantics.
+window.addEventListener('DOMContentLoaded', () => {
+  loadWhiteblockCorkCountyNetwork();
 });
