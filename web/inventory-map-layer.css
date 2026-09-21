@@ -1,0 +1,96 @@
+.wb-inventory-marker-wrapper,
+.wb-parking-cluster-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.wb-inventory-marker {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: #0E1D17;
+  border: 1px solid rgba(237,247,241,.35);
+  box-shadow: 0 6px 18px rgba(0,0,0,.32);
+  color: #EDF7F1;
+  font: 800 10px/1 "Manrope", system-ui, sans-serif;
+}
+
+.wb-inventory-marker.general { border-color: rgba(120,230,170,.62); color: #78E6AA; }
+.wb-inventory-marker.accessible { border-color: rgba(118,190,255,.72); color: #9DD0FF; }
+.wb-inventory-marker.ev { border-color: rgba(200,245,107,.78); color: #C8F56B; }
+.wb-inventory-marker.ev-accessible {
+  border-color: rgba(200,245,107,.82);
+  color: #C8F56B;
+  box-shadow: 0 0 0 2px rgba(118,190,255,.24), 0 6px 18px rgba(0,0,0,.32);
+}
+.wb-inventory-marker.restricted { border-color: rgba(143,163,154,.34); color: #8FA39A; opacity: .78; }
+
+.wb-parking-cluster {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: rgba(11,23,18,.95);
+  border: 1px solid rgba(120,230,170,.55);
+  box-shadow: 0 10px 24px rgba(0,0,0,.38), inset 0 0 0 4px rgba(120,230,170,.06);
+  color: #EDF7F1;
+  backdrop-filter: blur(8px);
+}
+.wb-parking-cluster span { font: 800 13px/1 "Manrope", system-ui, sans-serif; }
+.wb-parking-cluster small { margin-top: 3px; color: #78E6AA; font: 600 7px/1 "DM Sans", system-ui, sans-serif; text-transform: uppercase; letter-spacing: .06em; }
+.wb-parking-cluster.md { border-color: rgba(200,245,107,.62); }
+.wb-parking-cluster.lg,
+.wb-parking-cluster.xl { width: 58px; height: 58px; border-color: rgba(241,196,107,.68); }
+.wb-parking-cluster.xl { width: 62px; height: 62px; }
+
+.wb-inventory-map-control {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 0 10px 12px 0 !important;
+}
+.wb-inventory-map-control button {
+  min-width: 118px;
+  min-height: 42px;
+  border: 1px solid rgba(120,230,170,.28);
+  border-radius: 13px;
+  background: rgba(7,17,13,.92);
+  color: #EDF7F1;
+  display: grid;
+  grid-template-columns: 9px auto;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  text-align: left;
+  box-shadow: 0 10px 28px rgba(0,0,0,.28);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+.wb-inventory-map-control button.is-off { opacity: .64; border-color: rgba(143,163,154,.24); }
+.wb-inventory-control-dot {
+  grid-row: 1 / 3;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #78E6AA;
+  box-shadow: 0 0 12px rgba(120,230,170,.42);
+}
+.wb-inventory-map-control button.is-off .wb-inventory-control-dot { background: #62756C; box-shadow: none; }
+.wb-inventory-map-control strong { font: 800 12px/1.05 "Manrope", system-ui, sans-serif; }
+.wb-inventory-map-control small { color: #8FA39A; font: 500 8px/1.1 "DM Sans", system-ui, sans-serif; }
+
+.wb-inventory-tooltip { line-height: 1.35; }
+.wb-inventory-tooltip strong { color: #EDF7F1; }
+
+@media (max-width: 640px) {
+  .wb-inventory-map-control { margin-right: 8px !important; margin-bottom: 8px !important; }
+  .wb-inventory-map-control button { min-width: 104px; min-height: 38px; padding: 6px 8px; }
+  .wb-parking-cluster { width: 48px; height: 48px; }
+  .wb-parking-cluster.lg,
+  .wb-parking-cluster.xl { width: 52px; height: 52px; }
+}
