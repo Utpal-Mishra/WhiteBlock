@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +12,14 @@ class ParkingGeometryLayerTests(unittest.TestCase):
         self.assertIn("parking-gl-overlay.js?v=20260921-3", runtime)
         self.assertIn("loadWhiteblockParkingGeometry", runtime)
         self.assertNotIn("parking-geometry-layer.js?v=20260921-1", runtime)
+
+    def test_overlay_javascript_syntax(self):
+        subprocess.run(
+            ["node", "--check", str(WEB / "parking-gl-overlay.js")],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
     def test_overlay_numbers_every_ranked_result(self):
         source = (WEB / "parking-gl-overlay.js").read_text(encoding="utf-8")
@@ -30,7 +39,7 @@ class ParkingGeometryLayerTests(unittest.TestCase):
     def test_overlay_queries_parking_polygons(self):
         source = (WEB / "parking-gl-overlay.js").read_text(encoding="utf-8")
         self.assertIn('way(around:4500,', source)
-        self.assertIn('amenity\\"=\\"parking', source)
+        self.assertIn('["amenity"="parking"]', source)
         self.assertIn("geometryCache", source)
         self.assertIn("matchGeometry", source)
 
