@@ -39,18 +39,14 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
 })();
 
 function loadWhiteblockParkingGeometry() {
-  if (!document.querySelector('link[data-whiteblock-parking-geometry]')) {
-    const style = document.createElement('link');
-    style.rel = 'stylesheet';
-    style.href = './parking-geometry-layer.css?v=20260921-1';
-    style.dataset.whiteblockParkingGeometry = 'true';
-    document.head.appendChild(style);
-  }
-  if (document.querySelector('script[data-whiteblock-parking-geometry]')) return;
+  if (document.querySelector('script[data-whiteblock-parking-gl-overlay]')) return;
   const script = document.createElement('script');
-  script.src = './parking-geometry-layer.js?v=20260921-1';
+  // Parking geometry is rendered inside the same MapLibre canvas as the basemap.
+  // This avoids Android/Chrome pane-stacking failures between Leaflet SVG layers
+  // and the WebGL basemap.
+  script.src = './parking-gl-overlay.js?v=20260921-2';
   script.defer = true;
-  script.dataset.whiteblockParkingGeometry = 'true';
+  script.dataset.whiteblockParkingGlOverlay = 'true';
   document.body.appendChild(script);
 }
 
@@ -107,9 +103,8 @@ function loadWhiteblockKildareAttributes() {
 }
 
 // The map engine is loaded after Leaflet/MapLibre and the base application have
-// initialised. It removes the legacy basemap and keeps one persistent MapLibre
-// instance for Street/Terrain/Satellite switching. Ranked parking geometry loads
-// immediately after it so every recommended result is spatially visible.
+// initialised. Parking geometry then attaches directly to the MapLibre style so
+// polygons and ranked labels cannot disappear behind the WebGL canvas.
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockMapEngineV2();
 });
