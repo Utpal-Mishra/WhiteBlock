@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import re
 import urllib.parse
 import urllib.request
@@ -34,8 +33,8 @@ CORK_COUNTY_DEVELOPMENT_BOUNDARIES_URL = (
     "Development_Boundaries_CDP22/FeatureServer"
 )
 
-# Geographic envelope used only as a browser-side fallback/metadata envelope.
-# Parking retrieval itself uses the OSM County Cork administrative area.
+# Geographic envelope used for browser-side coverage metadata only. Parking
+# retrieval itself uses the traditional County Cork admin_level=6 OSM area.
 CORK_COUNTY_BOUNDS = {
     "south": 51.40,
     "west": -10.72,
@@ -101,8 +100,7 @@ def freshness_score(observed_at: Optional[str], now: datetime) -> float:
 
 def confidence_score(base_source: float, observed_at: Optional[str], completeness: float, now: datetime) -> Dict[str, Any]:
     freshness = freshness_score(observed_at, now)
-    score = 0.60 * base_source + 0.25 * freshness + 0.15 * completeness
-    score = max(0.0, min(1.0, score))
+    score = max(0.0, min(1.0, 0.60 * base_source + 0.25 * freshness + 0.15 * completeness))
     return {
         "score": round(score, 3),
         "basis": {
@@ -113,36 +111,41 @@ def confidence_score(base_source: float, observed_at: Optional[str], completenes
     }
 
 
-def overpass_query() -> str:
-    # Historic County Cork is the intended geographic scope. The query also
-    # accepts the common Cork name at admin level 6 to survive naming changes.
-    return """
+def overpass_query(county_name: str = "Cork") -> str:
+    """Return valid Overpass QL for the traditional County Cork area.
+
+    Ireland maps traditional counties at admin_level=6. Querying an Overpass
+    area directly avoids the invalid relation-set map_to_area expression that
+    previously caused HTTP 400 responses. `out meta geom` provides coordinates,
+    tags, timestamps and way geometry in one valid output mode.
+    """
+    safe_name = county_name.replace('"', '')
+    return f"""
 [out:json][timeout:70];
+area["boundary"="administrative"]["admin_level"="6"]["name"="{safe_name}"]->.searchArea;
 (
-  rel["boundary"="administrative"]["admin_level"="6"]["name"="County Cork"];
-  rel["boundary"="administrative"]["admin_level"="6"]["name"="Cork"];
-)->.county;
-map_to_area.county -> .searchArea;
-(
-  nwr["amenity"="parking"](area.searchArea);
-  nwr["parking"~"street_side|lane"](area.searchArea);
+  nwr(area.searchArea)["amenity"="parking"];
+  nwr(area.searchArea)["parking"~"street_side|lane"];
 );
-out meta center tags geom;
+out meta geom;
 """.strip()
 
 
 def fetch_overpass() -> Tuple[Dict[str, Any], str]:
     errors: List[str] = []
-    encoded = urllib.parse.urlencode({"data": overpass_query()}).encode("utf-8")
-    for endpoint in OVERPASS_ENDPOINTS:
-        try:
-            payload = fetch_json(endpoint, data=encoded, timeout=85)
-            if payload.get("elements"):
-                return payload, endpoint
-            errors.append(f"{endpoint}: empty response")
-        except Exception as exc:  # network failover by design
-            errors.append(f"{endpoint}: {exc}")
-    raise RuntimeError("County Cork Overpass parking query failed: " + " | ".join(errors[-4:]))
+    # OSM's Ireland boundary convention names the traditional county "Cork".
+    # "County Cork" remains a defensive fallback for source naming changes.
+    for county_name in ("Cork", "County Cork"):
+        encoded = urllib.parse.urlencode({"data": overpass_query(county_name)}).encode("utf-8")
+        for endpoint in OVERPASS_ENDPOINTS:
+            try:
+                payload = fetch_json(endpoint, data=encoded, timeout=85)
+                if payload.get("elements"):
+                    return payload, endpoint
+                errors.append(f"{county_name} @ {endpoint}: empty response")
+            except Exception as exc:  # network failover by design
+                errors.append(f"{county_name} @ {endpoint}: {exc}")
+    raise RuntimeError("County Cork Overpass parking query failed: " + " | ".join(errors[-6:]))
 
 
 def element_point(element: Dict[str, Any]) -> Optional[Tuple[float, float]]:
@@ -153,18 +156,19 @@ def element_point(element: Dict[str, Any]) -> Optional[Tuple[float, float]]:
         return float(center["lat"]), float(center["lon"])
     geometry = element.get("geometry") or []
     valid = [p for p in geometry if p.get("lat") is not None and p.get("lon") is not None]
-    if valid:
-        return (
-            sum(float(p["lat"]) for p in valid) / len(valid),
-            sum(float(p["lon"]) for p in valid) / len(valid),
-        )
-    return None
+    if not valid:
+        return None
+    return (
+        sum(float(p["lat"]) for p in valid) / len(valid),
+        sum(float(p["lon"]) for p in valid) / len(valid),
+    )
 
 
 def polygon_geometry(element: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    # Overpass returns an ordered geometry array for ways. Relations can be
-    # multipart and are left without a fabricated polygon unless they arrive as
-    # one simple closed geometry.
+    # Simple way geometry can be published directly. Complex/multipart OSM
+    # relations are not converted into a fake single polygon.
+    if element.get("type") != "way":
+        return None
     geometry = element.get("geometry") or []
     coords = [
         [float(point["lon"]), float(point["lat"])]
@@ -187,10 +191,7 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
     osm_type = str(element.get("type") or "object")
     osm_id = element.get("id")
     parking_kind = tags.get("parking") or "parking"
-    name = tags.get("name") or tags.get("operator")
-    if not name:
-        name = f"{str(parking_kind).replace('_', ' ').title()} parking"
-
+    name = tags.get("name") or tags.get("operator") or f"{str(parking_kind).replace('_', ' ').title()} parking"
     area = (
         tags.get("addr:city")
         or tags.get("addr:town")
@@ -200,6 +201,7 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
         or tags.get("is_in:village")
         or "County Cork"
     )
+
     capacity = parse_int(tags.get("capacity"))
     accessible = parse_int(tags.get("capacity:disabled"))
     if accessible is None and tags.get("wheelchair") == "yes":
@@ -210,14 +212,15 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
 
     charge = tags.get("charge")
     fee = tags.get("fee")
-    if charge:
-        pricing = charge
-    elif fee == "no":
-        pricing = "No fee tagged in OpenStreetMap"
-    elif fee == "yes":
-        pricing = "Paid parking · tariff not published in source"
-    else:
-        pricing = None
+    pricing = (
+        charge
+        if charge
+        else "No fee tagged in OpenStreetMap"
+        if fee == "no"
+        else "Paid parking · tariff not published in source"
+        if fee == "yes"
+        else None
+    )
 
     observed_at = element.get("timestamp")
     geometry = polygon_geometry(element)
@@ -268,7 +271,6 @@ def build_snapshot() -> Dict[str, Any]:
     payload, endpoint = fetch_overpass()
     seen = set()
     locations: List[Dict[str, Any]] = []
-
     for element in payload.get("elements", []):
         key = (element.get("type"), element.get("id"))
         if key in seen:
