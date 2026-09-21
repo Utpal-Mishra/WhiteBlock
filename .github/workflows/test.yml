@@ -18,7 +18,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U whiteblock -d whiteblock"
+          --health-cmd "pg_isready -U whiteblock -d whiteblock
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -61,6 +61,7 @@ jobs:
           node --check web/result-card-polish.js
           node --check web/inventory-map-layer.js
           node --check web/map-fix.js
+          node --check web/map-engine-v2.js
           node --check web/guidance-layer.js
           node --check web/tile-resilience.js
           node --check web/parking-layout.js
