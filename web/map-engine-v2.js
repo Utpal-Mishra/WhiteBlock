@@ -1,16 +1,20 @@
-// WHITEBLOCK map engine v2.
-// One MapLibre/Leaflet rendering path for Street, Terrain and Satellite.
-// Leaflet owns parking/destination overlays; MapLibre stays below them in tilePane.
-// Selected parking is given a visible area footprint. If OSM exposes a nearby
-// parking polygon, the selected estimate is upgraded to mapped geometry.
+// WHITEBLOCK map engine v3 (kept at the v2 filename for deployment compatibility).
+//
+// The previous implementation recreated MapLibre layers and forced the WebGL
+// container into Leaflet's tilePane. That was fragile on Android Chrome: Leaflet
+// overlays survived while the basemap canvas could disappear. This version mirrors
+// the stable XPLORE pattern: one persistent L.maplibreGL layer is added normally,
+// and Street / Terrain / Satellite switch styles inside that same MapLibre map.
+// Leaflet remains responsible for destinations, clusters and parking polygons.
 
 (() => {
-  if (window.__WHITEBLOCK_MAP_ENGINE_V2__) return;
+  if (window.__WHITEBLOCK_MAP_ENGINE_V3__) return;
   if (typeof L === "undefined" || typeof state === "undefined" || !state.map) return;
   if (typeof L.maplibreGL !== "function") return;
 
+  window.__WHITEBLOCK_MAP_ENGINE_V3__ = true;
   window.__WHITEBLOCK_MAP_ENGINE_V2__ = true;
-  // Prevent the retired raster-retry adapter from taking ownership if it is loaded later.
+  // Prevent the retired raster retry adapter from claiming the map later.
   window.__WHITEBLOCK_TILE_RESILIENCE__ = true;
 
   const map = state.map;
@@ -26,26 +30,29 @@
   ];
 
   const LAYER_LABELS = { street: "Street", terrain: "Terrain", satellite: "Satellite" };
-  let basemap = null;
-  let basemapKey = "street";
-  let basemapGeneration = 0;
+  let basemapLayer = null;
+  let glMap = null;
+  let activeBasemap = "street";
+  let styleGeneration = 0;
+  let styleHealthTimer = null;
+  let styleErrors = 0;
   let parkingAreaLayer = null;
   let selectedFootprintLayer = null;
-  let destinationLayer = null;
-  let coverageLayer = null;
+  let destinationContextLayer = null;
+  let coverageContextLayer = null;
   let footprintRequest = 0;
   const footprintCache = new Map();
 
-  function loadStyle() {
-    if (document.querySelector('link[data-whiteblock-map-engine-v2]')) return;
-    const style = document.createElement("link");
-    style.rel = "stylesheet";
-    style.href = "./map-engine-v2.css?v=20260921-2";
-    style.dataset.whiteblockMapEngineV2 = "true";
-    document.head.appendChild(style);
+  function ensureStylesheet() {
+    if (document.querySelector('link[data-whiteblock-map-engine-v3]')) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "./map-engine-v2.css?v=20260921-3";
+    link.dataset.whiteblockMapEngineV3 = "true";
+    document.head.appendChild(link);
   }
 
-  function rasterStyle(id, tileUrl, attribution, maxzoom = 19) {
+  function rasterStyle(id, tileUrl, attribution, background, maxzoom = 19) {
     return {
       version: 8,
       sources: {
@@ -58,7 +65,10 @@
           attribution
         }
       },
-      layers: [{ id: `${id}-base`, type: "raster", source: id, minzoom: 0, maxzoom: 22 }]
+      layers: [
+        { id: `${id}-background`, type: "background", paint: { "background-color": background } },
+        { id: `${id}-base`, type: "raster", source: id, minzoom: 0, maxzoom: 22 }
+      ]
     };
   }
 
@@ -68,6 +78,7 @@
         "whiteblock-terrain",
         TERRAIN_TILE,
         "© OpenStreetMap contributors · SRTM · OpenTopoMap",
+        "#e7e1cf",
         17
       );
     }
@@ -76,33 +87,32 @@
         "whiteblock-satellite",
         SATELLITE_TILE,
         "Tiles © Esri, Maxar, Earthstar Geographics and GIS User Community",
+        "#111914",
         19
       );
     }
     return STREET_STYLE;
   }
 
-  function isLegacyBasemap(layer) {
-    if (!layer) return false;
-    if (layer.__whiteblockMapEngineV2) return false;
-    if (layer instanceof L.TileLayer) return true;
-    return typeof layer.getMaplibreMap === "function" || Boolean(layer._glMap);
+  function isMapLibreLayer(layer) {
+    return Boolean(layer) && (typeof layer.getMaplibreMap === "function" || Boolean(layer._glMap));
   }
 
-  function removeLegacyBasemaps() {
-    map.eachLayer(layer => {
-      if (!isLegacyBasemap(layer)) return;
-      try { map.removeLayer(layer); } catch (_) {}
-    });
-  }
-
-  function maplibreMap(layer) {
+  function getGlMap(layer = basemapLayer) {
     try {
       if (typeof layer?.getMaplibreMap === "function") return layer.getMaplibreMap();
       return layer?._glMap || null;
     } catch (_) {
       return null;
     }
+  }
+
+  function removeLegacyBasemaps() {
+    map.eachLayer(layer => {
+      if (layer === basemapLayer) return;
+      if (!(layer instanceof L.TileLayer) && !isMapLibreLayer(layer)) return;
+      try { map.removeLayer(layer); } catch (_) {}
+    });
   }
 
   function updateToolbar(key) {
@@ -113,92 +123,152 @@
     });
   }
 
-  function setBasemapStatus(key, suffix = "") {
-    mapEl.dataset.basemapEngine = "maplibre-v2";
+  function updateMapTheme(key) {
+    activeBasemap = key;
+    mapEl.dataset.basemapEngine = "maplibre-v3";
     mapEl.dataset.basemap = key;
     mapEl.classList.remove("wb-map-street", "wb-map-terrain", "wb-map-satellite");
     mapEl.classList.add(`wb-map-${key}`);
-    if (suffix && typeof setMapStatus === "function") {
-      setMapStatus(`${LAYER_LABELS[key]} map`, suffix);
-    }
+    updateToolbar(key);
   }
 
   function resizeBasemap() {
-    const gl = maplibreMap(basemap);
-    if (gl?.resize) {
-      try { gl.resize(); } catch (_) {}
-    }
+    const gl = glMap || getGlMap();
+    if (!gl?.resize) return;
+    try { gl.resize(); } catch (_) {}
   }
 
-  function activateBasemap(key, { quiet = false } = {}) {
-    if (!LAYER_LABELS[key]) key = "street";
-    const generation = ++basemapGeneration;
-    basemapKey = key;
-    updateToolbar(key);
+  function activateLayoutFallback(reason) {
+    mapEl.classList.remove("wb-map-repairing");
+    mapEl.dataset.basemapEngine = "layout-fallback";
+    if (typeof setMapStatus === "function") {
+      setMapStatus("Map renderer unavailable", reason || "Showing the parking layout instead");
+    }
+    const openLayout = () => {
+      const button = document.querySelector(".wb-parking-layout-button");
+      if (button && !mapEl.classList.contains("layout-active")) button.click();
+    };
+    openLayout();
+    window.setTimeout(openLayout, 250);
+  }
+
+  function clearStyleHealthTimer() {
+    if (styleHealthTimer) window.clearTimeout(styleHealthTimer);
+    styleHealthTimer = null;
+  }
+
+  function armStyleHealth(key, generation) {
+    clearStyleHealthTimer();
+    styleErrors = 0;
     mapEl.classList.add("wb-map-repairing");
 
-    if (basemap) {
-      try { if (map.hasLayer(basemap)) map.removeLayer(basemap); } catch (_) {}
-      basemap = null;
-    }
-    removeLegacyBasemaps();
+    const recovered = () => {
+      if (generation !== styleGeneration) return;
+      clearStyleHealthTimer();
+      styleErrors = 0;
+      mapEl.classList.remove("wb-map-repairing");
+      window.requestAnimationFrame(resizeBasemap);
+    };
 
+    const currentGl = glMap;
+    currentGl?.once?.("style.load", recovered);
+    currentGl?.once?.("idle", recovered);
+
+    styleHealthTimer = window.setTimeout(() => {
+      if (generation !== styleGeneration) return;
+      let loaded = false;
+      try { loaded = Boolean(currentGl?.isStyleLoaded?.()); } catch (_) {}
+      if (loaded) return recovered();
+
+      if (key !== "street") {
+        if (typeof setMapStatus === "function") {
+          setMapStatus(`${LAYER_LABELS[key]} temporarily unavailable`, "Returning to Street map");
+        }
+        switchBasemap("street", { quiet: true });
+      } else {
+        activateLayoutFallback("The device could not initialise the vector basemap; parking results remain usable.");
+      }
+    }, 4500);
+  }
+
+  function bindGlHealth() {
+    if (!glMap || glMap.__whiteblockHealthBound) return;
+    glMap.__whiteblockHealthBound = true;
+    glMap.on?.("error", event => {
+      // MapLibre can report isolated glyph/tile errors while the map remains usable.
+      // Only act after a sustained burst from the currently selected non-Street style.
+      styleErrors += 1;
+      if (styleErrors >= 16 && activeBasemap !== "street") {
+        switchBasemap("street", { quiet: true });
+      }
+      if (event?.error) console.debug("WHITEBLOCK map source warning", event.error.message || event.error);
+    });
+  }
+
+  function createPersistentBasemap() {
+    removeLegacyBasemaps();
     try {
-      basemap = L.maplibreGL({
-        style: styleFor(key),
-        pane: "tilePane",
+      // Intentionally mirrors XPLORE: no custom pane and no custom canvas sizing.
+      basemapLayer = L.maplibreGL({
+        style: STREET_STYLE,
         interactive: false,
         attributionControl: false
       });
-      basemap.__whiteblockMapEngineV2 = true;
-      basemap.addTo(map);
+      basemapLayer.__whiteblockMapEngineV3 = true;
+      basemapLayer.addTo(map);
     } catch (error) {
-      console.warn(`WHITEBLOCK ${key} basemap could not start`, error);
-      mapEl.classList.remove("wb-map-repairing");
-      if (key !== "street") activateBasemap("street", { quiet: true });
+      console.warn("WHITEBLOCK MapLibre could not initialise", error);
+      activateLayoutFallback("MapLibre could not start on this device.");
+      return false;
+    }
+
+    const connect = (attempt = 0) => {
+      glMap = getGlMap();
+      if (!glMap) {
+        if (attempt < 80) return window.setTimeout(() => connect(attempt + 1), 50);
+        activateLayoutFallback("The map canvas did not initialise; showing parking layout instead.");
+        return;
+      }
+      bindGlHealth();
+      const generation = ++styleGeneration;
+      updateMapTheme("street");
+      armStyleHealth("street", generation);
+      window.requestAnimationFrame(() => {
+        map.invalidateSize({ pan: false, animate: false });
+        resizeBasemap();
+      });
+    };
+    connect();
+    return true;
+  }
+
+  function switchBasemap(key, { quiet = false } = {}) {
+    if (!LAYER_LABELS[key]) key = "street";
+    if (!glMap) {
+      updateMapTheme(key);
       return;
     }
 
-    const connectHealth = () => {
-      if (generation !== basemapGeneration || !basemap) return;
-      const gl = maplibreMap(basemap);
-      if (!gl) {
-        window.setTimeout(connectHealth, 50);
-        return;
-      }
-
-      let errors = 0;
-      const recovered = () => {
-        if (generation !== basemapGeneration) return;
-        errors = 0;
-        mapEl.classList.remove("wb-map-repairing");
-      };
-
-      gl.on?.("load", recovered);
-      gl.on?.("idle", recovered);
-      gl.on?.("error", () => {
-        if (generation !== basemapGeneration) return;
-        errors += 1;
-        // A single raster/vector tile failure is recoverable. Repeated failures
-        // indicate a provider/device incompatibility; fall back to Street rather
-        // than leaving a checkerboard/black map visible.
-        if (errors >= 8 && key !== "street") {
-          if (typeof setMapStatus === "function") {
-            setMapStatus(`${LAYER_LABELS[key]} temporarily unavailable`, "Showing the stable Street map instead");
-          }
-          activateBasemap("street", { quiet: true });
+    const generation = ++styleGeneration;
+    updateMapTheme(key);
+    try {
+      glMap.setStyle(styleFor(key), { diff: false });
+      armStyleHealth(key, generation);
+      if (!quiet && typeof setMapStatus === "function") {
+        const currentTitle = document.getElementById("map-status-title")?.textContent || "Parking map";
+        const currentCopy = document.getElementById("map-status-copy")?.textContent || "";
+        if (/map renderer unavailable|temporarily unavailable/i.test(currentTitle)) {
+          setMapStatus(`${LAYER_LABELS[key]} map`, "Parking overlays remain active on this layer");
+        } else if (!currentCopy) {
+          setMapStatus(currentTitle, `${LAYER_LABELS[key]} basemap · parking overlays active`);
         }
-      });
-      window.setTimeout(recovered, 1200);
-    };
-    connectHealth();
-
-    setBasemapStatus(key, quiet ? "" : "Parking overlays remain active on every layer");
-    window.requestAnimationFrame(() => {
-      map.invalidateSize({ pan: false, animate: false });
-      resizeBasemap();
-      renderParkingAreas();
-    });
+      }
+    } catch (error) {
+      console.warn(`WHITEBLOCK could not switch to ${key}`, error);
+      if (key !== "street") switchBasemap("street", { quiet: true });
+      else activateLayoutFallback("Street map style could not load; parking layout is available.");
+    }
+    window.requestAnimationFrame(resizeBasemap);
   }
 
   function statusColour(item) {
@@ -213,23 +283,25 @@
     try {
       if (typeof currentData === "function") {
         const rows = currentData();
-        if (Array.isArray(rows)) return rows.filter(item => Number.isFinite(item?.lat) && Number.isFinite(item?.lng));
+        if (Array.isArray(rows)) {
+          return rows.filter(item => Number.isFinite(Number(item?.lat)) && Number.isFinite(Number(item?.lng)));
+        }
       }
     } catch (_) {}
     return Array.isArray(parkingData)
-      ? parkingData.filter(item => Number.isFinite(item?.lat) && Number.isFinite(item?.lng)).slice(0, 12)
+      ? parkingData.filter(item => Number.isFinite(Number(item?.lat)) && Number.isFinite(Number(item?.lng))).slice(0, 12)
       : [];
   }
 
   function footprintRadius(item) {
     const capacity = Number(item?.capacity);
-    if (!Number.isFinite(capacity) || capacity <= 0) return 38;
-    // 28 m²/space is used only to size a visual estimate including circulation.
-    // It is not stored as verified geometry and is deliberately capped.
-    return Math.max(28, Math.min(105, Math.sqrt((capacity * 28) / Math.PI)));
+    if (!Number.isFinite(capacity) || capacity <= 0) return 42;
+    // Visual estimate only: 28 m² per space including circulation, capped so a
+    // capacity value can never create an implausibly huge UI polygon.
+    return Math.max(30, Math.min(110, Math.sqrt((capacity * 28) / Math.PI)));
   }
 
-  function approximatePolygon(lat, lng, radiusMeters, points = 18) {
+  function approximatePolygon(lat, lng, radiusMeters, points = 20) {
     const coords = [];
     const latScale = 111320;
     const lngScale = Math.max(25000, 111320 * Math.cos(lat * Math.PI / 180));
@@ -244,21 +316,17 @@
   }
 
   function ensurePanes() {
-    if (!map.getPane("wbParkingAreaPane")) {
-      const pane = map.createPane("wbParkingAreaPane");
-      pane.style.zIndex = "430";
+    const panes = [
+      ["wbParkingAreaPane", "455"],
+      ["wbSelectedAreaPane", "485"],
+      ["wbParkingPointPane", "645"]
+    ];
+    panes.forEach(([name, zIndex]) => {
+      if (map.getPane(name)) return;
+      const pane = map.createPane(name);
+      pane.style.zIndex = zIndex;
       pane.style.pointerEvents = "auto";
-    }
-    if (!map.getPane("wbSelectedAreaPane")) {
-      const pane = map.createPane("wbSelectedAreaPane");
-      pane.style.zIndex = "470";
-      pane.style.pointerEvents = "auto";
-    }
-    if (!map.getPane("wbParkingPointPane")) {
-      const pane = map.createPane("wbParkingPointPane");
-      pane.style.zIndex = "640";
-      pane.style.pointerEvents = "auto";
-    }
+    });
   }
 
   function clearLayer(layer) {
@@ -275,42 +343,38 @@
     rows.forEach((item, index) => {
       const selected = item.id === state.selectedId;
       const colour = statusColour(item);
-      const polygon = L.polygon(
-        approximatePolygon(Number(item.lat), Number(item.lng), footprintRadius(item)),
-        {
-          pane: "wbParkingAreaPane",
-          color: colour,
-          weight: selected ? 2.5 : 1.4,
-          opacity: selected ? 1 : 0.76,
-          fillColor: colour,
-          fillOpacity: selected ? 0.22 : 0.10,
-          dashArray: selected ? null : "5 5",
-          interactive: true
-        }
-      ).addTo(parkingAreaLayer);
+      const lat = Number(item.lat);
+      const lng = Number(item.lng);
+      const polygon = L.polygon(approximatePolygon(lat, lng, footprintRadius(item)), {
+        pane: "wbParkingAreaPane",
+        color: selected ? "#EDF7F1" : colour,
+        weight: selected ? 3 : 1.7,
+        opacity: selected ? 1 : 0.9,
+        fillColor: colour,
+        fillOpacity: selected ? 0.32 : 0.16,
+        dashArray: selected ? null : "6 5",
+        interactive: true
+      }).addTo(parkingAreaLayer);
       polygon.bindTooltip(
-        `<strong>${escapeHtml(item.name || "Parking")}</strong><br>${selected ? "Selected parking" : `Option ${index + 1}`} · estimated display footprint`,
+        `<strong>${escapeHtml(item.name || "Parking")}</strong><br>${selected ? "Selected parking" : `Option ${index + 1}`} · estimated footprint`,
         { sticky: true, className: "wb-tooltip" }
       );
-      polygon.on("click", () => {
-        if (typeof selectParking === "function") selectParking(item.id);
-      });
+      polygon.on("click", () => typeof selectParking === "function" && selectParking(item.id));
 
-      L.circleMarker([Number(item.lat), Number(item.lng)], {
+      L.circleMarker([lat, lng], {
         pane: "wbParkingPointPane",
-        radius: selected ? 8 : 6,
+        radius: selected ? 9 : 6.5,
         color: "#07110D",
-        weight: 2,
+        weight: 2.5,
         fillColor: colour,
         fillOpacity: 1,
         interactive: true
       }).bindTooltip(`${escapeHtml(item.name || "Parking")} · option ${index + 1}`, {
         direction: "top",
-        offset: [0, -9],
+        offset: [0, -10],
         className: "wb-tooltip"
-      }).on("click", () => {
-        if (typeof selectParking === "function") selectParking(item.id);
-      }).addTo(parkingAreaLayer);
+      }).on("click", () => typeof selectParking === "function" && selectParking(item.id))
+        .addTo(parkingAreaLayer);
     });
 
     if (state.selectedId) void upgradeSelectedFootprint(state.selectedId);
@@ -338,7 +402,6 @@
       return { lat: Number(element.center.lat), lng: Number(element.center.lon) };
     }
     const geometry = Array.isArray(element?.geometry) ? element.geometry : [];
-    if (!geometry.length) return null;
     const valid = geometry.filter(point => Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lon)));
     if (!valid.length) return null;
     return {
@@ -388,15 +451,10 @@
       footprintCache.set(item.id, null);
       return null;
     }
-
     const coords = winner.element.geometry
       .filter(point => Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lon)))
       .map(point => [Number(point.lat), Number(point.lon)]);
-    const result = coords.length >= 3 ? {
-      coords,
-      osmId: winner.element.id,
-      name: winner.element?.tags?.name || null
-    } : null;
+    const result = coords.length >= 3 ? { coords, osmId: winner.element.id } : null;
     footprintCache.set(item.id, result);
     return result;
   }
@@ -414,38 +472,36 @@
     const colour = statusColour(item);
     const polygon = L.polygon(mapped.coords, {
       pane: "wbSelectedAreaPane",
-      color: "#EDF7F1",
-      weight: 2.5,
-      opacity: 0.95,
+      color: "#FFFFFF",
+      weight: 3.2,
+      opacity: 1,
       fillColor: colour,
-      fillOpacity: 0.28,
+      fillOpacity: 0.36,
       interactive: true
     }).addTo(selectedFootprintLayer);
     polygon.bindTooltip(
       `<strong>${escapeHtml(item.name || "Selected parking")}</strong><br>Mapped parking footprint · OpenStreetMap`,
       { sticky: true, className: "wb-tooltip" }
     );
-    try {
-      map.fitBounds(polygon.getBounds(), { padding: [52, 52], maxZoom: 18, animate: false });
-    } catch (_) {}
+    try { map.fitBounds(polygon.getBounds(), { padding: [52, 52], maxZoom: 18, animate: false }); } catch (_) {}
   }
 
-  function renderDestination() {
-    clearLayer(destinationLayer);
-    destinationLayer = L.layerGroup().addTo(map);
+  function renderDestinationContext() {
+    clearLayer(destinationContextLayer);
+    destinationContextLayer = L.layerGroup().addTo(map);
     const destination = state.destination;
-    if (!destination || !Number.isFinite(destination.lat) || !Number.isFinite(destination.lng)) return;
-    L.circle([destination.lat, destination.lng], {
+    if (!destination || !Number.isFinite(Number(destination.lat)) || !Number.isFinite(Number(destination.lng))) return;
+    L.circle([Number(destination.lat), Number(destination.lng)], {
       pane: "wbParkingAreaPane",
-      radius: 180,
+      radius: 150,
       color: "#EDF7F1",
       dashArray: "5 7",
-      weight: 1.5,
-      opacity: 0.75,
+      weight: 1.6,
+      opacity: 0.9,
       fillColor: "#78E6AA",
-      fillOpacity: 0.035,
+      fillOpacity: 0.06,
       interactive: false
-    }).addTo(destinationLayer);
+    }).addTo(destinationContextLayer);
   }
 
   function selectedParking() {
@@ -457,7 +513,7 @@
     if (!item) return;
     try { map.setView([Number(item.lat), Number(item.lng)], 17, { animate: false }); } catch (_) {}
     renderParkingAreas();
-    window.setTimeout(resizeBasemap, 20);
+    window.setTimeout(resizeBasemap, 40);
   }
 
   function openStreetView() {
@@ -472,18 +528,15 @@
 
   function takeoverToolbar() {
     const toolbar = document.querySelector(".wb-map-toolbar");
-    if (!toolbar || toolbar.dataset.mapEngineV2 === "true") return;
-    toolbar.dataset.mapEngineV2 = "true";
+    if (!toolbar || toolbar.dataset.mapEngineV3 === "true") return;
+    toolbar.dataset.mapEngineV3 = "true";
     toolbar.setAttribute("aria-label", "Map views and parking context");
-
-    // Capture layer clicks before the legacy handlers. Parking Layout has no
-    // data-layer attribute, so its existing behaviour is preserved.
     toolbar.addEventListener("click", event => {
       const layerButton = event.target.closest?.(".wb-map-layer-button[data-layer]");
       if (layerButton) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        activateBasemap(layerButton.dataset.layer);
+        switchBasemap(layerButton.dataset.layer);
         return;
       }
       const streetView = event.target.closest?.(".wb-street-view-button");
@@ -496,8 +549,8 @@
   }
 
   function renderCoverage() {
-    clearLayer(coverageLayer);
-    coverageLayer = L.layerGroup().addTo(map);
+    clearLayer(coverageContextLayer);
+    coverageContextLayer = L.layerGroup().addTo(map);
     if (typeof coverageAreas === "undefined") return;
     coverageAreas.forEach(area => {
       const colour = area.status === "live" ? "#52D98D" : area.status === "next" ? "#C8F56B" : "#F1C46B";
@@ -505,56 +558,38 @@
         pane: "wbParkingAreaPane",
         radius: area.status === "live" ? 24000 : 16000,
         color: colour,
-        weight: 1.4,
+        weight: 1.5,
         dashArray: area.status === "live" ? null : "8 7",
         fillColor: colour,
-        fillOpacity: area.status === "live" ? 0.08 : 0.035,
+        fillOpacity: area.status === "live" ? 0.10 : 0.04,
         interactive: false
-      }).addTo(coverageLayer);
+      }).addTo(coverageContextLayer);
     });
   }
 
   function wrapSelection() {
-    if (typeof selectParking !== "function" || selectParking.__wbMapEngineV2Wrapped) return;
+    if (typeof selectParking !== "function" || selectParking.__wbMapEngineV3Wrapped) return;
     const base = selectParking;
-    const wrapped = function whiteblockMapEngineV2Select(id, ...args) {
+    const wrapped = function whiteblockMapEngineV3Select(id, ...args) {
       const result = base.call(this, id, ...args);
       window.setTimeout(focusSelectedParking, 0);
       return result;
     };
-    wrapped.__wbMapEngineV2Wrapped = true;
+    wrapped.__wbMapEngineV3Wrapped = true;
     selectParking = wrapped;
   }
 
-  function loadGuidanceLayer() {
-    if (!document.querySelector('link[data-wb-guidance-style]')) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "./guidance-layer.css";
-      link.dataset.wbGuidanceStyle = "true";
-      document.head.appendChild(link);
-    }
-    if (!document.querySelector('script[data-wb-guidance-script]')) {
-      const script = document.createElement("script");
-      script.src = "./guidance-layer.js";
-      script.defer = true;
-      script.dataset.wbGuidanceScript = "true";
-      document.body.appendChild(script);
-    }
-  }
-
-  loadStyle();
+  ensureStylesheet();
   ensurePanes();
   takeoverToolbar();
   wrapSelection();
-  loadGuidanceLayer();
 
-  // Kill any late Leaflet raster basemap. MapLibre raster/vector sources render
-  // inside one canvas; parking markers and SVG polygons remain above it.
   map.on("layeradd", event => {
     const layer = event.layer;
-    if (layer instanceof L.TileLayer) {
+    if (layer === basemapLayer) return;
+    if (layer instanceof L.TileLayer || isMapLibreLayer(layer)) {
       window.setTimeout(() => {
+        if (layer === basemapLayer) return;
         try { if (map.hasLayer(layer)) map.removeLayer(layer); } catch (_) {}
       }, 0);
     }
@@ -562,17 +597,12 @@
 
   document.addEventListener("whiteblock:data-ready", () => {
     wrapSelection();
-    renderDestination();
+    renderDestinationContext();
     renderParkingAreas();
-    window.setTimeout(resizeBasemap, 30);
+    window.setTimeout(resizeBasemap, 40);
   });
-  document.addEventListener("whiteblock:kildare-attributes-ready", () => {
-    renderParkingAreas();
-  });
-  document.addEventListener("whiteblock:inventory-map-ready", () => {
-    // Inventory clusters are Leaflet markers; pane ordering keeps them above MapLibre.
-    window.setTimeout(resizeBasemap, 20);
-  });
+  document.addEventListener("whiteblock:kildare-attributes-ready", renderParkingAreas);
+  document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(resizeBasemap, 30));
 
   document.addEventListener("click", event => {
     if (event.target.closest?.("#ireland-overview-button")) {
@@ -586,22 +616,20 @@
     }
     if (event.target.closest?.("#search-button") || event.target.closest?.("#destination-suggestions") || event.target.closest?.(".chip")) {
       window.setTimeout(() => {
-        renderDestination();
+        renderDestinationContext();
         renderParkingAreas();
         resizeBasemap();
       }, 520);
     }
   });
 
-  window.addEventListener("resize", () => window.setTimeout(resizeBasemap, 80), { passive: true });
-  window.addEventListener("orientationchange", () => window.setTimeout(resizeBasemap, 160), { passive: true });
+  window.addEventListener("resize", () => window.setTimeout(resizeBasemap, 100), { passive: true });
+  window.addEventListener("orientationchange", () => window.setTimeout(resizeBasemap, 180), { passive: true });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) window.setTimeout(resizeBasemap, 80);
+    if (!document.hidden) window.setTimeout(resizeBasemap, 100);
   });
 
-  // Street is deliberately the default again: readable vector streets plus strong
-  // parking overlays. Terrain/Satellite remain available through the same engine.
-  activateBasemap("street", { quiet: true });
-  renderDestination();
+  createPersistentBasemap();
+  renderDestinationContext();
   renderParkingAreas();
 })();
