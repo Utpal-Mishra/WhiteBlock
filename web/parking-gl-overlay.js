@@ -1,9 +1,6 @@
 // WHITEBLOCK MapLibre-native ranked parking overlay.
-//
-// The basemap is rendered by MapLibre. Rendering ranked parking polygons in
-// Leaflet panes above that WebGL canvas proved unreliable on Android Chrome.
-// This layer puts the parking intelligence in the same MapLibre renderer so the
-// numbered options and selected footprint stay visible on every basemap style.
+// Parking polygons and ranked points render inside the same MapLibre canvas as
+// the basemap so Android browsers cannot hide them behind WebGL/Leaflet panes.
 
 (() => {
   if (window.__WHITEBLOCK_PARKING_GL_OVERLAY__) return;
@@ -13,7 +10,8 @@
   const leafMap = state.map;
   const SOURCE_ID = "whiteblock-ranked-parking";
   const POLYGON_FILL = "whiteblock-ranked-parking-fill";
-  const POLYGON_LINE = "whiteblock-ranked-parking-line";
+  const POLYGON_LINE_MAPPED = "whiteblock-ranked-parking-line-mapped";
+  const POLYGON_LINE_ESTIMATED = "whiteblock-ranked-parking-line-estimated";
   const POINT_CIRCLE = "whiteblock-ranked-parking-point";
   const POINT_LABEL = "whiteblock-ranked-parking-label";
   const MAX_RESULTS = 10;
@@ -24,7 +22,7 @@
 
   let glMap = null;
   let renderGeneration = 0;
-  let geometryCache = new Map();
+  const geometryCache = new Map();
   let latestFeatureCollection = { type: "FeatureCollection", features: [] };
   let selectionWrapped = false;
 
@@ -190,7 +188,6 @@
       const colour = statusColour(item);
       features.push({
         type: "Feature",
-        id: `polygon-${item.id}`,
         properties: {
           kind: "polygon",
           parking_id: item.id,
@@ -204,7 +201,6 @@
       });
       features.push({
         type: "Feature",
-        id: `point-${item.id}`,
         properties: {
           kind: "point",
           parking_id: item.id,
@@ -242,6 +238,7 @@
       if (!glMap.getSource(SOURCE_ID)) {
         glMap.addSource(SOURCE_ID, { type: "geojson", data: latestFeatureCollection });
       }
+
       if (!layerExists(POLYGON_FILL)) {
         glMap.addLayer({
           id: POLYGON_FILL,
@@ -250,24 +247,40 @@
           filter: ["==", ["get", "kind"], "polygon"],
           paint: {
             "fill-color": ["get", "colour"],
-            "fill-opacity": ["case", ["==", ["get", "selected"], 1], 0.42, ["==", ["get", "mapped"], 1], 0.28, 0.18]
+            "fill-opacity": ["case", ["==", ["get", "selected"], 1], 0.46, ["==", ["get", "mapped"], 1], 0.30, 0.20]
           }
         });
       }
-      if (!layerExists(POLYGON_LINE)) {
+
+      if (!layerExists(POLYGON_LINE_MAPPED)) {
         glMap.addLayer({
-          id: POLYGON_LINE,
+          id: POLYGON_LINE_MAPPED,
           type: "line",
           source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "polygon"],
+          filter: ["all", ["==", ["get", "kind"], "polygon"], ["==", ["get", "mapped"], 1]],
           paint: {
             "line-color": ["case", ["==", ["get", "selected"], 1], "#FFFFFF", ["get", "colour"]],
-            "line-width": ["case", ["==", ["get", "selected"], 1], 5, ["==", ["get", "mapped"], 1], 3.5, 2.5],
-            "line-opacity": 1,
-            "line-dasharray": ["case", ["==", ["get", "mapped"], 1], [1, 0], [3, 2]]
+            "line-width": ["case", ["==", ["get", "selected"], 1], 5, 3.5],
+            "line-opacity": 1
           }
         });
       }
+
+      if (!layerExists(POLYGON_LINE_ESTIMATED)) {
+        glMap.addLayer({
+          id: POLYGON_LINE_ESTIMATED,
+          type: "line",
+          source: SOURCE_ID,
+          filter: ["all", ["==", ["get", "kind"], "polygon"], ["==", ["get", "mapped"], 0]],
+          paint: {
+            "line-color": ["case", ["==", ["get", "selected"], 1], "#FFFFFF", ["get", "colour"]],
+            "line-width": ["case", ["==", ["get", "selected"], 1], 5, 3],
+            "line-opacity": 1,
+            "line-dasharray": [3, 2]
+          }
+        });
+      }
+
       if (!layerExists(POINT_CIRCLE)) {
         glMap.addLayer({
           id: POINT_CIRCLE,
@@ -275,14 +288,15 @@
           source: SOURCE_ID,
           filter: ["==", ["get", "kind"], "point"],
           paint: {
-            "circle-radius": ["case", ["==", ["get", "selected"], 1], 17, 14],
+            "circle-radius": ["case", ["==", ["get", "selected"], 1], 18, 15],
             "circle-color": ["get", "colour"],
             "circle-stroke-color": ["case", ["==", ["get", "selected"], 1], "#FFFFFF", "#07110D"],
             "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 4, 3],
-            "circle-opacity": 0.98
+            "circle-opacity": 1
           }
         });
       }
+
       if (!layerExists(POINT_LABEL)) {
         glMap.addLayer({
           id: POINT_LABEL,
@@ -292,19 +306,18 @@
           layout: {
             "text-field": ["get", "rank"],
             "text-size": 13,
-            "text-font": ["Noto Sans Regular"],
             "text-allow-overlap": true,
             "text-ignore-placement": true
           },
           paint: {
             "text-color": "#07110D",
-            "text-halo-color": "rgba(255,255,255,0.35)",
-            "text-halo-width": 0.5
+            "text-halo-color": "rgba(255,255,255,0.45)",
+            "text-halo-width": 0.6
           }
         });
       }
-      const source = glMap.getSource(SOURCE_ID);
-      source?.setData?.(latestFeatureCollection);
+
+      glMap.getSource(SOURCE_ID)?.setData?.(latestFeatureCollection);
       return true;
     } catch (error) {
       console.warn("WHITEBLOCK parking GL overlay could not attach", error);
@@ -326,8 +339,7 @@
       return;
     }
 
-    // Estimated polygons appear immediately, so the map never looks empty while
-    // OSM geometry is being resolved.
+    // Draw estimated geometry immediately. Real OSM geometry replaces it later.
     updateSource(featureCollection(rows));
 
     if (fit) {
