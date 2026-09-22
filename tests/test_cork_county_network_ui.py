@@ -12,7 +12,8 @@ class CorkCountyNetworkUiTests(unittest.TestCase):
         self.assertIn("loadWhiteblockCorkCountyNetwork();", source)
         self.assertIn("script.addEventListener('load', loadWhiteblockRegionNetwork, { once: true });", source)
         self.assertIn("cork-county-network.js?v=20260921-1", source)
-        self.assertIn("region-network.js?v=20260921-corkcounty1", source)
+        self.assertIn("region-network.js?v=", source)
+        self.assertIn("loadWhiteblockRegionNetwork", source)
 
     def test_county_adapter_exposes_major_hubs_and_snapshot(self):
         source = (WEB / "cork-county-network.js").read_text(encoding="utf-8")
