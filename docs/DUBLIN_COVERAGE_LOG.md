@@ -29,10 +29,10 @@ Status: complete.
 
 Configured council evidence probes after reviewing current/open official datasets:
 
-- Dublin City Council parking-meter locations — source snapshot/date recorded as 2025-06-20.
+- Dublin City Council parking-meter locations — resource data last updated 2025-06-20.
 - Fingal County Council Parking Meters FCC — current 2026 dataset, source date recorded as 2026-07-30.
 - South Dublin County Council Parking Meters SDCC — current 2026 dataset, source date recorded as 2026-05-18.
-- Dún Laoghaire–Rathdown Parking Tag Information — source date recorded as 2025-06-19.
+- Dún Laoghaire–Rathdown Parking Tag Information — **resource data last updated 2021-04-15**. The dataset catalogue metadata was refreshed on 2025-06-19, but that metadata date is not treated as new parking evidence.
 
 Precision decision: official meter/sign records are evidence about regulated parking, tariffs, restrictions and hours. They are not automatically converted into standalone parking-area polygons.
 
@@ -116,11 +116,14 @@ Updated the Pages workflow to use the resilient runner while retaining the same 
 
 Also fixed the Cork PostGIS API adapter so later widening of the UI coverage gate for Kildare/Dublin cannot accidentally send a Dublin destination to the Cork-only API.
 
+A further evidence correction was applied after re-checking Smart Dublin: the DLR Parking Tag **resource data** is dated 2021-04-15, despite the dataset catalogue metadata being refreshed in 2025. The stable runner now uses the 2021 resource date for freshness/confidence.
+
 Commits:
 
 - `3940cf9f4808097bbf961be56603d51b834b5942`
 - `b13862d6e52fc8b0c8b1b302672d5a34a9b2878a`
 - `889c1d98eaf77f156349c94573e8f420f6954e41`
+- `f6889d6f0c5384bc13e0f672aeae18b5347e6bd8`
 
 Status: resilient live build running; no precision checks removed.
 
