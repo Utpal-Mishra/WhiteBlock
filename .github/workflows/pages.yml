@@ -7,6 +7,7 @@ on:
       - "web/**"
       - "scripts/ingest_cork_parking.py"
       - "scripts/ingest_cork_county_parking.py"
+      - "scripts/ingest_cork_county_parking_stable.py"
       - "scripts/export_web_snapshot.py"
       - "scripts/ingest_kildare_parking.py"
       - "scripts/ingest_kildare_county_parking.py"
@@ -26,7 +27,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -35,7 +36,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -46,15 +47,27 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build current Cork, Kildare and Dublin parking snapshots
+      - name: Build Cork City live snapshot
         run: |
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
-          python scripts/ingest_cork_county_parking.py --output web/data/cork_county_parking_snapshot.json
+
+      - name: Build County Cork network snapshot
+        run: |
+          python scripts/ingest_cork_county_parking_stable.py --output web/data/cork_county_parking_snapshot.json
+
+      - name: Build County Kildare network snapshot
+        run: |
           python scripts/ingest_kildare_county_parking.py --output web/data/kildare_parking_snapshot.json
           python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
+
+      - name: Build County Dublin network snapshot
+        run: |
           python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
+
+      - name: Validate regional snapshots
+        run: |
           python - <<'PY'
           import json
           from pathlib import Path
