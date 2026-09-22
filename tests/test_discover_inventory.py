@@ -43,7 +43,7 @@ class DiscoverInventoryTests(unittest.TestCase):
     def test_discover_is_safe_for_dublin_scale(self):
         js = (WEB / "discover.js").read_text(encoding="utf-8")
         self.assertIn("const PAGE_SIZE = 100", js)
-        self.assertIn("discoverVisibleLimit", js)
+        self.assertIn("discoveryVisibleLimit", js)
         self.assertIn("Show ${formatInteger", js)
         self.assertIn("corkCounty", js)
         self.assertIn("Do not add `corkCounty` a second time", js)
