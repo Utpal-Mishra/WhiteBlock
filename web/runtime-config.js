@@ -74,7 +74,7 @@ function loadWhiteblockInventoryMapLayer() {
 function loadWhiteblockInventoryCoverage() {
   if (!document.querySelector('script[data-whiteblock-inventory-coverage]')) {
     const script = document.createElement('script');
-    script.src = './inventory-coverage.js?v=20260921-corkcounty1';
+    script.src = './inventory-coverage.js?v=20260922-dublin1';
     script.defer = true;
     script.dataset.whiteblockInventoryCoverage = 'true';
     document.body.appendChild(script);
@@ -82,17 +82,31 @@ function loadWhiteblockInventoryCoverage() {
   loadWhiteblockInventoryMapLayer();
 }
 
+function loadWhiteblockDublinNetwork() {
+  const existing = document.querySelector('script[data-whiteblock-dublin-network]');
+  if (existing) {
+    loadWhiteblockInventoryCoverage();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './dublin-network.js?v=20260922-1';
+  script.defer = true;
+  script.dataset.whiteblockDublinNetwork = 'true';
+  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  document.body.appendChild(script);
+}
+
 function loadWhiteblockKildareAttributes() {
   const existing = document.querySelector('script[data-whiteblock-kildare-attributes]');
   if (existing) {
-    loadWhiteblockInventoryCoverage();
+    loadWhiteblockDublinNetwork();
     return;
   }
   const script = document.createElement('script');
   script.src = './kildare-asset-enrichment.js?v=20260919-1';
   script.defer = true;
   script.dataset.whiteblockKildareAttributes = 'true';
-  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  script.addEventListener('load', loadWhiteblockDublinNetwork, { once: true });
   document.body.appendChild(script);
 }
 
