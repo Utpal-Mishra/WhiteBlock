@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Build an auditable city/town/suburb/village coverage ledger for Dublin.
+"""Build auditable County Dublin coverage artifacts.
 
-The ledger is intentionally diagnostic. A settlement with mapped parking is
-reported as mapped inventory coverage, not as proof of complete real-world
-parking coverage. Unassigned records remain visible as a quality gap.
+The mapped-inventory ledger is intentionally diagnostic. A settlement with mapped
+parking is reported as mapped inventory coverage, not as proof of complete real-
+world parking coverage. Unassigned records remain visible as a quality gap.
+
+The command also publishes the named-settlement audit beside the ledger. This
+keeps GitHub Pages deployments and independent validation runs aligned without
+requiring a separate deployment-only orchestration step.
 """
 
 from __future__ import annotations
@@ -13,6 +17,8 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
+
+import build_dublin_settlement_audit as settlement_audit
 
 
 def sorted_unique(values: Iterable[Any]) -> List[str]:
@@ -71,7 +77,7 @@ def build_ledger(snapshot: Dict[str, Any]) -> Dict[str, Any]:
         )
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": snapshot.get("generated_at"),
         "source_snapshot_schema_version": snapshot.get("schema_version"),
         "coverage": snapshot.get("coverage") or {},
@@ -86,33 +92,54 @@ def build_ledger(snapshot: Dict[str, Any]) -> Dict[str, Any]:
             ),
             "unknown_access_assets": sum(1 for item in locations if item.get("access_type") == "unknown"),
             "mapped_polygon_assets": sum(1 for item in locations if item.get("geometry")),
+            "settlement_anchor_records": len(snapshot.get("settlement_anchors") or []),
         },
         "quality_rules": [
             "Mapped inventory presence is not a claim of exhaustive real-world parking coverage.",
             "Unknown access remains unknown and is not promoted to public parking.",
             "Local-authority fallback assignments remain visible as geography-quality gaps.",
             "Capacity totals include only source-published integer capacity values.",
+            "Named settlement audit rows are generated from the same published anchor evidence when available.",
         ],
         "local_authorities": authorities,
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build County Dublin settlement coverage ledger")
+    parser = argparse.ArgumentParser(description="Build County Dublin settlement coverage artifacts")
     parser.add_argument("--input", type=Path, default=Path("web/data/dublin_parking_snapshot.json"))
     parser.add_argument("--output", type=Path, default=Path("web/data/dublin_coverage_ledger.json"))
+    parser.add_argument(
+        "--settlement-audit-output",
+        type=Path,
+        default=None,
+        help="Optional audit path; defaults to dublin_settlement_audit.json beside the ledger",
+    )
     args = parser.parse_args()
 
     snapshot = json.loads(args.input.read_text(encoding="utf-8"))
     ledger = build_ledger(snapshot)
+    audit = settlement_audit.build_audit(snapshot)
+
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    audit_output = args.settlement_audit_output or args.output.with_name("dublin_settlement_audit.json")
+    audit_output.parent.mkdir(parents=True, exist_ok=True)
+    audit_output.write_text(json.dumps(audit, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
     print(
         "WHITEBLOCK Dublin coverage ledger:",
         ledger["summary"]["parking_assets"], "assets /",
         ledger["summary"]["settlement_rows"], "settlement rows /",
         ledger["summary"]["settlement_assignment_fallback_assets"], "fallback assignments ->",
         args.output,
+    )
+    print(
+        "WHITEBLOCK Dublin settlement audit sidecar:",
+        audit["summary"]["named_settlement_rows"], "named settlements /",
+        audit["summary"]["settlements_without_mapped_inventory"], "research gaps ->",
+        audit_output,
     )
     return 0
 
