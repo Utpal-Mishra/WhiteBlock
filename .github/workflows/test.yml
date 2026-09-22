@@ -67,6 +67,7 @@ jobs:
           node --check web/tile-resilience.js
           node --check web/parking-layout.js
           node --check web/region-network.js
+          node --check web/dublin-network.js
           python -m compileall -q api scripts
 
       - name: Run tests
