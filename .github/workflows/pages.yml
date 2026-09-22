@@ -16,6 +16,7 @@ on:
       - "scripts/finalize_kildare_county_snapshot.py"
       - "scripts/ingest_dublin_county_parking.py"
       - "scripts/ingest_dublin_county_parking_stable.py"
+      - "scripts/build_dublin_coverage_ledger.py"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -63,9 +64,10 @@ jobs:
           python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
 
-      - name: Build County Dublin network snapshot
+      - name: Build County Dublin network snapshot and coverage ledger
         run: |
           python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
+          python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
 
       - name: Validate regional snapshots
         run: |
@@ -173,11 +175,21 @@ jobs:
               if int(authority_counts.get(authority) or 0) <= 0:
                   raise SystemExit(f"Dublin county build is missing parking inventory for {authority}")
 
+          ledger = json.loads(Path("web/data/dublin_coverage_ledger.json").read_text())
+          ledger_summary = ledger.get("summary") or {}
+          if int(ledger_summary.get("parking_assets") or 0) != len(dublin_locations):
+              raise SystemExit("Dublin coverage ledger asset count does not match snapshot")
+          if int(ledger_summary.get("local_authorities") or 0) != 4:
+              raise SystemExit("Dublin coverage ledger does not contain all four local authorities")
+          if int(ledger_summary.get("settlement_rows") or 0) <= 0:
+              raise SystemExit("Dublin coverage ledger contains no city/town/suburb/village rows")
+
           print(
               "Validated County Dublin exact-boundary traversal:",
               dublin_summary.get("locations"), "locations /",
               dublin_summary.get("mapped_polygon_locations"), "polygons /",
-              dublin_summary.get("settlement_labelled_locations"), "settlement-labelled",
+              dublin_summary.get("settlement_labelled_locations"), "settlement-labelled /",
+              ledger_summary.get("settlement_rows"), "coverage-ledger rows",
           )
           print("Dublin locations by local authority:", json.dumps(authority_counts, ensure_ascii=False))
           PY
