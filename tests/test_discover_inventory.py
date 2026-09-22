@@ -54,6 +54,19 @@ class DiscoverInventoryTests(unittest.TestCase):
         self.assertIn("Access unknown", js)
         self.assertIn("Customers only", js)
         self.assertIn("discoverAccessState", js)
+        self.assertIn('["private", "permit", "restricted", "no", "destination"]', js)
+        self.assertNotIn('["yes", "public", "permissive", "destination"]', js)
+
+    def test_discover_exposes_dublin_and_evidence_filters(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Discover hidden parking supply.", html)
+        self.assertIn('data-discover-filter-group="region"', html)
+        self.assertIn('data-discover-filter="dublin"', html)
+        self.assertIn('data-discover-filter-group="access"', html)
+        self.assertIn('data-discover-filter="customer"', html)
+        self.assertIn('data-discover-filter="unknown"', html)
+        self.assertIn('data-discover-filter-group="supply"', html)
+        self.assertIn('data-discover-filter="candidate"', html)
 
 
 if __name__ == "__main__":
