@@ -13,6 +13,7 @@ on:
       - "scripts/enrich_kildare_snapshot.py"
       - "scripts/finalize_kildare_county_snapshot.py"
       - "scripts/ingest_dublin_county_parking.py"
+      - "scripts/ingest_dublin_county_parking_stable.py"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -53,7 +54,7 @@ jobs:
           python scripts/ingest_kildare_county_parking.py --output web/data/kildare_parking_snapshot.json
           python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
-          python scripts/ingest_dublin_county_parking.py --output web/data/dublin_parking_snapshot.json
+          python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
           python - <<'PY'
           import json
           from pathlib import Path
