@@ -16,7 +16,7 @@ CORK_TRADITIONAL_COUNTY_RELATION_ID = 332631
 cork.OVERPASS_ENDPOINTS = [
     "https://overpass.private.coffee/api/interpreter",
     "https://overpass-api.de/api/interpreter",
-    "https://overpass.osm.jp/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ]
 
 
@@ -26,13 +26,13 @@ def exact_county_query(county_name: str = "Cork") -> str:
     # lookup ambiguity and keeping the query inside the traditional county.
     return f"""
 [out:json][timeout:90];
-rel({CORK_TRADITIONAL_COUNTY_RELATION_ID})->.boundary;
-map_to_area.boundary->.searchArea;
+rel({CORK_TRADITIONAL_COUNTY_RELATION_ID});
+map_to_area -> .searchArea;
 (
   nwr["amenity"="parking"](area.searchArea);
   nwr["parking"~"street_side|lane"](area.searchArea);
 );
-out meta center geom;
+out meta geom;
 """.strip()
 
 
