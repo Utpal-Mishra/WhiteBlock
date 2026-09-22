@@ -55,12 +55,14 @@ Council datasets are probed separately and retained as regulatory/evidence sourc
 
 Current evidence sources configured at implementation time:
 
-| Authority | Evidence source | Source freshness recorded | WHITEBLOCK use |
+| Authority | Evidence source | Resource-data freshness used | WHITEBLOCK use |
 | --- | --- | --- | --- |
 | Dublin City Council | Parking meter locations | 2025-06-20 | regulation / meter evidence |
 | Fingal County Council | Parking Meters FCC | 2026-07-30 | tariff, hours, max-stay and regulation evidence |
 | South Dublin County Council | Parking Meters SDCC | 2026-05-18 | regulation / meter evidence |
-| Dún Laoghaire–Rathdown County Council | Parking Tag Information | 2025-06-19 | tariff, restrictions and hours evidence |
+| Dún Laoghaire–Rathdown County Council | Parking Tag Information | **2021-04-15** | tariff, restrictions and hours evidence; treated as stale unless independently corroborated |
+
+For DLR, Smart Dublin's **dataset catalogue metadata** was refreshed on 2025-06-19, but the downloadable Parking Tag CSV itself reports `Data last updated: 2021-04-15`. WHITEBLOCK uses the resource-data date for freshness/confidence rather than treating a metadata refresh as new parking evidence.
 
 Additional official datasets such as Dublin City multistorey availability, accessible parking and older DLR parking-run geometry can be reconciled into the evidence model without overwriting fresher or more precise facts.
 
