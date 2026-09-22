@@ -9,6 +9,7 @@ on:
       - "scripts/ingest_cork_county_parking.py"
       - "scripts/export_web_snapshot.py"
       - "scripts/ingest_kildare_parking.py"
+      - "scripts/ingest_kildare_county_parking.py"
       - "scripts/enrich_kildare_snapshot.py"
       - "scripts/finalize_kildare_county_snapshot.py"
       - ".github/workflows/pages.yml"
@@ -48,7 +49,7 @@ jobs:
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
           python scripts/ingest_cork_county_parking.py --output web/data/cork_county_parking_snapshot.json
-          python scripts/ingest_kildare_parking.py --output web/data/kildare_parking_snapshot.json
+          python scripts/ingest_kildare_county_parking.py --output web/data/kildare_parking_snapshot.json
           python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
           python - <<'PY'
@@ -83,6 +84,8 @@ jobs:
               raise SystemExit("Kildare snapshot does not reference the canonical County Kildare OSM boundary")
           if kildare_osm.get("query_mode") != "exact_county_boundary" or kildare_osm.get("status") != "ok":
               raise SystemExit("Kildare OSM inventory was not built from the exact county boundary")
+          if int(kildare_osm.get("admin_level") or 0) != 6:
+              raise SystemExit("Kildare OSM inventory did not resolve the Irish county admin level")
           kildare_polygon_count = kildare_summary.get("mapped_polygon_locations", 0) or 0
           if kildare_polygon_count <= 0:
               raise SystemExit("County Kildare snapshot contains no mapped parking polygons; refusing degraded county deployment")
