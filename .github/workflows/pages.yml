@@ -12,6 +12,7 @@ on:
       - "scripts/ingest_kildare_county_parking.py"
       - "scripts/enrich_kildare_snapshot.py"
       - "scripts/finalize_kildare_county_snapshot.py"
+      - "scripts/ingest_dublin_county_parking.py"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -33,7 +34,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -44,7 +45,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build current Cork City, County Cork and County Kildare parking snapshots
+      - name: Build current Cork, Kildare and Dublin parking snapshots
         run: |
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
@@ -52,6 +53,7 @@ jobs:
           python scripts/ingest_kildare_county_parking.py --output web/data/kildare_parking_snapshot.json
           python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
           python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
+          python scripts/ingest_dublin_county_parking.py --output web/data/dublin_parking_snapshot.json
           python - <<'PY'
           import json
           from pathlib import Path
@@ -60,6 +62,7 @@ jobs:
               ("Cork City live", Path("web/data/parking_snapshot.json")),
               ("County Cork network", Path("web/data/cork_county_parking_snapshot.json")),
               ("County Kildare network", Path("web/data/kildare_parking_snapshot.json")),
+              ("County Dublin network", Path("web/data/dublin_parking_snapshot.json")),
           ]
           for region, path in checks:
               data = json.loads(path.read_text())
@@ -103,6 +106,65 @@ jobs:
           if not any((item.get("ev_spaces") or 0) > 0 for item in kildare.get("locations", [])):
               raise SystemExit("Kildare snapshot contains no EV-enabled parking; refusing degraded deployment")
           print("Validated critical Kildare Village/Town parking + EV coverage")
+
+          dublin = json.loads(Path("web/data/dublin_parking_snapshot.json").read_text())
+          dublin_summary = dublin.get("summary", {})
+          dublin_coverage = dublin.get("coverage", {})
+          if dublin_coverage.get("scope") != "county_wide_network":
+              raise SystemExit("Dublin snapshot is not marked as county-wide network coverage")
+          if dublin_coverage.get("coverage_claim") != "complete_boundary_traversal_not_complete_real_world_inventory":
+              raise SystemExit("Dublin snapshot is missing the mandatory precision/completeness disclaimer")
+          if int(dublin_coverage.get("osm_traditional_county_relation_id") or 0) != 282800:
+              raise SystemExit("Dublin snapshot does not reference the traditional County Dublin boundary provenance")
+
+          expected_relations = {
+              "Dublin City": 1109531,
+              "Fingal": 1114164,
+              "Dún Laoghaire–Rathdown": 1115720,
+              "South Dublin": 1117469,
+          }
+          actual_relations = {
+              key: int(value)
+              for key, value in (dublin_coverage.get("local_authority_relation_ids") or {}).items()
+          }
+          if actual_relations != expected_relations:
+              raise SystemExit(f"Dublin local-authority boundary set mismatch: {actual_relations!r}")
+
+          authority_source_keys = {
+              "Dublin City": "openstreetmap_dublin_city_parking",
+              "Fingal": "openstreetmap_fingal_parking",
+              "Dún Laoghaire–Rathdown": "openstreetmap_dun_laoghaire_rathdown_parking",
+              "South Dublin": "openstreetmap_south_dublin_parking",
+          }
+          for authority, source_key in authority_source_keys.items():
+              meta = dublin.get("sources", {}).get(source_key, {})
+              if meta.get("status") != "ok" or meta.get("query_mode") != "exact_local_authority_boundary":
+                  raise SystemExit(f"Dublin authority traversal failed validation for {authority}: {meta!r}")
+              if int(meta.get("admin_level") or 0) != 7:
+                  raise SystemExit(f"Dublin authority {authority} did not resolve at admin level 7")
+              if int(meta.get("count") or 0) <= 0:
+                  raise SystemExit(f"Dublin authority {authority} returned no mapped parking; refusing partial county deployment")
+
+          dublin_locations = dublin.get("locations", [])
+          if any(not item.get("local_authority") for item in dublin_locations):
+              raise SystemExit("Dublin snapshot contains parking without local-authority provenance")
+          if int(dublin_summary.get("mapped_polygon_locations") or 0) <= 0:
+              raise SystemExit("Dublin snapshot contains no mapped parking polygons")
+          if int(dublin_summary.get("settlement_labelled_locations") or 0) <= 0:
+              raise SystemExit("Dublin snapshot contains no city/town/suburb/village labels")
+
+          authority_counts = dublin_summary.get("locations_by_local_authority") or {}
+          for authority in expected_relations:
+              if int(authority_counts.get(authority) or 0) <= 0:
+                  raise SystemExit(f"Dublin county build is missing parking inventory for {authority}")
+
+          print(
+              "Validated County Dublin exact-boundary traversal:",
+              dublin_summary.get("locations"), "locations /",
+              dublin_summary.get("mapped_polygon_locations"), "polygons /",
+              dublin_summary.get("settlement_labelled_locations"), "settlement-labelled",
+          )
+          print("Dublin locations by local authority:", json.dumps(authority_counts, ensure_ascii=False))
           PY
 
       - name: Configure optional WHITEBLOCK API
@@ -130,7 +192,7 @@ jobs:
               raise SystemExit("Could not configure WHITEBLOCK runtime API block")
           path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
-          print("WHITEBLOCK regional loader: Cork City live + County Cork network + complete County Kildare network")
+          print("WHITEBLOCK regional loader: Cork City live + County Cork + County Kildare + County Dublin network snapshots")
           PY
 
       - name: Configure GitHub Pages
