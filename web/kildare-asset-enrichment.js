@@ -67,3 +67,15 @@
   document.addEventListener("whiteblock:data-ready", () => window.setTimeout(applyEnrichment, 0));
   tryApply();
 })();
+
+// Destination search should reveal the mapped parking supply around the chosen
+// place. Keep this as a separate layer so the same behaviour can be reused by
+// Cork, Kildare, Dublin and future regional adapters.
+(() => {
+  if (document.querySelector('script[data-whiteblock-destination-parking-focus]')) return;
+  const script = document.createElement('script');
+  script.src = './destination-parking-focus.js?v=20260922-1';
+  script.defer = true;
+  script.dataset.whiteblockDestinationParkingFocus = 'true';
+  document.body.appendChild(script);
+})();
