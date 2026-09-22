@@ -74,7 +74,7 @@ function loadWhiteblockInventoryMapLayer() {
 function loadWhiteblockInventoryCoverage() {
   if (!document.querySelector('script[data-whiteblock-inventory-coverage]')) {
     const script = document.createElement('script');
-    script.src = './inventory-coverage.js?v=20260922-dublin2';
+    script.src = './inventory-coverage.js?v=20260922-dublin3';
     script.defer = true;
     script.dataset.whiteblockInventoryCoverage = 'true';
     document.body.appendChild(script);
@@ -82,18 +82,33 @@ function loadWhiteblockInventoryCoverage() {
   loadWhiteblockInventoryMapLayer();
 }
 
+function loadWhiteblockDublinRestrictionIntegration() {
+  const existing = document.querySelector('script[data-whiteblock-dublin-restriction-integration]');
+  if (existing) {
+    if (typeof state !== 'undefined' && state.dublinRestrictionAuditStatus) loadWhiteblockInventoryCoverage();
+    else existing.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './dublin-restriction-integration.js?v=20260922-1';
+  script.defer = true;
+  script.dataset.whiteblockDublinRestrictionIntegration = 'true';
+  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  document.body.appendChild(script);
+}
+
 function loadWhiteblockDublinSettlementIntegration() {
   const existing = document.querySelector('script[data-whiteblock-dublin-settlement-integration]');
   if (existing) {
-    if (typeof state !== 'undefined' && state.dublinSettlementAuditStatus) loadWhiteblockInventoryCoverage();
-    else existing.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+    if (typeof state !== 'undefined' && state.dublinSettlementAuditStatus) loadWhiteblockDublinRestrictionIntegration();
+    else existing.addEventListener('load', loadWhiteblockDublinRestrictionIntegration, { once: true });
     return;
   }
   const script = document.createElement('script');
   script.src = './dublin-settlement-integration.js?v=20260922-1';
   script.defer = true;
   script.dataset.whiteblockDublinSettlementIntegration = 'true';
-  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  script.addEventListener('load', loadWhiteblockDublinRestrictionIntegration, { once: true });
   document.body.appendChild(script);
 }
 
