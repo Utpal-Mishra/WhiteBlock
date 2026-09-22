@@ -45,7 +45,7 @@ Added `scripts/ingest_dublin_county_parking.py`.
 The builder:
 
 - traverses all four exact local-authority relations;
-- retrieves mapped car parks plus street-side/lane parking;
+- retrieves mapped car parks plus street-side/lane parking in the full model;
 - collects named city/town/village/suburb/neighbourhood anchors;
 - assigns each parking asset a transparent geography hierarchy;
 - preserves access, fee, opening-hours, maximum-stay, accessibility, EV and geometry evidence where present;
@@ -72,8 +72,62 @@ Commit: `0dd1f2afdb9f2fe2a3544aae5cfc015d6602cd24`.
 
 Status: complete.
 
-## 2026-09-22 — Step 6: deployment integration
+## 2026-09-22 — Step 6: deployment and hard validation
 
-Pending in this log entry: add Dublin snapshot generation and hard validation to GitHub Pages CI, then record the actual run result and counts here.
+Updated GitHub Pages CI so County Dublin is built and rejected unless:
 
-Status: in progress.
+- all four configured Dublin local-authority boundaries are traversed successfully;
+- every authority returns mapped parking inventory;
+- the traditional County Dublin provenance relation and all four authority relation IDs match the configured evidence;
+- every emitted parking record retains local-authority provenance;
+- city/town/suburb/village labelling is present;
+- the snapshot carries the mandatory `complete_boundary_traversal_not_complete_real_world_inventory` precision disclaimer.
+
+Commit: `ccdd587dd57a9314233802387bd9518f358e5c1b`.
+
+The first two Pages executions failed inside the combined data-build gate. Deployment was therefore skipped: no partial or misleading Dublin inventory was published. The regular application test suite passed, so the failure was isolated to the live data-build path rather than general application syntax/tests.
+
+Status: validation gate working; live build remediation in progress.
+
+## 2026-09-22 — Step 7: browser integration
+
+Added `web/dublin-network.js` and connected it through `web/runtime-config.js`.
+
+The browser adapter:
+
+- loads `web/data/dublin_parking_snapshot.json` only after validating county scope and boundary provenance;
+- supports Dublin destinations across city/town/suburb/village coverage anchors;
+- keeps live availability unknown unless an actual observation source reports it;
+- exposes the four-authority network in the Network view;
+- does not substitute demo parking when Dublin data is unavailable.
+
+Commits:
+
+- `dcdc7de7fdf59a13584c2269196fd4410581ec34`
+- `74f4914a839bfc55a2191fc59decee864bdc2dd4`
+
+Status: complete; awaiting successful county snapshot deployment.
+
+## 2026-09-22 — Step 8: ingestion resilience and cross-region safety
+
+Added `scripts/ingest_dublin_county_parking_stable.py` to run the same evidence model against multiple current public Overpass endpoints and a narrower `amenity=parking` discovery query. Regulated on-street parking remains represented through council meter/tag evidence instead of promoting signs/meters into unsupported car-park geometry.
+
+Updated the Pages workflow to use the resilient runner while retaining the same four-authority validation gates.
+
+Also fixed the Cork PostGIS API adapter so later widening of the UI coverage gate for Kildare/Dublin cannot accidentally send a Dublin destination to the Cork-only API.
+
+Commits:
+
+- `3940cf9f4808097bbf961be56603d51b834b5942`
+- `b13862d6e52fc8b0c8b1b302672d5a34a9b2878a`
+- `889c1d98eaf77f156349c94573e8f420f6954e41`
+
+Status: resilient live build running; no precision checks removed.
+
+## 2026-09-22 — Step 9: test coverage
+
+Added `web/dublin-network.js` to the JavaScript syntax gate in `.github/workflows/test.yml`.
+
+Commit: `8ddbb8b55102f0428e46826b72a77a118379dcaf`.
+
+Status: complete.
