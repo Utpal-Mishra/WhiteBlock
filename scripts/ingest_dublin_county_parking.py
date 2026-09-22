@@ -37,8 +37,9 @@ LOCAL_AUTHORITIES = (
 )
 
 OVERPASS_ENDPOINTS = (
+    "https://overpass.private.coffee/api/interpreter",
     "https://overpass-api.de/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 )
 
 OFFICIAL_EVIDENCE_SOURCES = (
@@ -71,7 +72,8 @@ OFFICIAL_EVIDENCE_SOURCES = (
         "authority": "Dún Laoghaire–Rathdown County Council",
         "url": "https://data.smartdublin.ie/dataset/8a1a724b-9c4c-4ab4-8571-95fecca47ee6/resource/9fa8d438-b4ae-4189-9b11-feb10ec92b4a/download/parking-tag-information-dlrcc.csv",
         "format": "csv",
-        "published_freshness": "2025-06-19",
+        "published_freshness": "2021-04-15",
+        "catalogue_metadata_last_updated": "2025-06-19",
         "role": "regulation_tariff_and_restriction_evidence",
     },
 )
@@ -162,14 +164,14 @@ def confidence_score(base_source: float, observed_at: Optional[str], completenes
 def overpass_query(relation_id: int) -> str:
     return f"""
 [out:json][timeout:90];
-rel({relation_id})->.boundary;
-map_to_area.boundary->.searchArea;
+rel({relation_id});
+map_to_area -> .searchArea;
 (
   nwr["amenity"="parking"](area.searchArea);
   nwr["parking"~"street_side|lane"](area.searchArea);
   node["place"~"city|town|village|suburb|neighbourhood"](area.searchArea);
 );
-out meta center geom;
+out meta geom;
 """.strip()
 
 
@@ -184,7 +186,7 @@ def fetch_overpass(relation_id: int) -> Tuple[Dict[str, Any], str]:
             errors.append(f"{endpoint}: empty response")
         except Exception as exc:  # network failover by design
             errors.append(f"{endpoint}: {exc}")
-    raise RuntimeError(f"Overpass relation {relation_id} failed: " + " | ".join(errors[-4:]))
+    raise RuntimeError(f"Overpass relation {relation_id} failed: " + " | ".join(errors[-6:]))
 
 
 def element_point(element: Dict[str, Any]) -> Optional[Tuple[float, float]]:
@@ -395,6 +397,8 @@ def probe_official_source(source: Dict[str, str], now: datetime) -> Dict[str, An
         "url": source["url"],
         "license": "CC BY 4.0",
     }
+    if source.get("catalogue_metadata_last_updated"):
+        meta["catalogue_metadata_last_updated"] = source["catalogue_metadata_last_updated"]
     try:
         raw = fetch_bytes(source["url"], timeout=45)
         if source["format"] == "geojson":
