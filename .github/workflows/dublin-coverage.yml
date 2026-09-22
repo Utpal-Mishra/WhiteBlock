@@ -1,0 +1,124 @@
+name: Validate County Dublin Coverage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/ingest_dublin_county_parking.py"
+      - "scripts/ingest_dublin_county_parking_stable.py"
+      - "scripts/build_dublin_coverage_ledger.py"
+      - "web/dublin-network.js"
+      - "docs/DUBLIN_NETWORK.md"
+      - "docs/DUBLIN_COVERAGE_LOG.md"
+      - ".github/workflows/dublin-coverage.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dublin-coverage-validation
+  cancel-in-progress: true
+
+jobs:
+  validate-dublin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build exact-boundary Dublin snapshot
+        run: |
+          python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
+          python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
+
+      - name: Validate Dublin precision gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          snapshot_path = Path("web/data/dublin_parking_snapshot.json")
+          ledger_path = Path("web/data/dublin_coverage_ledger.json")
+          dublin = json.loads(snapshot_path.read_text())
+          ledger = json.loads(ledger_path.read_text())
+
+          coverage = dublin.get("coverage") or {}
+          summary = dublin.get("summary") or {}
+          locations = dublin.get("locations") or []
+
+          if coverage.get("scope") != "county_wide_network":
+              raise SystemExit("Dublin scope is not county_wide_network")
+          if coverage.get("coverage_claim") != "complete_boundary_traversal_not_complete_real_world_inventory":
+              raise SystemExit("Mandatory Dublin completeness disclaimer is missing")
+          if int(coverage.get("osm_traditional_county_relation_id") or 0) != 282800:
+              raise SystemExit("Traditional County Dublin provenance relation mismatch")
+
+          expected_relations = {
+              "Dublin City": 1109531,
+              "Fingal": 1114164,
+              "Dún Laoghaire–Rathdown": 1115720,
+              "South Dublin": 1117469,
+          }
+          actual_relations = {key: int(value) for key, value in (coverage.get("local_authority_relation_ids") or {}).items()}
+          if actual_relations != expected_relations:
+              raise SystemExit(f"Dublin local-authority relation mismatch: {actual_relations!r}")
+
+          source_keys = {
+              "Dublin City": "openstreetmap_dublin_city_parking",
+              "Fingal": "openstreetmap_fingal_parking",
+              "Dún Laoghaire–Rathdown": "openstreetmap_dun_laoghaire_rathdown_parking",
+              "South Dublin": "openstreetmap_south_dublin_parking",
+          }
+          counts = summary.get("locations_by_local_authority") or {}
+          for authority, source_key in source_keys.items():
+              meta = (dublin.get("sources") or {}).get(source_key) or {}
+              if meta.get("status") != "ok":
+                  raise SystemExit(f"{authority}: source did not complete")
+              if meta.get("query_mode") != "exact_local_authority_boundary":
+                  raise SystemExit(f"{authority}: not an exact local-authority traversal")
+              if int(meta.get("relation_id") or 0) != expected_relations[authority]:
+                  raise SystemExit(f"{authority}: source relation mismatch")
+              if int(meta.get("count") or 0) <= 0 or int(counts.get(authority) or 0) <= 0:
+                  raise SystemExit(f"{authority}: no mapped parking inventory")
+
+          if not locations:
+              raise SystemExit("Dublin snapshot contains no locations")
+          if any(not item.get("local_authority") for item in locations):
+              raise SystemExit("Parking location missing local-authority provenance")
+          if int(summary.get("settlement_labelled_locations") or 0) <= 0:
+              raise SystemExit("No settlement-labelled parking locations")
+
+          ledger_summary = ledger.get("summary") or {}
+          if int(ledger_summary.get("parking_assets") or 0) != len(locations):
+              raise SystemExit("Coverage ledger count differs from Dublin snapshot")
+          if int(ledger_summary.get("local_authorities") or 0) != 4:
+              raise SystemExit("Coverage ledger does not include all four local authorities")
+          if int(ledger_summary.get("settlement_rows") or 0) <= 0:
+              raise SystemExit("Coverage ledger contains no settlement rows")
+
+          print("DUBLIN_VALIDATION=PASS")
+          print("DUBLIN_LOCATIONS=" + str(len(locations)))
+          print("DUBLIN_SETTLEMENT_ROWS=" + str(ledger_summary.get("settlement_rows")))
+          print("DUBLIN_FALLBACK_ASSIGNMENTS=" + str(ledger_summary.get("settlement_assignment_fallback_assets")))
+          print("DUBLIN_UNKNOWN_ACCESS=" + str(ledger_summary.get("unknown_access_assets")))
+          for authority in expected_relations:
+              print(f"DUBLIN_AUTHORITY_{authority}=" + str(counts.get(authority)))
+          PY
+
+      - name: Upload Dublin evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: county-dublin-parking-evidence
+          path: |
+            web/data/dublin_parking_snapshot.json
+            web/data/dublin_coverage_ledger.json
+          if-no-files-found: error
+          retention-days: 30
