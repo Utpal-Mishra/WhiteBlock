@@ -85,15 +85,15 @@
   function pricingState(item) {
     const raw = String(item.pricingRaw || item.pricing_raw || "").toLowerCase();
     if (item.price === 0 || /\b(no fee|free)\b/.test(raw)) return "free";
-    if ((numeric(item.price) ?? 0) > 0 || /\b(paid|tariff|€|eur)\b/.test(raw)) return "paid";
+    if ((numeric(item.price) ?? 0) > 0 || /\b(paid|tariff|eur)\b/.test(raw) || raw.includes("€")) return "paid";
     return "unknown";
   }
 
   function accessState(item) {
     const value = String(item.accessType || item.access_type || "unknown").toLowerCase();
-    if (["yes", "public", "permissive", "destination"].includes(value)) return "public";
+    if (["yes", "public", "permissive"].includes(value)) return "public";
     if (["customer", "customers"].includes(value)) return "customer";
-    if (["private", "permit", "restricted", "no"].includes(value)) return value === "permit" ? "permit" : "restricted";
+    if (["private", "permit", "restricted", "no", "destination"].includes(value)) return value === "permit" ? "permit" : "restricted";
     return "unknown";
   }
 
@@ -130,7 +130,6 @@
       const id = String(item.id || "");
       if (id && ids.has(id)) {
         const index = ids.get(id);
-        // Prefer the richer later representation but preserve any populated fields.
         target[index] = { ...target[index], ...item };
         return;
       }
