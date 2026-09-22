@@ -20,6 +20,15 @@ dublin.OVERPASS_ENDPOINTS = (
     "https://overpass.osm.jp/api/interpreter",
 )
 
+# Smart Dublin's DLR dataset catalogue page was refreshed in 2025, but the
+# downloadable Parking Tag CSV reports its actual data/resource last-update as
+# 2021-04-15. Confidence/freshness must follow the resource data, not catalogue
+# metadata.
+for source in dublin.OFFICIAL_EVIDENCE_SOURCES:
+    if source.get("key") == "dlr_parking_tag_information":
+        source["published_freshness"] = "2021-04-15"
+        source["catalogue_metadata_last_updated"] = "2025-06-19"
+
 
 def parking_area_query(relation_id: int) -> str:
     """Retrieve parking areas plus settlement anchors inside one exact LA boundary.
