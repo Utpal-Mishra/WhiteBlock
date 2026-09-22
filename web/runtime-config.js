@@ -74,7 +74,7 @@ function loadWhiteblockInventoryMapLayer() {
 function loadWhiteblockInventoryCoverage() {
   if (!document.querySelector('script[data-whiteblock-inventory-coverage]')) {
     const script = document.createElement('script');
-    script.src = './inventory-coverage.js?v=20260922-dublin1';
+    script.src = './inventory-coverage.js?v=20260922-dublin2';
     script.defer = true;
     script.dataset.whiteblockInventoryCoverage = 'true';
     document.body.appendChild(script);
@@ -82,17 +82,32 @@ function loadWhiteblockInventoryCoverage() {
   loadWhiteblockInventoryMapLayer();
 }
 
-function loadWhiteblockDublinNetwork() {
-  const existing = document.querySelector('script[data-whiteblock-dublin-network]');
+function loadWhiteblockDublinSettlementIntegration() {
+  const existing = document.querySelector('script[data-whiteblock-dublin-settlement-integration]');
   if (existing) {
-    loadWhiteblockInventoryCoverage();
+    if (typeof state !== 'undefined' && state.dublinSettlementAuditStatus) loadWhiteblockInventoryCoverage();
+    else existing.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
     return;
   }
   const script = document.createElement('script');
-  script.src = './dublin-network.js?v=20260922-1';
+  script.src = './dublin-settlement-integration.js?v=20260922-1';
+  script.defer = true;
+  script.dataset.whiteblockDublinSettlementIntegration = 'true';
+  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  document.body.appendChild(script);
+}
+
+function loadWhiteblockDublinNetwork() {
+  const existing = document.querySelector('script[data-whiteblock-dublin-network]');
+  if (existing) {
+    loadWhiteblockDublinSettlementIntegration();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './dublin-network.js?v=20260922-2';
   script.defer = true;
   script.dataset.whiteblockDublinNetwork = 'true';
-  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  script.addEventListener('load', loadWhiteblockDublinSettlementIntegration, { once: true });
   document.body.appendChild(script);
 }
 
