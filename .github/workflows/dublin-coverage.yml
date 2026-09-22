@@ -7,9 +7,11 @@ on:
       - "scripts/ingest_dublin_county_parking.py"
       - "scripts/ingest_dublin_county_parking_stable.py"
       - "scripts/build_dublin_coverage_ledger.py"
+      - "scripts/build_dublin_settlement_audit.py"
       - "web/dublin-network.js"
       - "docs/DUBLIN_NETWORK.md"
       - "docs/DUBLIN_COVERAGE_LOG.md"
+      - "docs/DUBLIN_SETTLEMENT_AUDIT.md"
       - ".github/workflows/dublin-coverage.yml"
   workflow_dispatch:
 
@@ -23,7 +25,7 @@ concurrency:
 jobs:
   validate-dublin:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -38,6 +40,7 @@ jobs:
         run: |
           python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
           python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
+          python scripts/build_dublin_settlement_audit.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_settlement_audit.json
 
       - name: Validate Dublin precision gates
         run: |
@@ -47,8 +50,10 @@ jobs:
 
           snapshot_path = Path("web/data/dublin_parking_snapshot.json")
           ledger_path = Path("web/data/dublin_coverage_ledger.json")
+          audit_path = Path("web/data/dublin_settlement_audit.json")
           dublin = json.loads(snapshot_path.read_text())
           ledger = json.loads(ledger_path.read_text())
+          audit = json.loads(audit_path.read_text())
 
           coverage = dublin.get("coverage") or {}
           summary = dublin.get("summary") or {}
@@ -104,9 +109,23 @@ jobs:
           if int(ledger_summary.get("settlement_rows") or 0) <= 0:
               raise SystemExit("Coverage ledger contains no settlement rows")
 
+          audit_summary = audit.get("summary") or {}
+          audit_authorities = audit.get("local_authorities") or []
+          if len(audit_authorities) != 4:
+              raise SystemExit("Settlement audit does not include all four local authorities")
+          audit_relations = {item.get("local_authority"): int(item.get("relation_id") or 0) for item in audit_authorities}
+          if audit_relations != expected_relations:
+              raise SystemExit(f"Settlement audit relation mismatch: {audit_relations!r}")
+          if int(audit_summary.get("named_settlement_rows") or 0) <= 0:
+              raise SystemExit("Settlement audit contains no named settlement rows")
+          if int(audit_summary.get("parking_assets") or 0) != len(locations):
+              raise SystemExit("Settlement audit parking count differs from Dublin snapshot")
+
           print("DUBLIN_VALIDATION=PASS")
           print("DUBLIN_LOCATIONS=" + str(len(locations)))
           print("DUBLIN_SETTLEMENT_ROWS=" + str(ledger_summary.get("settlement_rows")))
+          print("DUBLIN_NAMED_SETTLEMENT_AUDIT_ROWS=" + str(audit_summary.get("named_settlement_rows")))
+          print("DUBLIN_NAMED_SETTLEMENTS_WITHOUT_MAPPED_INVENTORY=" + str(audit_summary.get("settlements_without_mapped_inventory")))
           print("DUBLIN_FALLBACK_ASSIGNMENTS=" + str(ledger_summary.get("settlement_assignment_fallback_assets")))
           print("DUBLIN_UNKNOWN_ACCESS=" + str(ledger_summary.get("unknown_access_assets")))
           for authority in expected_relations:
@@ -120,5 +139,6 @@ jobs:
           path: |
             web/data/dublin_parking_snapshot.json
             web/data/dublin_coverage_ledger.json
+            web/data/dublin_settlement_audit.json
           if-no-files-found: error
           retention-days: 30
