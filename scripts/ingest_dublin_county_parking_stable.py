@@ -12,12 +12,11 @@ from __future__ import annotations
 
 import ingest_dublin_county_parking as dublin
 
-# Current public global instances documented by the OpenStreetMap Overpass wiki.
-# Private.coffee is the successor/front-end for the former kumi.systems instance.
+# Current public global instances listed by the OpenStreetMap Overpass wiki.
 dublin.OVERPASS_ENDPOINTS = (
     "https://overpass.private.coffee/api/interpreter",
     "https://overpass-api.de/api/interpreter",
-    "https://overpass.osm.jp/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 )
 
 # Smart Dublin's DLR dataset catalogue page was refreshed in 2025, but the
@@ -39,14 +38,14 @@ def parking_area_query(relation_id: int) -> str:
     parking assets.
     """
     return f"""
-[out:json][timeout:75];
-rel({relation_id})->.boundary;
-map_to_area.boundary->.searchArea;
+[out:json][timeout:90];
+rel({relation_id});
+map_to_area -> .searchArea;
 (
   nwr["amenity"="parking"](area.searchArea);
   node["place"~"city|town|village|suburb|neighbourhood"](area.searchArea);
 );
-out meta center geom;
+out meta geom;
 """.strip()
 
 
