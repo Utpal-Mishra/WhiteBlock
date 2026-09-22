@@ -111,7 +111,7 @@
 
       <section class="view" id="view-discover" data-view-panel="discover">
         <div class="section-intro">
-          <div><p class="eyebrow">Supply Discovery Engine</p><h2>See what WHITEBLOCK has added to the parking inventory.</h2></div>
+          <div><p class="eyebrow">Supply Discovery Engine</p><h2>Discover hidden parking supply.</h2></div>
           <span class="prototype-badge" id="discover-data-status">Loading inventory</span>
         </div>
 
@@ -120,7 +120,7 @@
             <div>
               <p class="eyebrow">Current inventory coverage</p>
               <h3><span id="discover-primary-region">Loading…</span> parking layer</h3>
-              <p>Track the regions and individual parking locations that have been ingested, verified and made available to WHITEBLOCK. This view represents inventory coverage—not a claim that the physical parking itself is newly built.</p>
+              <p>Track mapped and evidence-backed parking across connected regions. Candidate supply remains separate until access, legal use and evidence checks support promotion into the verified inventory.</p>
             </div>
             <div class="discover-overview-foot"><strong id="discover-sync-value">Waiting for data</strong><span>Discover → verify → add to inventory</span></div>
           </article>
@@ -136,10 +136,60 @@
         <div id="discover-region-list" class="discover-region-list"><div class="surface discover-empty">Loading region coverage…</div></div>
 
         <div class="discover-section-head">
-          <div><p class="eyebrow">Parking inventory</p><h2>Locations added</h2><p>Every location below comes from the current evidence-backed parking inventory.</p></div>
+          <div><p class="eyebrow">Parking inventory</p><h2>Locations added</h2><p>Browse evidence-backed parking across Cork, Kildare and Dublin. Unknown access remains unknown until a source verifies it.</p></div>
+          <span class="prototype-badge" id="discover-filter-match-count">Loading matches</span>
         </div>
+
+        <div class="surface discover-filter-panel" aria-label="Discover parking supply filters">
+          <div class="discover-filter-group" data-discover-filter-group="region">
+            <span>Region</span>
+            <div class="quick-filters">
+              <button class="chip active" type="button" data-discover-filter="all">All</button>
+              <button class="chip" type="button" data-discover-filter="cork">Cork</button>
+              <button class="chip" type="button" data-discover-filter="kildare">Kildare</button>
+              <button class="chip" type="button" data-discover-filter="dublin">Dublin</button>
+            </div>
+          </div>
+          <div class="discover-filter-group" data-discover-filter-group="access">
+            <span>Access</span>
+            <div class="quick-filters">
+              <button class="chip active" type="button" data-discover-filter="all">All</button>
+              <button class="chip" type="button" data-discover-filter="public">Public</button>
+              <button class="chip" type="button" data-discover-filter="customer">Customers</button>
+              <button class="chip" type="button" data-discover-filter="permit">Permit</button>
+              <button class="chip" type="button" data-discover-filter="restricted">Restricted</button>
+              <button class="chip" type="button" data-discover-filter="unknown">Unknown</button>
+            </div>
+          </div>
+          <div class="discover-filter-group" data-discover-filter-group="pricing">
+            <span>Price evidence</span>
+            <div class="quick-filters">
+              <button class="chip active" type="button" data-discover-filter="all">All</button>
+              <button class="chip" type="button" data-discover-filter="free">Free / no-fee tagged</button>
+              <button class="chip" type="button" data-discover-filter="paid">Paid</button>
+              <button class="chip" type="button" data-discover-filter="unknown">Unknown</button>
+            </div>
+          </div>
+          <div class="discover-filter-group" data-discover-filter-group="feature">
+            <span>Feature</span>
+            <div class="quick-filters">
+              <button class="chip active" type="button" data-discover-filter="all">All</button>
+              <button class="chip" type="button" data-discover-filter="ev">EV</button>
+              <button class="chip" type="button" data-discover-filter="accessible">Accessible</button>
+            </div>
+          </div>
+          <div class="discover-filter-group" data-discover-filter-group="supply">
+            <span>Supply state</span>
+            <div class="quick-filters">
+              <button class="chip active" type="button" data-discover-filter="mapped">Mapped parking</button>
+              <button class="chip" type="button" data-discover-filter="candidate">Candidate supply</button>
+              <button class="chip" type="button" data-discover-filter="all">All states</button>
+            </div>
+          </div>
+        </div>
+
         <div id="discover-location-list" class="discover-location-list"><div class="surface discover-empty">Loading parking locations…</div></div>
-        <div class="discover-inventory-note"><strong>Important:</strong> “Added” means added to the WHITEBLOCK data inventory. A separately detected parking candidate should only appear as verified parking after access, legal use and evidence checks are complete.</div>
+        <div class="discover-inventory-note"><strong>Important:</strong> “Added” means added to the WHITEBLOCK data inventory—not newly constructed or newly discovered physical parking. Candidate supply is kept separate until access, legal use and evidence checks are complete.</div>
       </section>
 
       <section class="view" id="view-network" data-view-panel="network">
