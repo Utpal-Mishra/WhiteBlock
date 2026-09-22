@@ -104,7 +104,7 @@ function loadWhiteblockRegionNetwork() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './region-network.js?v=20260921-corkcounty1';
+  script.src = './region-network.js?v=20260922-kildarecounty1';
   script.defer = true;
   script.dataset.whiteblockRegionNetwork = 'true';
   script.addEventListener('load', loadWhiteblockKildareAttributes, { once: true });

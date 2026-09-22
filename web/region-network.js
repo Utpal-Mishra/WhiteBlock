@@ -5,6 +5,7 @@
   if (typeof state === "undefined" || typeof haversineKm !== "function") return;
 
   const SNAPSHOT_URL = "./data/kildare_parking_snapshot.json";
+  const WB_KILDARE_BOUNDARY_RELATION_ID = 285833;
   const WB_KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
@@ -12,6 +13,8 @@
     east: -6.4849660938960625
   };
 
+  // Hubs are navigation/coverage anchors only. The actual inventory is built
+  // from the complete County Kildare administrative area, not from these towns.
   const hubs = [
     { name: "Naas", lat: 53.2158, lng: -6.6669 },
     { name: "Newbridge", lat: 53.1815, lng: -6.7966 },
@@ -23,15 +26,34 @@
     { name: "Clane", lat: 53.2917, lng: -6.6892 },
     { name: "Kilcock", lat: 53.3990, lng: -6.6696 },
     { name: "Sallins", lat: 53.2488, lng: -6.6646 },
-    { name: "Kilcullen", lat: 53.1301, lng: -6.7443 }
+    { name: "Kilcullen", lat: 53.1301, lng: -6.7443 },
+    { name: "Monasterevin", lat: 53.1407, lng: -7.0667 },
+    { name: "Rathangan", lat: 53.2214, lng: -6.9950 },
+    { name: "Prosperous", lat: 53.2905, lng: -6.7530 },
+    { name: "Kill", lat: 53.2519, lng: -6.5917 },
+    { name: "Johnstown", lat: 53.2350, lng: -6.6230 },
+    { name: "Straffan", lat: 53.3113, lng: -6.6070 },
+    { name: "Castledermot", lat: 52.9099, lng: -6.8376 },
+    { name: "Allenwood", lat: 53.2878, lng: -6.8540 },
+    { name: "Robertstown", lat: 53.2700, lng: -6.8140 },
+    { name: "Ballymore Eustace", lat: 53.1330, lng: -6.6140 },
+    { name: "Ballitore", lat: 53.0127, lng: -6.8114 },
+    { name: "Athgarvan", lat: 53.1523, lng: -6.7817 }
   ];
 
   const hubEdges = [
-    ["Naas", "Newbridge"], ["Newbridge", "Kildare Town"], ["Kildare Town", "Athy"],
+    ["Naas", "Newbridge"], ["Newbridge", "Kildare Town"], ["Kildare Town", "Monasterevin"],
+    ["Kildare Town", "Athy"], ["Athy", "Castledermot"], ["Athy", "Ballitore"],
     ["Naas", "Sallins"], ["Sallins", "Clane"], ["Clane", "Maynooth"],
     ["Maynooth", "Celbridge"], ["Celbridge", "Leixlip"], ["Clane", "Kilcock"],
-    ["Newbridge", "Kilcullen"]
+    ["Clane", "Prosperous"], ["Prosperous", "Allenwood"], ["Allenwood", "Robertstown"],
+    ["Kildare Town", "Rathangan"], ["Newbridge", "Kilcullen"], ["Newbridge", "Athgarvan"],
+    ["Naas", "Kill"], ["Kill", "Johnstown"], ["Johnstown", "Straffan"],
+    ["Naas", "Ballymore Eustace"]
   ];
+
+  const otherCountyPattern = /county\s+(dublin|meath|offaly|laois|carlow|wicklow)|\b(dublin|meath|offaly|laois|carlow|wicklow)\b/i;
+  const kildareTextPattern = /county\s+kildare|co\.?\s*kildare|\bkildare\b/i;
 
   state.regionInventories = state.regionInventories || {};
   state.regionSnapshots = state.regionSnapshots || {};
@@ -43,10 +65,30 @@
   const originalApplyDestinationContext = applyDestinationContext;
   const originalSetKpiMode = setKpiMode;
 
-  function isInKildareCoverage(lat, lng) {
+  function destinationText() {
+    const d = state.destination || {};
+    return [d.primary, d.secondary, d.label].filter(Boolean).join(" ");
+  }
+
+  function insideKildareEnvelope(lat, lng) {
     return Number.isFinite(lat) && Number.isFinite(lng)
       && lat >= WB_KILDARE_BOUNDS.south && lat <= WB_KILDARE_BOUNDS.north
       && lng >= WB_KILDARE_BOUNDS.west && lng <= WB_KILDARE_BOUNDS.east;
+  }
+
+  function nearestHubDistance(lat, lng) {
+    return hubs.reduce((best, hub) => Math.min(best, haversineKm(lat, lng, hub.lat, hub.lng)), Infinity);
+  }
+
+  function isInKildareCoverage(lat, lng) {
+    if (!insideKildareEnvelope(lat, lng)) return false;
+    const text = destinationText();
+    if (otherCountyPattern.test(text) && !kildareTextPattern.test(text)) return false;
+    if (kildareTextPattern.test(text)) return true;
+    // Geocoder responses do not always include county text. Dense county-wide
+    // navigation anchors keep rural Kildare destinations connected without
+    // treating the whole rectangular envelope as authoritative county geometry.
+    return nearestHubDistance(lat, lng) <= 24;
   }
 
   function resolveRegion(lat, lng) {
@@ -74,12 +116,14 @@
       area: record.area || "County Kildare",
       lat: Number(record.latitude),
       lng: Number(record.longitude),
+      geometry: record.geometry || null,
+      geometryTruthState: record.geometry_truth_state || null,
       available: null,
       capacity: Number.isFinite(Number(record.capacity)) ? Number(record.capacity) : null,
       occupancyRatio: null,
       confidence: Math.round(Number(record?.confidence?.score ?? 0.7) * 100),
       confidenceBasis: record?.confidence?.basis || {},
-      accessible: Number(record.accessible_spaces || 0) > 0 ? true : null,
+      accessible: Number(record.accessible_spaces || 0) > 0 || record.accessibility_available === true ? true : null,
       ev: Number(record.ev_spaces || 0) > 0 ? true : null,
       pricingRaw: record.pricing_raw || null,
       openingHoursRaw: record.opening_hours_raw || null,
@@ -90,12 +134,14 @@
       sourceKey: record.source_key || "kildare_network",
       sourceUrl: record.source_url || null,
       networkRole: record.network_role || "parking_asset",
+      parkingType: record.parking_type || "parking",
+      accessType: record.access_type || "unknown",
       distanceKm: null,
       walk: null,
       price: priceNumber(record.pricing_raw),
       reason: record.network_role === "accessible_space"
         ? "Official Kildare accessible-parking location. Live occupancy is not published by this source."
-        : "Mapped Kildare parking inventory. Live occupancy is not currently published for this asset."
+        : "Mapped County Kildare parking inventory. Live occupancy is not currently published for this asset."
     };
   }
 
@@ -128,7 +174,7 @@
       const marker = L.marker([item.lat, item.lng], { icon }).addTo(state.map);
       const availability = item.available != null
         ? `${Math.round(item.available)} spaces reported free`
-        : (state.activeRegion === "kildare" ? "inventory location · live availability not connected" : "availability unknown");
+        : (state.activeRegion === "kildare" ? "county inventory · live availability not connected" : "availability unknown");
       marker.bindTooltip(`${item.name} · ${availability}`, { direction: "top", offset: [0, -22], className: "wb-tooltip" });
       marker.on("click", () => selectParking(item.id));
       state.markers.set(item.id, marker);
@@ -139,14 +185,14 @@
     const eyebrow = document.querySelector(".topbar .eyebrow");
     if (eyebrow) {
       eyebrow.textContent = region === "kildare"
-        ? "Ireland · Kildare parking network"
+        ? "Ireland · County Kildare parking network"
         : region === "cork"
           ? "Ireland · Cork intelligence pilot"
           : "Ireland · destination search";
     }
 
     if (region === "kildare") {
-      setMapStatus("Kildare parking network", "Council + OpenStreetMap inventory · live availability not connected");
+      setMapStatus("County Kildare parking network", "Exact county boundary · Council + OpenStreetMap inventory · live availability not connected");
     } else if (region === "cork") {
       setMapStatus("Cork official parking data", "Official parking snapshot ranked for this destination");
     }
@@ -185,7 +231,7 @@
   function nearbyKildare() {
     if (!state.destination) return parkingData;
     return parkingData.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng)
-      && haversineKm(state.destination.lat, state.destination.lng, item.lat, item.lng) <= 10);
+      && haversineKm(state.destination.lat, state.destination.lng, item.lat, item.lng) <= 12);
   }
 
   setKpiMode = function setMultiRegionKpis(inConnectedRegion) {
@@ -197,7 +243,7 @@
     const confidences = nearby.map(item => item.confidence).filter(Number.isFinite);
     const knownCapacity = nearby.reduce((sum, item) => sum + (item.capacity || 0), 0);
     const values = {
-      coverage: [String(nearby.length), "mapped Kildare parking assets within 10 km"],
+      coverage: [String(nearby.length), "mapped County Kildare parking assets within 12 km"],
       availability: ["—", "no live occupancy feed connected for Kildare"],
       confidence: [confidences.length ? `${Math.round(confidences.reduce((a, b) => a + b, 0) / confidences.length)}%` : "—", "source + freshness + completeness"],
       pressure: ["Network", knownCapacity ? `${knownCapacity} known spaces across nearby mapped assets` : "inventory coverage · pressure not inferred"]
@@ -222,7 +268,7 @@
     const result = originalApplyDestinationContext(options);
     updateRegionChrome(region);
     if (region === "kildare" && state.kildareNetworkStatus === "loading") {
-      setMapStatus("Loading Kildare parking network", "Connecting County Council + OpenStreetMap inventory");
+      setMapStatus("Loading County Kildare parking network", "Connecting exact-boundary County Council + OpenStreetMap inventory");
     }
     return result;
   };
@@ -237,12 +283,12 @@
         winner = hub;
       }
     });
-    return winner && best <= 15 ? winner.name : "Other Kildare";
+    return winner && best <= 16 ? winner.name : "Other County Kildare";
   }
 
   function clusterCounts() {
     const counts = new Map(hubs.map(hub => [hub.name, 0]));
-    counts.set("Other Kildare", 0);
+    counts.set("Other County Kildare", 0);
     (state.regionInventories.kildare || []).forEach(item => {
       const hub = nearestHub(item);
       counts.set(hub, (counts.get(hub) || 0) + 1);
@@ -266,6 +312,7 @@
     const snapshot = state.regionSnapshots.kildare;
     const counts = clusterCounts();
     const total = snapshot?.summary?.locations ?? state.regionInventories.kildare?.length ?? 0;
+    const polygons = snapshot?.summary?.mapped_polygon_locations ?? 0;
     const accessible = snapshot?.summary?.accessible_locations ?? 0;
     const chips = hubs.map(hub => {
       const count = counts.get(hub.name) || 0;
@@ -273,9 +320,9 @@
     }).join("");
 
     panel.innerHTML = `
-      <p class="eyebrow">Kildare county network</p>
-      <h3 style="margin:5px 0 6px">${total || "Loading"} mapped parking locations across town clusters</h3>
-      <p style="margin:0;color:#8fa39a;font-size:12px;line-height:1.5">Logical WHITEBLOCK inventory network — not a driving-route claim. ${accessible ? `${accessible} accessible locations are represented from Kildare County Council's official layer.` : "Official accessible-parking data is loading."}</p>
+      <p class="eyebrow">County Kildare network</p>
+      <h3 style="margin:5px 0 6px">${total || "Loading"} parking locations across the complete county inventory</h3>
+      <p style="margin:0;color:#8fa39a;font-size:12px;line-height:1.5">Inventory is clipped to OSM County Kildare relation ${WB_KILDARE_BOUNDARY_RELATION_ID}; it is not a rectangular county approximation. ${polygons ? `${polygons} records include mapped parking-area geometry.` : "Mapped parking geometry is loading."} ${accessible ? `${accessible} accessible locations are represented.` : "Official accessible-parking data is loading."}</p>
       <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:13px">${chips}</div>`;
 
     panel.querySelectorAll("[data-kildare-hub]").forEach(button => {
@@ -289,7 +336,7 @@
           lat: hub.lat,
           lng: hub.lng,
           type: "town",
-          source: "WHITEBLOCK network hub"
+          source: "WHITEBLOCK County Kildare network hub"
         };
         selectAddressSuggestion(destination, { runRanking: true });
         setView("find");
@@ -318,9 +365,9 @@
       weight: 1.4,
       dashArray: "8 7",
       fillColor: "#78E6AA",
-      fillOpacity: 0.035,
+      fillOpacity: 0.025,
       interactive: true
-    }).bindTooltip("Kildare network coverage envelope · published KCC geographic coverage", { sticky: true }).addTo(state.kildareCoverageLayer);
+    }).bindTooltip("County Kildare search envelope · inventory itself is clipped to the exact county boundary", { sticky: true }).addTo(state.kildareCoverageLayer);
 
     const hubByName = new Map(hubs.map(hub => [hub.name, hub]));
     hubEdges.forEach(([from, to]) => {
@@ -330,7 +377,7 @@
       L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {
         color: "#78E6AA",
         weight: 1,
-        opacity: 0.35,
+        opacity: 0.30,
         dashArray: "4 7",
         interactive: false
       }).addTo(state.kildareCoverageLayer);
@@ -344,13 +391,17 @@
         weight: 1.5,
         fillColor: "#07110D",
         fillOpacity: 1
-      }).bindTooltip(`${hub.name} · ${counts.get(hub.name) || 0} mapped assets`, { direction: "top" }).addTo(state.kildareCoverageLayer);
+      }).bindTooltip(`${hub.name} · ${counts.get(hub.name) || 0} county inventory assets`, { direction: "top" }).addTo(state.kildareCoverageLayer);
     });
   }
 
   function registerCoverageAndFallbacks() {
-    if (!coverageAreas.some(area => area.name === "Kildare")) {
-      coverageAreas.splice(1, 0, { name: "Kildare", lat: 53.20, lng: -6.78, status: "live", label: "County parking network connected" });
+    const existing = coverageAreas.find(area => area.name === "Kildare");
+    if (existing) {
+      existing.label = "Complete county parking network";
+      existing.status = "live";
+    } else {
+      coverageAreas.splice(1, 0, { name: "Kildare", lat: 53.20, lng: -6.78, status: "live", label: "Complete county parking network" });
     }
     hubs.forEach(hub => {
       if (fallbackPlaces.some(place => place.primary === hub.name && String(place.secondary).includes("Kildare"))) return;
@@ -361,7 +412,7 @@
         lat: hub.lat,
         lng: hub.lng,
         type: "town",
-        source: "WHITEBLOCK Kildare fallback"
+        source: "WHITEBLOCK County Kildare fallback"
       });
     });
   }
@@ -372,6 +423,9 @@
       if (!response.ok) throw new Error(`Kildare snapshot returned ${response.status}`);
       const snapshot = await response.json();
       if (!Array.isArray(snapshot.locations) || !snapshot.locations.length) throw new Error("Kildare snapshot contains no parking locations");
+      if (snapshot?.coverage?.scope !== "county_wide_network") throw new Error("Kildare snapshot is not county-wide");
+      if (Number(snapshot?.coverage?.osm_boundary_relation_id) !== WB_KILDARE_BOUNDARY_RELATION_ID) throw new Error("Kildare county-boundary evidence mismatch");
+      if (!(Number(snapshot?.summary?.mapped_polygon_locations) > 0)) throw new Error("Kildare snapshot contains no mapped parking polygons");
 
       state.regionSnapshots.kildare = snapshot;
       state.regionInventories.kildare = snapshot.locations
@@ -385,12 +439,12 @@
         originalApplyDestinationContext({ runRanking: true });
       }
     } catch (error) {
-      console.error("WHITEBLOCK Kildare network unavailable", error);
+      console.error("WHITEBLOCK County Kildare network unavailable", error);
       state.kildareNetworkStatus = "error";
       if (state.activeRegion === "kildare") {
         state.dataStatus = "error";
         renderParkingList();
-        setMapStatus("Kildare network temporarily unavailable", "No demo parking values will be substituted");
+        setMapStatus("County Kildare network temporarily unavailable", "No demo parking values will be substituted");
       }
     }
   }

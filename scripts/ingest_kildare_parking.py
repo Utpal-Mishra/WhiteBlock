@@ -3,7 +3,7 @@
 
 Sources:
 - Kildare County Council Accessible Parking ArcGIS FeatureServer (CC BY 4.0)
-- OpenStreetMap parking inventory through Overpass (ODbL)
+- OpenStreetMap parking inventory through the exact County Kildare boundary (ODbL)
 
 This source is inventory/network coverage, not a live occupancy feed. The script
 therefore never fabricates available-space values.
@@ -13,13 +13,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import re
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 KCC_FEATURE_URL = (
     "https://services-eu1.arcgis.com/7382h3fBABGPKrTJ/arcgis/rest/services/"
@@ -31,7 +30,12 @@ OVERPASS_ENDPOINTS = [
 ]
 KCC_SOURCE_UPDATED_AT = "2024-06-17T11:08:00Z"
 
+# OpenStreetMap's historic/traditional County Kildare boundary relation.
+# A stable relation ID avoids bounding-box leakage into neighbouring counties.
+KILDARE_OSM_RELATION_ID = 285833
+
 # Published geographic coverage envelope from Kildare County Council open-data metadata.
+# It is metadata/browser fallback only; parking retrieval uses the exact OSM county area.
 KILDARE_BOUNDS = {
     "south": 52.89292777262258,
     "west": -7.094685794312817,
@@ -39,7 +43,7 @@ KILDARE_BOUNDS = {
     "east": -6.4849660938960625,
 }
 
-USER_AGENT = "WHITEBLOCK/1.0 parking-network-ingestion (public research prototype)"
+USER_AGENT = "WHITEBLOCK/1.0 county-kildare-parking-ingestion (public research prototype)"
 
 
 def utc_now() -> datetime:
@@ -50,7 +54,7 @@ def iso_z(value: datetime) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def fetch_json(url: str, *, data: Optional[bytes] = None, timeout: int = 45) -> Dict[str, Any]:
+def fetch_json(url: str, *, data: Optional[bytes] = None, timeout: int = 75) -> Dict[str, Any]:
     request = urllib.request.Request(
         url,
         data=data,
@@ -139,6 +143,8 @@ def kcc_accessible_locations(now: datetime) -> Tuple[List[Dict[str, Any]], Dict[
                 "area": town,
                 "latitude": float(lat),
                 "longitude": float(lng),
+                "geometry": None,
+                "geometry_truth_state": None,
                 "parking_type": "accessible_bay",
                 "access_type": "public_or_bylaw_designated",
                 "status": "known",
@@ -162,47 +168,38 @@ def kcc_accessible_locations(now: datetime) -> Tuple[List[Dict[str, Any]], Dict[
             }
         )
 
-    return output, {"count": len(output), "status": "ok"}
+    return output, {"count": len(output), "status": "ok", "license": "CC BY 4.0"}
 
 
 def overpass_query() -> str:
-    return """
-[out:json][timeout:45];
-rel["boundary"="administrative"]["name"="County Kildare"];
-map_to_area -> .searchArea;
+    # Use one known county relation before map_to_area. This is deliberately not
+    # a rectangular query: neighbouring Dublin/Meath/Laois/Wicklow parking must
+    # not be promoted into the Kildare inventory simply because it falls inside
+    # the county's geographic envelope.
+    return f"""
+[out:json][timeout:70];
+rel({KILDARE_OSM_RELATION_ID})->.county;
+map_to_area.county -> .searchArea;
 (
   nwr["amenity"="parking"](area.searchArea);
   nwr["parking"~"street_side|lane"](area.searchArea);
 );
-out meta center tags;
-""".strip()
-
-
-def overpass_bbox_query() -> str:
-    b = KILDARE_BOUNDS
-    bbox = f"{b['south']},{b['west']},{b['north']},{b['east']}"
-    return f"""
-[out:json][timeout:45];
-(
-  nwr["amenity"="parking"]({bbox});
-  nwr["parking"~"street_side|lane"]({bbox});
-);
-out meta center tags;
+out meta geom;
 """.strip()
 
 
 def fetch_overpass() -> Tuple[Dict[str, Any], str]:
     errors: List[str] = []
-    for query_name, query in [("county_boundary", overpass_query()), ("coverage_bbox_fallback", overpass_bbox_query())]:
-        encoded = urllib.parse.urlencode({"data": query}).encode("utf-8")
-        for endpoint in OVERPASS_ENDPOINTS:
-            try:
-                payload = fetch_json(endpoint, data=encoded, timeout=55)
-                if payload.get("elements"):
-                    return payload, query_name
-            except Exception as exc:  # network failover by design
-                errors.append(f"{endpoint}: {exc}")
-    raise RuntimeError("Overpass parking query failed: " + " | ".join(errors[-4:]))
+    encoded = urllib.parse.urlencode({"data": overpass_query()}).encode("utf-8")
+    for endpoint in OVERPASS_ENDPOINTS:
+        try:
+            payload = fetch_json(endpoint, data=encoded, timeout=85)
+            if payload.get("elements"):
+                return payload, endpoint
+            errors.append(f"{endpoint}: empty response")
+        except Exception as exc:  # network failover by design
+            errors.append(f"{endpoint}: {exc}")
+    raise RuntimeError("County Kildare Overpass parking query failed: " + " | ".join(errors[-4:]))
 
 
 def element_point(element: Dict[str, Any]) -> Optional[Tuple[float, float]]:
@@ -211,7 +208,32 @@ def element_point(element: Dict[str, Any]) -> Optional[Tuple[float, float]]:
     center = element.get("center") or {}
     if center.get("lat") is not None and center.get("lon") is not None:
         return float(center["lat"]), float(center["lon"])
+    geometry = element.get("geometry") or []
+    valid = [p for p in geometry if isinstance(p, dict) and p.get("lat") is not None and p.get("lon") is not None]
+    if valid:
+        return (
+            sum(float(p["lat"]) for p in valid) / len(valid),
+            sum(float(p["lon"]) for p in valid) / len(valid),
+        )
     return None
+
+
+def polygon_geometry(element: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    # A way arrives as one ordered geometry ring. Parking relations may be
+    # multipart, so WHITEBLOCK does not collapse those into a fabricated polygon.
+    if element.get("type") != "way":
+        return None
+    geometry = element.get("geometry") or []
+    coords = [
+        [float(point["lon"]), float(point["lat"])]
+        for point in geometry
+        if isinstance(point, dict) and point.get("lat") is not None and point.get("lon") is not None
+    ]
+    if len(coords) < 3:
+        return None
+    if coords[0] != coords[-1]:
+        coords.append(coords[0])
+    return {"type": "Polygon", "coordinates": [coords]}
 
 
 def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, Any]]:
@@ -225,14 +247,15 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
     parking_kind = tags.get("parking") or "parking"
     name = tags.get("name") or tags.get("operator")
     if not name:
-        pretty = str(parking_kind).replace("_", " ").title()
-        name = f"{pretty} parking"
+        name = f"{str(parking_kind).replace('_', ' ').title()} parking"
 
     area = (
         tags.get("addr:city")
         or tags.get("addr:town")
+        or tags.get("addr:village")
         or tags.get("is_in:city")
         or tags.get("is_in:town")
+        or tags.get("is_in:village")
         or "County Kildare"
     )
     capacity = parse_int(tags.get("capacity"))
@@ -240,6 +263,9 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
     if accessible is None and tags.get("wheelchair") == "yes":
         accessible = 1
     ev_spaces = parse_int(tags.get("capacity:charging"))
+    if ev_spaces is None and tags.get("charging_station") == "yes":
+        ev_spaces = 1
+
     charge = tags.get("charge")
     fee = tags.get("fee")
     if charge:
@@ -252,7 +278,15 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
         pricing = None
 
     observed_at = element.get("timestamp")
-    completeness_checks = [bool(tags.get("name")), capacity is not None, bool(tags.get("access")), bool(tags.get("surface")), bool(tags.get("opening_hours"))]
+    geometry = polygon_geometry(element)
+    completeness_checks = [
+        bool(tags.get("name")),
+        capacity is not None,
+        bool(tags.get("access")),
+        bool(tags.get("surface")),
+        bool(tags.get("opening_hours")),
+        geometry is not None,
+    ]
     completeness = sum(completeness_checks) / len(completeness_checks)
 
     return {
@@ -261,6 +295,8 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
         "area": str(area),
         "latitude": lat,
         "longitude": lng,
+        "geometry": geometry,
+        "geometry_truth_state": "observed" if geometry else None,
         "parking_type": str(parking_kind),
         "access_type": tags.get("access") or "unknown",
         "status": "known",
@@ -286,7 +322,7 @@ def osm_location(element: Dict[str, Any], now: datetime) -> Optional[Dict[str, A
 
 
 def osm_locations(now: datetime) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    payload, query_mode = fetch_overpass()
+    payload, endpoint = fetch_overpass()
     seen = set()
     output: List[Dict[str, Any]] = []
     for element in payload.get("elements", []):
@@ -297,7 +333,14 @@ def osm_locations(now: datetime) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         record = osm_location(element, now)
         if record is not None:
             output.append(record)
-    return output, {"count": len(output), "status": "ok", "query_mode": query_mode}
+    return output, {
+        "count": len(output),
+        "status": "ok",
+        "query_mode": "exact_county_boundary",
+        "relation_id": KILDARE_OSM_RELATION_ID,
+        "endpoint": endpoint,
+        "license": "ODbL",
+    }
 
 
 def build_snapshot() -> Dict[str, Any]:
@@ -312,38 +355,43 @@ def build_snapshot() -> Dict[str, Any]:
     except Exception as exc:
         sources["kildare_coco_accessible_parking"] = {"count": 0, "status": "error", "error": str(exc)}
 
-    try:
-        osm, meta = osm_locations(now)
-        locations.extend(osm)
-        sources["openstreetmap_kildare_parking"] = meta
-    except Exception as exc:
-        sources["openstreetmap_kildare_parking"] = {"count": 0, "status": "error", "error": str(exc)}
+    # County-wide OSM is required for full-network coverage. Unlike the earlier
+    # best-effort implementation, do not silently replace it with a rectangular
+    # bbox because that can import parking from neighbouring counties.
+    osm, meta = osm_locations(now)
+    locations.extend(osm)
+    sources["openstreetmap_kildare_parking"] = meta
 
-    # Stable deterministic ordering and cross-source de-dup by canonical id.
     unique = {item["parking_id"]: item for item in locations}
     locations = sorted(unique.values(), key=lambda item: (item.get("area") or "", item.get("name") or "", item["parking_id"]))
 
     if not locations:
-        raise RuntimeError("No Kildare parking locations could be retrieved from any source")
+        raise RuntimeError("No County Kildare parking locations could be retrieved")
 
     capacity_values = [item["capacity"] for item in locations if isinstance(item.get("capacity"), int)]
     accessible_count = sum(1 for item in locations if (item.get("accessible_spaces") or 0) > 0)
+    ev_count = sum(1 for item in locations if (item.get("ev_spaces") or 0) > 0)
+    polygons = sum(1 for item in locations if item.get("geometry"))
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": iso_z(now),
         "coverage": {
             "country": "IE",
             "region": "Kildare",
+            "scope": "county_wide_network",
             "mode": "network_inventory",
             "availability_mode": "not_live",
+            "osm_boundary_relation_id": KILDARE_OSM_RELATION_ID,
             "bounds": KILDARE_BOUNDS,
         },
         "sources": sources,
         "summary": {
             "locations": len(locations),
+            "mapped_polygon_locations": polygons,
             "known_capacity": sum(capacity_values) if capacity_values else None,
             "accessible_locations": accessible_count,
+            "ev_locations": ev_count,
             "live_availability": False,
         },
         "licenses": [
@@ -366,9 +414,11 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(
-        "WHITEBLOCK Kildare network snapshot:",
+        "WHITEBLOCK County Kildare network snapshot:",
         snapshot["summary"]["locations"],
-        "locations ->",
+        "locations /",
+        snapshot["summary"]["mapped_polygon_locations"],
+        "mapped polygons ->",
         args.output,
     )
     return 0
