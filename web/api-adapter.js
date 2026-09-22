@@ -8,6 +8,9 @@
   const apiBaseUrl = String(config.apiBaseUrl || "").trim().replace(/\/$/, "");
   const API_RADIUS_KM = 10;
   const API_LIMIT = 16;
+  // Capture the Cork coverage predicate before later regional adapters widen the
+  // legacy isInCorkPilot gate to Kildare/Dublin. The PostGIS API remains Cork-only.
+  const apiCoverageGate = isInCorkPilot;
 
   state.dataMode = apiBaseUrl ? "api-pending" : "snapshot";
   state.apiBaseUrl = apiBaseUrl || null;
@@ -158,7 +161,7 @@
   }
 
   async function loadApiParking(destination, { initial = false } = {}) {
-    if (!destination || !isInCorkPilot(destination.lat, destination.lng)) return;
+    if (!destination || !apiCoverageGate(destination.lat, destination.lng)) return;
 
     const sequence = ++state.apiRequestSequence;
     if (state.apiRequestController) state.apiRequestController.abort();
@@ -228,7 +231,7 @@
   const baseApplyDestinationContext = applyDestinationContext;
   applyDestinationContext = function applyDestinationContextApi(options = {}) {
     baseApplyDestinationContext(options);
-    if (state.destination && isInCorkPilot(state.destination.lat, state.destination.lng)) {
+    if (state.destination && apiCoverageGate(state.destination.lat, state.destination.lng)) {
       window.setTimeout(() => loadApiParking(state.destination), 20);
     }
   };
