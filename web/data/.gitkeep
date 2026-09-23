@@ -1,0 +1,2 @@
+# Keep the runtime data directory present in fresh GitHub Actions checkouts.
+# Regional snapshots are generated/downloaded during deployment and are not committed here.
