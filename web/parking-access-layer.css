@@ -1,0 +1,211 @@
+/* WHITEBLOCK parking access intelligence layer */
+
+.wb-inventory-marker.wb-access-public {
+  background: #0f2b20;
+  border-color: rgba(120, 230, 170, .82);
+  color: #9af0bd;
+}
+.wb-inventory-marker.wb-access-customer {
+  background: #2a2412;
+  border-color: rgba(241, 196, 107, .82);
+  color: #f3ce84;
+}
+.wb-inventory-marker.wb-access-conditional {
+  background: #17283a;
+  border-color: rgba(118, 190, 255, .78);
+  color: #acd7ff;
+}
+.wb-inventory-marker.wb-access-unknown {
+  background: #202623;
+  border-color: rgba(151, 168, 160, .56);
+  color: #aebdb6;
+  opacity: .84;
+}
+.wb-inventory-marker.wb-access-restricted {
+  background: #2b1718;
+  border-color: rgba(232, 125, 125, .64);
+  color: #e8a0a0;
+  opacity: .72;
+}
+.wb-inventory-marker .wb-marker-capability-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  background: #0b1712;
+  border: 1px solid rgba(237, 247, 241, .28);
+  color: #edf7f1;
+  font: 800 7px/1 "Manrope", system-ui, sans-serif;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .28);
+}
+
+.wb-access-map-control {
+  width: min(310px, calc(100vw - 28px));
+  margin: 0 0 12px 10px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  background: rgba(7, 17, 13, .94) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .34) !important;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+}
+.wb-access-control-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #edf7f1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.wb-access-control-toggle span { display: grid; gap: 3px; }
+.wb-access-control-toggle b { font: 800 11px/1.1 "Manrope", system-ui, sans-serif; }
+.wb-access-control-toggle small { color: #8fa39a; font: 500 9px/1.1 "DM Sans", system-ui, sans-serif; }
+.wb-access-control-toggle > strong { color: #78e6aa; font: 700 18px/1 "Manrope", system-ui, sans-serif; }
+
+.wb-access-control-panel {
+  border-top: 1px solid rgba(237, 247, 241, .08);
+  padding: 6px;
+}
+.wb-access-control-panel[hidden] { display: none !important; }
+.wb-access-filter-row {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #edf7f1;
+  display: grid;
+  grid-template-columns: 9px 1fr auto;
+  gap: 9px;
+  align-items: center;
+  padding: 6px 7px;
+  text-align: left;
+  cursor: pointer;
+  opacity: .58;
+}
+.wb-access-filter-row:hover { background: rgba(237, 247, 241, .045); }
+.wb-access-filter-row.is-active { opacity: 1; background: rgba(237, 247, 241, .035); }
+.wb-access-filter-row > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #71877e;
+  box-shadow: 0 0 0 3px rgba(113, 135, 126, .12);
+}
+.wb-access-filter-public > i { background: #78e6aa; }
+.wb-access-filter-customer > i { background: #f1c46b; }
+.wb-access-filter-conditional > i { background: #76beff; }
+.wb-access-filter-unknown > i { background: #8fa39a; }
+.wb-access-filter-restricted > i { background: #d98484; }
+.wb-access-filter-row > span { display: grid; gap: 2px; min-width: 0; }
+.wb-access-filter-row b { font: 700 10px/1.1 "Manrope", system-ui, sans-serif; }
+.wb-access-filter-row small {
+  color: #81968d;
+  font: 500 8px/1.2 "DM Sans", system-ui, sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wb-access-filter-row > strong { color: #b8c9c0; font: 700 10px/1 "Manrope", system-ui, sans-serif; }
+
+.wb-access-control-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 6px 2px 2px;
+}
+.wb-access-control-actions button {
+  min-height: 31px;
+  border: 1px solid rgba(120, 230, 170, .18);
+  border-radius: 9px;
+  background: rgba(120, 230, 170, .06);
+  color: #bfe8cf;
+  font: 700 9px/1 "DM Sans", system-ui, sans-serif;
+  cursor: pointer;
+}
+.wb-access-control-panel > p {
+  margin: 7px 4px 4px;
+  color: #71877e;
+  font: 500 8px/1.35 "DM Sans", system-ui, sans-serif;
+}
+
+.wb-access-chip-public { border-color: rgba(120, 230, 170, .28) !important; color: #9be7ba !important; }
+.wb-access-chip-customer { border-color: rgba(241, 196, 107, .3) !important; color: #e9c67f !important; }
+.wb-access-chip-conditional { border-color: rgba(118, 190, 255, .3) !important; color: #a9d3fb !important; }
+.wb-access-chip-unknown { border-color: rgba(143, 163, 154, .28) !important; color: #9fb0a8 !important; }
+.wb-access-chip-restricted { border-color: rgba(217, 132, 132, .3) !important; color: #dca0a0 !important; }
+
+.wb-access-warning {
+  margin: 9px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font: 600 10px/1.45 "DM Sans", system-ui, sans-serif;
+}
+.wb-access-warning-customer { background: rgba(241, 196, 107, .07); color: #d9bd83; }
+.wb-access-warning-conditional { background: rgba(118, 190, 255, .07); color: #9fc8ed; }
+.wb-access-warning-unknown { background: rgba(143, 163, 154, .07); color: #93a59d; }
+.wb-access-warning-restricted { background: rgba(217, 132, 132, .07); color: #d39a9a; }
+
+.wb-access-evidence-panel {
+  margin: 0 0 18px;
+  padding: 18px;
+  border-radius: 16px;
+}
+.wb-access-evidence-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+.wb-access-evidence-head h3 { margin: 4px 0 0; font-size: 16px; }
+.wb-access-evidence-head > span {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(120, 230, 170, .08);
+  border: 1px solid rgba(120, 230, 170, .16);
+  color: #9cdeb8;
+  font: 700 9px/1 "DM Sans", system-ui, sans-serif;
+}
+.wb-access-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.wb-access-evidence-card {
+  min-width: 0;
+  padding: 11px;
+  border-radius: 12px;
+  background: rgba(237, 247, 241, .025);
+  border: 1px solid rgba(237, 247, 241, .07);
+}
+.wb-access-evidence-card span { display: block; color: #8fa39a; font: 600 9px/1.2 "DM Sans", system-ui, sans-serif; }
+.wb-access-evidence-card strong { display: block; margin: 7px 0 5px; font: 800 20px/1 "Manrope", system-ui, sans-serif; }
+.wb-access-evidence-card small { display: block; color: #71877e; font: 500 8px/1.3 "DM Sans", system-ui, sans-serif; }
+.wb-evidence-public strong { color: #78e6aa; }
+.wb-evidence-customer strong { color: #f1c46b; }
+.wb-evidence-conditional strong { color: #76beff; }
+.wb-evidence-unknown strong { color: #9fb0a8; }
+.wb-evidence-restricted strong { color: #d98484; }
+.wb-access-evidence-note { margin: 12px 0 0; color: #71877e; font-size: 10px; line-height: 1.5; }
+
+@media (max-width: 760px) {
+  .wb-access-map-control { width: min(286px, calc(100vw - 18px)); margin-left: 8px !important; margin-bottom: 8px !important; }
+  .wb-access-control-panel { max-height: min(48vh, 330px); overflow-y: auto; }
+  .wb-access-filter-row small { max-width: 175px; }
+  .wb-access-evidence-head { display: grid; gap: 9px; }
+  .wb-access-evidence-head > span { justify-self: start; }
+  .wb-access-evidence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wb-access-evidence-card:last-child { grid-column: 1 / -1; }
+}
