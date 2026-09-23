@@ -65,7 +65,7 @@ function loadWhiteblockMapEngineV2() {
 function loadWhiteblockInventoryMapLayer() {
   if (document.querySelector('script[data-whiteblock-inventory-map]')) return;
   const script = document.createElement('script');
-  script.src = './inventory-map-layer.js?v=20260921-1';
+  script.src = './inventory-map-layer.js?v=20260923-dublin1';
   script.defer = true;
   script.dataset.whiteblockInventoryMap = 'true';
   document.body.appendChild(script);
