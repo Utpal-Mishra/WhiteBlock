@@ -57,6 +57,7 @@ jobs:
           node --check web/session-controls.js
           node --check web/api-adapter.js
           node --check web/discover.js
+          node --check web/discover-access-alignment.js
           node --check web/inventory-coverage.js
           node --check web/kildare-asset-enrichment.js
           node --check web/destination-parking-focus.js
