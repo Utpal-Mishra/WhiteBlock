@@ -82,18 +82,47 @@ function loadWhiteblockInventoryCoverage() {
   loadWhiteblockInventoryMapLayer();
 }
 
+function loadWhiteblockDestinationParkingFocus() {
+  const existing = document.querySelector('script[data-whiteblock-destination-parking-focus]');
+  if (existing) {
+    loadWhiteblockInventoryCoverage();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './destination-parking-focus.js?v=20260923-1';
+  script.defer = true;
+  script.dataset.whiteblockDestinationParkingFocus = 'true';
+  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  document.body.appendChild(script);
+}
+
+function loadWhiteblockDublinVenueKnowledge() {
+  const existing = document.querySelector('script[data-whiteblock-dublin-venue-knowledge]');
+  if (existing) {
+    if (typeof state !== 'undefined' && state.dublinVenueKnowledgeStatus) loadWhiteblockDestinationParkingFocus();
+    else existing.addEventListener('load', loadWhiteblockDestinationParkingFocus, { once: true });
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './dublin-venue-knowledge.js?v=20260923-1';
+  script.defer = true;
+  script.dataset.whiteblockDublinVenueKnowledge = 'true';
+  script.addEventListener('load', loadWhiteblockDestinationParkingFocus, { once: true });
+  document.body.appendChild(script);
+}
+
 function loadWhiteblockDublinRestrictionIntegration() {
   const existing = document.querySelector('script[data-whiteblock-dublin-restriction-integration]');
   if (existing) {
-    if (typeof state !== 'undefined' && state.dublinRestrictionAuditStatus) loadWhiteblockInventoryCoverage();
-    else existing.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+    if (typeof state !== 'undefined' && state.dublinRestrictionAuditStatus) loadWhiteblockDublinVenueKnowledge();
+    else existing.addEventListener('load', loadWhiteblockDublinVenueKnowledge, { once: true });
     return;
   }
   const script = document.createElement('script');
   script.src = './dublin-restriction-integration.js?v=20260922-1';
   script.defer = true;
   script.dataset.whiteblockDublinRestrictionIntegration = 'true';
-  script.addEventListener('load', loadWhiteblockInventoryCoverage, { once: true });
+  script.addEventListener('load', loadWhiteblockDublinVenueKnowledge, { once: true });
   document.body.appendChild(script);
 }
 
