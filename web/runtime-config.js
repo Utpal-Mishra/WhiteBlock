@@ -199,6 +199,15 @@ function loadWhiteblockCorkCountyNetwork() {
   document.body.appendChild(script);
 }
 
+function loadWhiteblockDiscoverAccessAlignment() {
+  if (document.querySelector('script[data-whiteblock-discover-access-alignment]')) return;
+  const script = document.createElement('script');
+  script.src = './discover-access-alignment.js?v=20260923-1';
+  script.defer = true;
+  script.dataset.whiteblockDiscoverAccessAlignment = 'true';
+  document.body.appendChild(script);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockMapEngineV2();
 });
@@ -208,4 +217,10 @@ window.addEventListener('DOMContentLoaded', () => {
 // destinations as connected while retaining Cork City live-data semantics.
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockCorkCountyNetwork();
+});
+
+// Discover initially had a separate access taxonomy. Keep it synchronized with
+// the shared parking access layer after all static application scripts load.
+window.addEventListener('DOMContentLoaded', () => {
+  loadWhiteblockDiscoverAccessAlignment();
 });
