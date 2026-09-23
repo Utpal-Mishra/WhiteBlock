@@ -37,6 +37,17 @@ class ParkingAccessLayerTests(unittest.TestCase):
         self.assertIn('parking-access-layer.js?v=20260923-1', index)
         self.assertLess(index.index('./session-rules.js'), index.index('./parking-access-layer.js'))
 
+    def test_discover_uses_shared_access_taxonomy_bridge(self):
+        bridge = (ROOT / "web" / "discover-access-alignment.js").read_text(encoding="utf-8")
+        runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
+        self.assertIn('window.WBParkingAccess', bridge)
+        self.assertIn('accessApi.classify(item)', bridge)
+        self.assertIn('permit.dataset.discoverFilter = "conditional"', bridge)
+        self.assertIn('permit.textContent = "Permissive"', bridge)
+        self.assertIn('restricted.textContent = "Private / permit"', bridge)
+        self.assertIn('discover-access-alignment.js?v=20260923-1', runtime)
+        self.assertIn('loadWhiteblockDiscoverAccessAlignment', runtime)
+
 
 if __name__ == "__main__":
     unittest.main()
