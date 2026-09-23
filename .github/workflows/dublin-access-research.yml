@@ -1,0 +1,106 @@
+name: Build Dublin Access Research Queue
+
+on:
+  workflow_run:
+    workflows: ["Validate County Dublin Coverage"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: dublin-access-research
+  cancel-in-progress: true
+
+jobs:
+  build-queue:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve validated Dublin evidence run
+        id: evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_RUN_ID: ${{ github.event.workflow_run.id }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [[ "${EVENT_NAME}" == "workflow_run" && -n "${TRIGGER_RUN_ID:-}" ]]; then
+            RUN_ID="${TRIGGER_RUN_ID}"
+          else
+            RUN_ID="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/dublin-coverage.yml/runs?branch=main&status=success&per_page=1" \
+              --jq '.workflow_runs[0].id // empty')"
+          fi
+          test -n "${RUN_ID}" || { echo "No successful Dublin validation run available"; exit 1; }
+          echo "run_id=${RUN_ID}" >> "${GITHUB_OUTPUT}"
+          echo "Using validated Dublin evidence run ${RUN_ID}"
+
+      - name: Download validated Dublin evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.evidence.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p web/data
+          gh run download "${RUN_ID}" \
+            -R "${GITHUB_REPOSITORY}" \
+            -n county-dublin-parking-evidence \
+            -D web/data
+          test -s web/data/dublin_parking_snapshot.json
+
+      - name: Build access research queue
+        run: |
+          python scripts/build_dublin_access_research_queue.py \
+            --input web/data/dublin_parking_snapshot.json \
+            --output web/data/dublin_access_research_queue.json
+
+      - name: Validate queue precision gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("web/data/dublin_access_research_queue.json")
+          queue = json.loads(path.read_text(encoding="utf-8"))
+          summary = queue.get("summary") or {}
+          coverage = queue.get("coverage") or {}
+          rows = queue.get("queue") or []
+
+          if coverage.get("coverage_claim") != "complete_boundary_traversal_not_complete_real_world_inventory":
+              raise SystemExit("Research queue lost the mandatory Dublin precision claim")
+          if int(summary.get("parking_assets") or 0) <= 0:
+              raise SystemExit("Research queue has no source parking assets")
+          if int(summary.get("unknown_access_assets") or 0) <= 0:
+              raise SystemExit("Research queue has no unresolved access evidence")
+          if int(summary.get("settlement_research_rows") or 0) != len(rows):
+              raise SystemExit("Research queue row count mismatch")
+          if any(row.get("research_goal") != "resolve_access_evidence_without_inferring_public_access" for row in rows):
+              raise SystemExit("Research queue contains an invalid evidence goal")
+
+          priorities = summary.get("priority_rows") or {}
+          print("DUBLIN_ACCESS_RESEARCH_QUEUE=PASS")
+          print("DUBLIN_ACCESS_UNRESOLVED=" + str(summary.get("unknown_access_assets")))
+          print("DUBLIN_ACCESS_RESEARCH_ROWS=" + str(len(rows)))
+          print("DUBLIN_ACCESS_PRIORITY_ROWS=" + json.dumps(priorities, sort_keys=True))
+          PY
+
+      - name: Upload Dublin access research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: county-dublin-access-research-queue
+          path: web/data/dublin_access_research_queue.json
+          if-no-files-found: error
+          retention-days: 30
