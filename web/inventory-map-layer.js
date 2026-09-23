@@ -1,6 +1,6 @@
 // WHITEBLOCK all-inventory parking map layer.
-// Renders every connected Cork + Kildare parking asset using clustering so the
-// full inventory remains legible and performant on mobile.
+// Renders every connected Cork + Kildare + Dublin parking asset using clustering
+// so the full inventory remains legible and performant on mobile.
 
 (() => {
   if (typeof state === "undefined" || typeof L === "undefined") return;
@@ -305,6 +305,11 @@
   wrapApplicationHooks();
   document.addEventListener("whiteblock:data-ready", () => window.setTimeout(renderInventoryLayer, 0));
   document.addEventListener("whiteblock:kildare-attributes-ready", () => window.setTimeout(renderInventoryLayer, 0));
+  document.addEventListener("whiteblock:region-inventory-ready", event => {
+    const region = String(event?.detail?.region || "").toLowerCase();
+    if (!region) return;
+    window.setTimeout(renderInventoryLayer, 0);
+  });
 
   loadClusterPlugin().then(() => {
     renderInventoryLayer();
