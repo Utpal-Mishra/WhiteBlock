@@ -1,7 +1,8 @@
 // WHITEBLOCK destination-first parking focus.
 // When a user searches a connected destination, show the mapped parking supply
 // around that destination immediately. Availability remains unknown unless a
-// source explicitly publishes it.
+// source explicitly publishes it. Customer-only venue parking is only surfaced
+// as a normal destination option when it is associated with the selected venue.
 
 (() => {
   if (typeof state === "undefined" || typeof haversineKm !== "function") return;
@@ -78,6 +79,39 @@
     return Array.isArray(parkingData) ? parkingData : [];
   }
 
+  function sessionRule(item) {
+    if (window.WBSessionRules && typeof window.WBSessionRules.evaluate === "function") {
+      return window.WBSessionRules.evaluate(item);
+    }
+    const access = String(item.accessType || item.access_type || "unknown").toLowerCase();
+    return {
+      eligible: !["private", "permit", "restricted", "no"].includes(access),
+      fitLabel: "Session rules not fully evaluated",
+      reason: "Session rules not fully evaluated"
+    };
+  }
+
+  function customerAccessMatchesDestination(item) {
+    const access = String(item.accessType || item.access_type || "unknown").toLowerCase();
+    if (!["customer", "customers", "destination"].includes(access)) return true;
+
+    const associations = Array.isArray(item.venueAssociations) ? item.venueAssociations : [];
+    const strongCustomerAssociations = associations.filter(association =>
+      association?.suggestionState === "conditional_customer_parking"
+      && association?.associationState === "name_or_operator_match"
+    );
+
+    // Legacy/source-backed customer parking that has not yet passed through the
+    // venue knowledge layer keeps its existing conditional behaviour. Venue-
+    // linked customer parking, however, is only promoted when the selected
+    // destination is that venue.
+    if (!strongCustomerAssociations.length) return true;
+
+    const destinationVenueId = state.destination?.venueKnowledgeId || state.activeVenueKnowledge?.venue_id || null;
+    if (!destinationVenueId) return false;
+    return strongCustomerAssociations.some(association => association.venueId === destinationVenueId);
+  }
+
   function mappedParkingRows() {
     if (!state.destination) return { rows: [], radiusKm: null };
     const rows = activeInventory()
@@ -87,8 +121,10 @@
         const role = String(item.networkRole || item.network_role || "parking_asset").toLowerCase();
         return !["candidate", "inferred"].includes(truth) && !role.includes("candidate");
       })
-      .map(item => ({
-        item,
+      .map(item => ({ item, rule: sessionRule(item) }))
+      .filter(({ item, rule }) => rule.eligible && customerAccessMatchesDestination(item))
+      .map(({ item, rule }) => ({
+        item: { ...item, sessionRule: rule },
         distanceKm: haversineKm(
           Number(state.destination.lat),
           Number(state.destination.lng),
@@ -123,10 +159,10 @@
 
   function accessCopy(item) {
     const access = String(item.accessType || item.access_type || "unknown").toLowerCase();
-    if (["customer", "customers"].includes(access)) return "Customer parking";
+    if (["customer", "customers", "destination"].includes(access)) return "Customer parking";
     if (["public", "yes", "permissive"].includes(access)) return "Public parking";
     if (access === "permit") return "Permit parking";
-    if (["private", "restricted", "destination", "no"].includes(access)) return "Restricted parking";
+    if (["private", "restricted", "no"].includes(access)) return "Restricted parking";
     return "Access not yet verified";
   }
 
@@ -134,6 +170,11 @@
     if (item.available != null) return `${Math.round(Number(item.available))} spaces reported free`;
     if (item.capacity != null) return `${Math.round(Number(item.capacity))} spaces capacity · live availability not reported`;
     return "Live availability not reported";
+  }
+
+  function sessionCopy(item) {
+    const rule = item.sessionRule || sessionRule(item);
+    return rule?.fitLabel || "Session rules not fully published";
   }
 
   function renderFocusedParking(rows) {
@@ -152,7 +193,7 @@
         opacity: 1
       }).addTo(layer);
       marker.bindTooltip(
-        `<strong>${escapeHtml(item.name || "Parking")}</strong><br>${escapeHtml(accessCopy(item))} · ${distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m` : `${distanceKm.toFixed(1)} km`} from destination<br>${escapeHtml(availabilityCopy(item))}`,
+        `<strong>${escapeHtml(item.name || "Parking")}</strong><br>${escapeHtml(accessCopy(item))} · ${distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m` : `${distanceKm.toFixed(1)} km`} from destination<br>${escapeHtml(sessionCopy(item))}<br>${escapeHtml(availabilityCopy(item))}`,
         { direction: "top", offset: [0, -8], className: "wb-tooltip" }
       );
       marker.on("click", () => {
@@ -208,8 +249,8 @@
     if (!rows.length) {
       if (typeof setMapStatus === "function") {
         setMapStatus(
-          `No mapped parking in the current ${RADIUS_STEPS_KM[RADIUS_STEPS_KM.length - 1]} km research window`,
-          "This means WHITEBLOCK has no mapped inventory near this destination yet; it does not prove that no parking exists."
+          `No session-suitable mapped parking in the current ${RADIUS_STEPS_KM[RADIUS_STEPS_KM.length - 1]} km research window`,
+          "Mapped or venue parking may still exist, but WHITEBLOCK will not promote a candidate that fails known stay/access rules or lacks the required customer-destination association."
         );
       }
       return;
@@ -219,10 +260,10 @@
     const radiusLabel = radiusKm < 1 ? `${Math.round(radiusKm * 1000)} m` : `${radiusKm.toFixed(radiusKm % 1 ? 1 : 0)} km`;
     if (typeof setMapStatus === "function") {
       setMapStatus(
-        `${rows.length} mapped parking location${rows.length === 1 ? "" : "s"} near ${place}`,
+        `${rows.length} session-suitable mapped parking location${rows.length === 1 ? "" : "s"} near ${place}`,
         liveCount
           ? `${liveCount} currently include reported availability; remaining locations stay availability-unknown. Search window: ${radiusLabel}.`
-          : `Parking locations are mapped, but live space availability is not inferred. Search window: ${radiusLabel}.`
+          : `Known access/stay rules are applied before display; live space availability is not inferred. Search window: ${radiusLabel}.`
       );
     }
   }
@@ -243,6 +284,7 @@
         destination: state.destination.primary || state.destination.label || null,
         mappedParking: rows.length,
         radiusKm,
+        requestedStayMinutes: window.WBSessionRules?.requestedStayMinutes?.() ?? null,
         liveAvailabilityRecords: rows.filter(({ item }) => item.available != null).length
       }
     }));
@@ -293,5 +335,8 @@
   install();
   document.addEventListener("whiteblock:data-ready", () => window.setTimeout(focusDestinationParking, 110));
   document.addEventListener("whiteblock:kildare-attributes-ready", () => window.setTimeout(focusDestinationParking, 110));
+  document.addEventListener("whiteblock:dublin-venue-knowledge-ready", () => window.setTimeout(focusDestinationParking, 110));
   document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(focusDestinationParking, 80));
+  document.getElementById("duration")?.addEventListener("change", () => window.setTimeout(focusDestinationParking, 90));
+  document.getElementById("arrival")?.addEventListener("change", () => window.setTimeout(focusDestinationParking, 90));
 })();
