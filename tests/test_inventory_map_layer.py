@@ -11,12 +11,14 @@ class InventoryMapLayerTests(unittest.TestCase):
         self.assertIn("chunkedLoading: true", js)
         self.assertIn("state.regionInventories", js)
         self.assertIn("whiteblock:inventory-map-ready", js)
+        self.assertIn("whiteblock:region-inventory-ready", js)
         self.assertIn("inventoryMarkersEnabled", js)
         self.assertIn("Kildare", (ROOT / "web" / "region-network.js").read_text(encoding="utf-8"))
+        self.assertIn("state.regionInventories.dublin", (ROOT / "web" / "dublin-network.js").read_text(encoding="utf-8"))
 
     def test_runtime_loads_inventory_map_layer(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("inventory-map-layer.js?v=20260921-1", runtime)
+        self.assertIn("inventory-map-layer.js?v=20260923-dublin1", runtime)
         self.assertIn("loadWhiteblockInventoryMapLayer", runtime)
 
     def test_map_layer_styles_exist(self):
