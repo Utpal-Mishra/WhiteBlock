@@ -1,5 +1,8 @@
 /* WHITEBLOCK parking access intelligence layer */
 
+/* The access control replaces the old binary all-markers control. */
+.wb-inventory-map-control { display: none !important; }
+
 .wb-inventory-marker.wb-access-public {
   background: #0f2b20;
   border-color: rgba(120, 230, 170, .82);
