@@ -6,8 +6,9 @@ parking is reported as mapped inventory coverage, not as proof of complete real-
 world parking coverage. Unassigned records remain visible as a quality gap.
 
 The command also enriches the snapshot with conservative access/session-rule
-semantics and publishes both the named-settlement audit and restriction audit.
-This keeps GitHub Pages deployments and independent validation runs aligned.
+semantics and publishes named-settlement, restriction and venue-knowledge
+sidecars. This keeps GitHub Pages deployments and independent validation runs
+aligned.
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
 import build_dublin_settlement_audit as settlement_audit
+import build_dublin_venue_knowledge as venue_knowledge
 import enrich_dublin_access_rules as access_rules
 
 
@@ -86,7 +88,7 @@ def build_ledger(snapshot: Dict[str, Any]) -> Dict[str, Any]:
         )
 
     return {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "generated_at": snapshot.get("generated_at"),
         "source_snapshot_schema_version": snapshot.get("schema_version"),
         "coverage": snapshot.get("coverage") or {},
@@ -116,7 +118,9 @@ def build_ledger(snapshot: Dict[str, Any]) -> Dict[str, Any]:
             "Unknown access remains unknown and is not promoted to public parking.",
             "Customer-only parking remains conditional parking and is not promoted to general public parking.",
             "A maximum stay is enforced only where the source snapshot publishes one.",
-            "No default supermarket or retail parking duration is assumed.",
+            "No default supermarket, shopping-centre or fuel-station parking duration is assumed.",
+            "Venue opening hours are not parking permission; a 24/7 venue is not automatically long-stay parking.",
+            "Imagery candidates remain candidates until access/stay evidence is verified.",
             "Local-authority fallback assignments remain visible as geography-quality gaps.",
             "Capacity totals include only source-published integer capacity values.",
             "Named settlement audit rows are generated from the same published anchor evidence when available.",
@@ -126,7 +130,7 @@ def build_ledger(snapshot: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build County Dublin settlement and restriction coverage artifacts")
+    parser = argparse.ArgumentParser(description="Build County Dublin settlement, restriction and venue coverage artifacts")
     parser.add_argument("--input", type=Path, default=Path("web/data/dublin_parking_snapshot.json"))
     parser.add_argument("--output", type=Path, default=Path("web/data/dublin_coverage_ledger.json"))
     parser.add_argument(
@@ -141,6 +145,12 @@ def main() -> int:
         default=None,
         help="Optional restriction audit path; defaults to dublin_restriction_audit.json beside the ledger",
     )
+    parser.add_argument(
+        "--venue-knowledge-output",
+        type=Path,
+        default=None,
+        help="Optional venue sidecar path; defaults to dublin_venue_knowledge.json beside the ledger",
+    )
     args = parser.parse_args()
 
     raw_snapshot = json.loads(args.input.read_text(encoding="utf-8"))
@@ -152,6 +162,7 @@ def main() -> int:
 
     ledger = build_ledger(snapshot)
     audit = settlement_audit.build_audit(snapshot)
+    venues = venue_knowledge.build_knowledge(snapshot)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -163,6 +174,10 @@ def main() -> int:
     restriction_output = args.restriction_audit_output or args.output.with_name("dublin_restriction_audit.json")
     restriction_output.parent.mkdir(parents=True, exist_ok=True)
     restriction_output.write_text(json.dumps(restriction_audit, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    venue_output = args.venue_knowledge_output or args.output.with_name("dublin_venue_knowledge.json")
+    venue_output.parent.mkdir(parents=True, exist_ok=True)
+    venue_output.write_text(json.dumps(venues, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     print(
         "WHITEBLOCK Dublin coverage ledger:",
@@ -183,6 +198,13 @@ def main() -> int:
         restriction_audit["summary"]["max_stay_published_assets"], "max-stay published /",
         restriction_audit["summary"]["unknown_access_assets"], "unknown access ->",
         restriction_output,
+    )
+    print(
+        "WHITEBLOCK Dublin venue knowledge sidecar:",
+        venues["summary"]["venues"], "venues /",
+        venues["summary"]["venues_with_any_mapped_parking_nearby"], "with mapped parking nearby /",
+        venues["summary"]["imagery_review_queue"], "imagery candidates ->",
+        venue_output,
     )
     return 0
 
