@@ -208,6 +208,22 @@ function loadWhiteblockDiscoverAccessAlignment() {
   document.body.appendChild(script);
 }
 
+function loadWhiteblockIrelandOverview() {
+  if (!document.querySelector('link[data-whiteblock-ireland-overview]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = './ireland-overview.css?v=20260923-1';
+    style.dataset.whiteblockIrelandOverview = 'true';
+    document.head.appendChild(style);
+  }
+  if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
+  const script = document.createElement('script');
+  script.src = './ireland-overview.js?v=20260923-1';
+  script.defer = true;
+  script.dataset.whiteblockIrelandOverview = 'true';
+  document.body.appendChild(script);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockMapEngineV2();
 });
@@ -223,4 +239,10 @@ window.addEventListener('DOMContentLoaded', () => {
 // the shared parking access layer after all static application scripts load.
 window.addEventListener('DOMContentLoaded', () => {
   loadWhiteblockDiscoverAccessAlignment();
+});
+
+// Replace the legacy Cork-first default shell with an Ireland-first landing view
+// after the static application/session modules have initialized.
+window.addEventListener('DOMContentLoaded', () => {
+  loadWhiteblockIrelandOverview();
 });
