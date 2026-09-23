@@ -70,6 +70,8 @@ jobs:
           node --check web/region-network.js
           node --check web/dublin-network.js
           node --check web/dublin-settlement-integration.js
+          node --check web/dublin-restriction-integration.js
+          node --check web/dublin-venue-knowledge.js
           python -m compileall -q api scripts
 
       - name: Run tests
