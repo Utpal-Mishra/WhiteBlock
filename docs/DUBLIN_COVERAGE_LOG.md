@@ -134,3 +134,38 @@ Added `web/dublin-network.js` to the JavaScript syntax gate in `.github/workflow
 Commit: `8ddbb8b55102f0428e46826b72a77a118379dcaf`.
 
 Status: complete.
+
+## 2026-09-23 — Step 10: access intelligence and evidence-resolution queue
+
+Converted Dublin mapped supply into an explicit access-evidence layer rather than treating every mapped asset as equally usable.
+
+Implemented five shared product classes:
+
+- Public
+- Customer / destination
+- Permissive
+- Restricted / private / permit
+- Unknown
+
+Precision rules retained:
+
+- missing access evidence is never promoted to public;
+- `designated` alone remains uncertain rather than being treated as general public access;
+- restricted parking remains visible in evidence/network views but is excluded from normal driver recommendations;
+- customer/destination and permissive parking remain conditional;
+- existing maximum-stay and opening-hour session rules still apply before ranking.
+
+The validated 9,005-asset snapshot contains 4,442 raw `unknown` records plus one `designated` record retained as uncertain, giving 4,443 unresolved access assets in the WHITEBLOCK taxonomy.
+
+Added `scripts/build_dublin_access_research_queue.py` and deterministic P0–P3 research tiers. Applying the queue to the validated snapshot produced 158 settlement research rows: 7 P0, 14 P1, 41 P2 and 96 P3.
+
+Highest-volume P0 gaps are Mulhuddart, Swords, Castleknock, Ballyogan, Balbriggan, Finglas and Cherrywood. These priorities are evidence-resolution targets, not claims of parking shortage or demand.
+
+Added `.github/workflows/dublin-access-research.yml` so a successful County Dublin validation automatically produces a machine-readable access research artifact from the validated evidence snapshot.
+
+Detailed methodology and current priorities are recorded in:
+
+- `docs/DUBLIN_ACCESS_LAYER.md`
+- `docs/DUBLIN_ACCESS_RESEARCH_QUEUE.md`
+
+Status: implemented; end-to-end queue automation triggered for validation.
