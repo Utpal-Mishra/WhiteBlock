@@ -50,10 +50,28 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build Cork City live snapshot
+      # Cork City is still refreshed when the upstream source responds, but a
+      # temporary source outage must not block publication of validated Dublin
+      # evidence. If refresh fails we retain the last published Cork snapshot
+      # when one is reachable; otherwise the browser exposes Cork as unavailable.
+      - name: Refresh Cork City snapshot without gating Dublin
         run: |
-          python scripts/ingest_cork_parking.py --output-dir data/cork
-          python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
+          rm -f web/data/parking_snapshot.json
+          if python scripts/ingest_cork_parking.py --output-dir data/cork \
+            && python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json; then
+            echo "Cork City live snapshot refreshed"
+          else
+            echo "::warning::Cork City upstream feed unavailable; attempting last published snapshot"
+            rm -f web/data/parking_snapshot.json
+            if curl --fail --silent --show-error --location --max-time 20 \
+              "https://utpal-mishra.github.io/WhiteBlock/data/parking_snapshot.json" \
+              --output web/data/parking_snapshot.json; then
+              echo "Reused last published Cork City snapshot"
+            else
+              echo "::warning::No Cork City fallback snapshot available; Dublin publication will continue"
+              rm -f web/data/parking_snapshot.json
+            fi
+          fi
 
       # Publishing and evidence refresh are deliberately separated. The Dublin
       # validation workflow can spend several minutes traversing exact authority
@@ -137,18 +155,23 @@ jobs:
           import json
           from pathlib import Path
 
-          required_checks = [
-              ("Cork City live", Path("web/data/parking_snapshot.json")),
-              ("County Dublin network", Path("web/data/dublin_parking_snapshot.json")),
-          ]
-          for region, path in required_checks:
-              if not path.exists():
-                  raise SystemExit(f"{region} required parking snapshot is missing")
-              data = json.loads(path.read_text())
-              locations = data.get("locations", [])
-              if not locations:
-                  raise SystemExit(f"{region} parking snapshot contains no locations; refusing to deploy misleading empty data")
-              print(f"Validated {region} browser snapshot with {len(locations)} locations")
+          dublin_path = Path("web/data/dublin_parking_snapshot.json")
+          if not dublin_path.exists():
+              raise SystemExit("County Dublin required parking snapshot is missing")
+          dublin = json.loads(dublin_path.read_text())
+          if not dublin.get("locations"):
+              raise SystemExit("County Dublin parking snapshot contains no locations; refusing to deploy misleading empty data")
+          print(f"Validated County Dublin browser snapshot with {len(dublin['locations'])} locations")
+
+          cork_city_path = Path("web/data/parking_snapshot.json")
+          if cork_city_path.exists():
+              cork_city = json.loads(cork_city_path.read_text())
+              cork_city_locations = cork_city.get("locations", [])
+              if not cork_city_locations:
+                  raise SystemExit("Cork City snapshot exists but contains no locations")
+              print(f"Validated optional Cork City snapshot with {len(cork_city_locations)} locations")
+          else:
+              print("Cork City optional snapshot unavailable; browser will expose the source-unavailable state")
 
           cork_county_path = Path("web/data/cork_county_parking_snapshot.json")
           if cork_county_path.exists():
@@ -199,7 +222,6 @@ jobs:
           else:
               print("County Kildare optional snapshot unavailable; browser will expose the source-unavailable state")
 
-          dublin = json.loads(Path("web/data/dublin_parking_snapshot.json").read_text())
           dublin_summary = dublin.get("summary", {})
           dublin_coverage = dublin.get("coverage", {})
           if dublin_coverage.get("scope") != "county_wide_network":
@@ -304,7 +326,7 @@ jobs:
               raise SystemExit("Could not configure WHITEBLOCK runtime API block")
           path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
-          print("WHITEBLOCK regional loader: Cork City live + optional County Cork + optional County Kildare + required validated County Dublin evidence snapshot")
+          print("WHITEBLOCK regional loader: optional Cork City + optional County Cork + optional County Kildare + required validated County Dublin evidence snapshot")
           PY
 
       - name: Configure GitHub Pages
