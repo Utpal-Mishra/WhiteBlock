@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -54,13 +55,58 @@ jobs:
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
 
-      # Dublin is a required publication target. Build it before the optional
-      # county feeds so a transient Cork/Kildare upstream failure cannot stop a
-      # valid Dublin evidence snapshot from reaching GitHub Pages.
-      - name: Build County Dublin network snapshot and coverage ledger
+      # Publishing and evidence refresh are deliberately separated. The Dublin
+      # validation workflow can spend several minutes traversing exact authority
+      # boundaries and may encounter transient Overpass 504/timeouts. Pages first
+      # publishes the latest successful, precision-gated Dublin evidence artifact.
+      # A live rebuild is retained only as a bootstrap fallback.
+      - name: Acquire validated County Dublin network evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
-          python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
+          set -u
+          rm -f \
+            web/data/dublin_parking_snapshot.json \
+            web/data/dublin_coverage_ledger.json \
+            web/data/dublin_settlement_audit.json \
+            web/data/dublin_restriction_audit.json \
+            web/data/dublin_venue_knowledge.json
+
+          RUN_ID="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/dublin-coverage.yml/runs?branch=main&status=success&per_page=1" \
+            --jq '.workflow_runs[0].id // empty' 2>/dev/null || true)"
+
+          ARTIFACT_READY=false
+          if [[ -n "${RUN_ID}" ]]; then
+            echo "Using latest successful Dublin validation run ${RUN_ID}"
+            rm -rf /tmp/dublin-evidence
+            mkdir -p /tmp/dublin-evidence
+            if gh run download "${RUN_ID}" \
+              -R "${GITHUB_REPOSITORY}" \
+              -n county-dublin-parking-evidence \
+              -D /tmp/dublin-evidence; then
+              cp /tmp/dublin-evidence/dublin_*.json web/data/
+              ARTIFACT_READY=true
+            else
+              echo "::warning::Validated Dublin artifact download failed; trying a live exact-boundary rebuild"
+            fi
+          else
+            echo "::warning::No successful Dublin validation artifact found; trying a live exact-boundary rebuild"
+          fi
+
+          if [[ "${ARTIFACT_READY}" != "true" || ! -s web/data/dublin_parking_snapshot.json ]]; then
+            python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
+            python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
+          fi
+
+          for required in \
+            dublin_parking_snapshot.json \
+            dublin_coverage_ledger.json \
+            dublin_settlement_audit.json \
+            dublin_restriction_audit.json \
+            dublin_venue_knowledge.json; do
+            test -s "web/data/${required}" || { echo "Missing required Dublin evidence file: ${required}"; exit 1; }
+          done
 
       # County Cork and County Kildare remain useful connected regions, but their
       # external-source availability must not gate publication of a valid Dublin
@@ -258,7 +304,7 @@ jobs:
               raise SystemExit("Could not configure WHITEBLOCK runtime API block")
           path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
-          print("WHITEBLOCK regional loader: Cork City live + optional County Cork + optional County Kildare + required County Dublin network snapshot")
+          print("WHITEBLOCK regional loader: Cork City live + optional County Cork + optional County Kildare + required validated County Dublin evidence snapshot")
           PY
 
       - name: Configure GitHub Pages
