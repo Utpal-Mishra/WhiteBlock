@@ -54,20 +54,36 @@ jobs:
           python scripts/ingest_cork_parking.py --output-dir data/cork
           python scripts/export_web_snapshot.py --input-dir data/cork --output web/data/parking_snapshot.json
 
-      - name: Build County Cork network snapshot
-        run: |
-          python scripts/ingest_cork_county_parking_stable.py --output web/data/cork_county_parking_snapshot.json
-
-      - name: Build County Kildare network snapshot
-        run: |
-          python scripts/ingest_kildare_county_parking_stable.py --output web/data/kildare_parking_snapshot.json
-          python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
-          python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
-
+      # Dublin is a required publication target. Build it before the optional
+      # county feeds so a transient Cork/Kildare upstream failure cannot stop a
+      # valid Dublin evidence snapshot from reaching GitHub Pages.
       - name: Build County Dublin network snapshot and coverage ledger
         run: |
           python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
           python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
+
+      # County Cork and County Kildare remain useful connected regions, but their
+      # external-source availability must not gate publication of a valid Dublin
+      # network. Missing snapshots are handled explicitly by the browser adapters.
+      - name: Build County Cork network snapshot
+        run: |
+          if python scripts/ingest_cork_county_parking_stable.py --output web/data/cork_county_parking_snapshot.json; then
+            echo "County Cork network snapshot built"
+          else
+            echo "::warning::County Cork network snapshot unavailable; deploying without the optional county snapshot"
+            rm -f web/data/cork_county_parking_snapshot.json
+          fi
+
+      - name: Build County Kildare network snapshot
+        run: |
+          if python scripts/ingest_kildare_county_parking_stable.py --output web/data/kildare_parking_snapshot.json \
+            && python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json \
+            && python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json; then
+            echo "County Kildare network snapshot built"
+          else
+            echo "::warning::County Kildare network snapshot unavailable; deploying without the optional county snapshot"
+            rm -f web/data/kildare_parking_snapshot.json
+          fi
 
       - name: Validate regional snapshots
         run: |
@@ -75,54 +91,67 @@ jobs:
           import json
           from pathlib import Path
 
-          checks = [
+          required_checks = [
               ("Cork City live", Path("web/data/parking_snapshot.json")),
-              ("County Cork network", Path("web/data/cork_county_parking_snapshot.json")),
-              ("County Kildare network", Path("web/data/kildare_parking_snapshot.json")),
               ("County Dublin network", Path("web/data/dublin_parking_snapshot.json")),
           ]
-          for region, path in checks:
+          for region, path in required_checks:
+              if not path.exists():
+                  raise SystemExit(f"{region} required parking snapshot is missing")
               data = json.loads(path.read_text())
               locations = data.get("locations", [])
               if not locations:
                   raise SystemExit(f"{region} parking snapshot contains no locations; refusing to deploy misleading empty data")
               print(f"Validated {region} browser snapshot with {len(locations)} locations")
 
-          cork_county = json.loads(Path("web/data/cork_county_parking_snapshot.json").read_text())
-          cork_polygon_count = cork_county.get("summary", {}).get("mapped_polygon_locations", 0) or 0
-          if cork_polygon_count <= 0:
-              raise SystemExit("County Cork snapshot contains no mapped parking polygons; refusing degraded county deployment")
-          print(f"Validated County Cork mapped geometry for {cork_polygon_count} parking locations")
+          cork_county_path = Path("web/data/cork_county_parking_snapshot.json")
+          if cork_county_path.exists():
+              cork_county = json.loads(cork_county_path.read_text())
+              cork_locations = cork_county.get("locations", [])
+              if not cork_locations:
+                  raise SystemExit("County Cork snapshot exists but contains no locations")
+              cork_polygon_count = cork_county.get("summary", {}).get("mapped_polygon_locations", 0) or 0
+              if cork_polygon_count <= 0:
+                  raise SystemExit("County Cork snapshot exists but contains no mapped parking polygons")
+              print(f"Validated optional County Cork snapshot with {len(cork_locations)} locations / {cork_polygon_count} polygons")
+          else:
+              print("County Cork optional snapshot unavailable; browser will expose the source-unavailable state")
 
-          kildare = json.loads(Path("web/data/kildare_parking_snapshot.json").read_text())
-          kildare_summary = kildare.get("summary", {})
-          kildare_coverage = kildare.get("coverage", {})
-          kildare_osm = kildare.get("sources", {}).get("openstreetmap_kildare_parking", {})
-          if kildare_coverage.get("scope") != "county_wide_network":
-              raise SystemExit("Kildare snapshot is not marked as complete county-wide coverage")
-          if int(kildare_coverage.get("osm_boundary_relation_id") or 0) != 285833:
-              raise SystemExit("Kildare snapshot does not reference the canonical County Kildare OSM boundary")
-          if kildare_osm.get("query_mode") != "exact_county_boundary" or kildare_osm.get("status") != "ok":
-              raise SystemExit("Kildare OSM inventory was not built from the exact county boundary")
-          if int(kildare_osm.get("admin_level") or 0) != 6:
-              raise SystemExit("Kildare OSM inventory did not resolve the Irish county admin level")
-          kildare_polygon_count = kildare_summary.get("mapped_polygon_locations", 0) or 0
-          if kildare_polygon_count <= 0:
-              raise SystemExit("County Kildare snapshot contains no mapped parking polygons; refusing degraded county deployment")
-          print(f"Validated County Kildare mapped geometry for {kildare_polygon_count} parking locations")
+          kildare_path = Path("web/data/kildare_parking_snapshot.json")
+          if kildare_path.exists():
+              kildare = json.loads(kildare_path.read_text())
+              kildare_locations = kildare.get("locations", [])
+              if not kildare_locations:
+                  raise SystemExit("County Kildare snapshot exists but contains no locations")
+              kildare_summary = kildare.get("summary", {})
+              kildare_coverage = kildare.get("coverage", {})
+              kildare_osm = kildare.get("sources", {}).get("openstreetmap_kildare_parking", {})
+              if kildare_coverage.get("scope") != "county_wide_network":
+                  raise SystemExit("Kildare snapshot is not marked as complete county-wide coverage")
+              if int(kildare_coverage.get("osm_boundary_relation_id") or 0) != 285833:
+                  raise SystemExit("Kildare snapshot does not reference the canonical County Kildare OSM boundary")
+              if kildare_osm.get("query_mode") != "exact_county_boundary" or kildare_osm.get("status") != "ok":
+                  raise SystemExit("Kildare OSM inventory was not built from the exact county boundary")
+              if int(kildare_osm.get("admin_level") or 0) != 6:
+                  raise SystemExit("Kildare OSM inventory did not resolve the Irish county admin level")
+              kildare_polygon_count = kildare_summary.get("mapped_polygon_locations", 0) or 0
+              if kildare_polygon_count <= 0:
+                  raise SystemExit("County Kildare snapshot contains no mapped parking polygons")
 
-          ids = {item.get("parking_id") for item in kildare.get("locations", [])}
-          required = {
-              "WB-PARK-IE-KILDARE-KV-MAIN",
-              "WB-PARK-IE-KILDARE-MARKET-SQUARE",
-              "WB-PARK-IE-KILDARE-TOP-NOLAN",
-          }
-          missing = sorted(required - ids)
-          if missing:
-              raise SystemExit("Critical Kildare parking anchors missing: " + ", ".join(missing))
-          if not any((item.get("ev_spaces") or 0) > 0 for item in kildare.get("locations", [])):
-              raise SystemExit("Kildare snapshot contains no EV-enabled parking; refusing degraded deployment")
-          print("Validated critical Kildare Village/Town parking + EV coverage")
+              ids = {item.get("parking_id") for item in kildare_locations}
+              required = {
+                  "WB-PARK-IE-KILDARE-KV-MAIN",
+                  "WB-PARK-IE-KILDARE-MARKET-SQUARE",
+                  "WB-PARK-IE-KILDARE-TOP-NOLAN",
+              }
+              missing = sorted(required - ids)
+              if missing:
+                  raise SystemExit("Critical Kildare parking anchors missing: " + ", ".join(missing))
+              if not any((item.get("ev_spaces") or 0) > 0 for item in kildare_locations):
+                  raise SystemExit("Kildare snapshot contains no EV-enabled parking")
+              print(f"Validated optional County Kildare snapshot with {len(kildare_locations)} locations / {kildare_polygon_count} polygons")
+          else:
+              print("County Kildare optional snapshot unavailable; browser will expose the source-unavailable state")
 
           dublin = json.loads(Path("web/data/dublin_parking_snapshot.json").read_text())
           dublin_summary = dublin.get("summary", {})
@@ -175,7 +204,10 @@ jobs:
               if int(authority_counts.get(authority) or 0) <= 0:
                   raise SystemExit(f"Dublin county build is missing parking inventory for {authority}")
 
-          ledger = json.loads(Path("web/data/dublin_coverage_ledger.json").read_text())
+          ledger_path = Path("web/data/dublin_coverage_ledger.json")
+          if not ledger_path.exists():
+              raise SystemExit("Dublin coverage ledger is missing")
+          ledger = json.loads(ledger_path.read_text())
           ledger_summary = ledger.get("summary") or {}
           if int(ledger_summary.get("parking_assets") or 0) != len(dublin_locations):
               raise SystemExit("Dublin coverage ledger asset count does not match snapshot")
@@ -183,6 +215,13 @@ jobs:
               raise SystemExit("Dublin coverage ledger does not contain all four local authorities")
           if int(ledger_summary.get("settlement_rows") or 0) <= 0:
               raise SystemExit("Dublin coverage ledger contains no city/town/suburb/village rows")
+
+          settlement_audit = Path("web/data/dublin_settlement_audit.json")
+          restriction_audit = Path("web/data/dublin_restriction_audit.json")
+          venue_knowledge = Path("web/data/dublin_venue_knowledge.json")
+          for sidecar in (settlement_audit, restriction_audit, venue_knowledge):
+              if not sidecar.exists():
+                  raise SystemExit(f"Required Dublin evidence sidecar missing: {sidecar.name}")
 
           print(
               "Validated County Dublin exact-boundary traversal:",
@@ -219,7 +258,7 @@ jobs:
               raise SystemExit("Could not configure WHITEBLOCK runtime API block")
           path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
-          print("WHITEBLOCK regional loader: Cork City live + County Cork + County Kildare + County Dublin network snapshots")
+          print("WHITEBLOCK regional loader: Cork City live + optional County Cork + optional County Kildare + required County Dublin network snapshot")
           PY
 
       - name: Configure GitHub Pages
