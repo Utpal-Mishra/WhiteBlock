@@ -1,14 +1,15 @@
 // WHITEBLOCK Inventory Coverage extension.
-// Aggregates canonical Cork + Kildare regional inventories for Discover, adds
-// fast client-side search/filtering, and provides a local unverified candidate
-// queue for parking locations that are not yet represented in the canonical
-// evidence-backed inventory.
+// Extends Discover with searchable connected inventory and a local unverified
+// candidate queue. The canonical source is the unified Discover inventory, which
+// already reconciles Cork, Kildare and Dublin; direct regional pools are only a
+// startup fallback while Discover is still initialising.
 
 (() => {
   if (typeof state === "undefined") return;
 
   const STORAGE_KEY = "whiteblock.inventoryCandidates.v1";
   const DISPLAY_LIMIT = 100;
+  const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin"];
   const KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
@@ -34,6 +35,7 @@
   }
 
   function numeric(value) {
+    if (value == null || value === "") return null;
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : null;
   }
@@ -53,11 +55,26 @@
   }
 
   function normalizeRegion(item) {
-    const area = String(item?.area || "").toLowerCase();
-    const id = String(item?.id || item?.parking_id || "").toLowerCase();
-    if (area.includes("kildare") || id.includes("-kildare-")) return "Kildare";
-    if (area.includes("cork") || id.includes("-cork-")) return "Cork";
-    if (item?.candidateRegion) return item.candidateRegion;
+    const explicit = String(item?.discoverRegion || item?.candidateRegion || "").trim();
+    if (CONNECTED_REGIONS.includes(explicit)) return explicit;
+
+    const regionKey = String(item?.discoverRegionKey || "").toLowerCase();
+    if (regionKey === "dublin") return "Dublin";
+    if (regionKey === "kildare") return "Kildare";
+    if (regionKey === "cork") return "Cork";
+
+    const haystack = [
+      item?.area,
+      item?.settlement,
+      item?.localAuthority,
+      item?.local_authority,
+      item?.id,
+      item?.parking_id
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    if (haystack.includes("dublin") || haystack.includes("fingal") || haystack.includes("laoghaire") || haystack.includes("rathdown")) return "Dublin";
+    if (haystack.includes("kildare") || haystack.includes("-kildare-")) return "Kildare";
+    if (haystack.includes("cork") || haystack.includes("-cork-")) return "Cork";
     return item?.area || "Other";
   }
 
@@ -74,16 +91,20 @@
   }
 
   function canonicalInventory() {
+    // Discover is the canonical cross-region aggregation layer. Using it first
+    // prevents this extension from accidentally dropping Dublin or showing a
+    // different total from the main Discover experience.
+    if (Array.isArray(state.discoveryInventory) && state.discoveryInventory.length) {
+      return dedupe(state.discoveryInventory).map(item => ({ ...item, inventoryStatus: "inventory" }));
+    }
+
     const pools = [];
     const regions = state.regionInventories || {};
-
     if (Array.isArray(regions.cork)) pools.push(...regions.cork);
     if (Array.isArray(regions.kildare)) pools.push(...regions.kildare);
+    if (Array.isArray(regions.dublin)) pools.push(...regions.dublin);
 
-    // Before the regional adapter is ready, retain the base Discover inventory.
-    if (!pools.length && Array.isArray(state.discoveryInventory)) pools.push(...state.discoveryInventory);
     if (!pools.length && Array.isArray(parkingData)) pools.push(...parkingData);
-
     return dedupe(pools).map(item => ({ ...item, inventoryStatus: "inventory" }));
   }
 
@@ -91,7 +112,9 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed.filter(item => item && item.id && Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lng))) : [];
+      return Array.isArray(parsed)
+        ? parsed.filter(item => item && item.id && Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lng)))
+        : [];
     } catch (error) {
       console.warn("WHITEBLOCK candidate queue could not be read", error);
       return [];
@@ -104,23 +127,26 @@
 
   function snapshotForRegion(region) {
     const snapshots = state.regionSnapshots || {};
+    if (region === "Dublin") return snapshots.dublin || null;
     if (region === "Kildare") return snapshots.kildare || null;
-    if (region === "Cork") return snapshots.cork || state.discoverySnapshot || state.parkingSnapshot || null;
+    if (region === "Cork") return snapshots.corkCounty || snapshots.cork || state.discoverySnapshot || state.parkingSnapshot || null;
     return null;
   }
 
   function sourceLabel(item, region) {
-    if (item?.candidate) return "User candidate · local review queue";
-    const raw = item?.sourceKey || snapshotForRegion(region)?.source?.key;
-    if (!raw) return region === "Kildare" ? "Kildare network inventory" : "Evidence-backed inventory";
-    return String(raw).replaceAll("_", " ").replace(/\b\w/g, char => char.toUpperCase());
+    if (item?.candidate) return "User candidate · local unverified review queue";
+    const raw = item?.sourceKey || item?.source_key || snapshotForRegion(region)?.source?.key;
+    if (raw) return String(raw).replaceAll("_", " ").replace(/\b\w/g, char => char.toUpperCase());
+    if (region === "Dublin") return "County Dublin exact-boundary inventory";
+    if (region === "Kildare") return "County Kildare network inventory";
+    return "Evidence-backed inventory";
   }
 
   function latestSnapshotTime() {
     const snapshots = Object.values(state.regionSnapshots || {}).filter(Boolean);
     if (state.discoverySnapshot) snapshots.push(state.discoverySnapshot);
     const values = snapshots
-      .map(snapshot => snapshot?.source?.retrieved_at || snapshot?.generated_at)
+      .flatMap(snapshot => [snapshot?.source?.retrieved_at, snapshot?.generated_at])
       .filter(Boolean)
       .map(value => new Date(value))
       .filter(value => !Number.isNaN(value.getTime()));
@@ -142,6 +168,9 @@
     return [
       item?.name,
       item?.area,
+      item?.settlement,
+      item?.localAuthority,
+      item?.local_authority,
       item?.id,
       item?.parkingType,
       item?.parking_type,
@@ -194,6 +223,7 @@
             <option value="all">All connected regions</option>
             <option value="cork">Cork</option>
             <option value="kildare">Kildare</option>
+            <option value="dublin">Dublin</option>
           </select>
         </label>
         <label class="inventory-filter-field">
@@ -208,7 +238,7 @@
       </div>
       <div class="inventory-search-summary">
         <span id="inventory-search-count">Loading connected regional inventory…</span>
-        <span>Kildare search includes County Council + OpenStreetMap inventory.</span>
+        <span>Cork, Kildare and Dublin remain source-backed; unknown access is never promoted to public.</span>
       </div>
       <form id="inventory-candidate-form" class="inventory-candidate-form" hidden>
         <div class="inventory-form-head">
@@ -218,7 +248,7 @@
         <p>A proposed location remains <strong>unverified</strong> and is not used in driver recommendations until evidence and access checks are completed.</p>
         <div class="inventory-form-grid">
           <label><span>Parking name</span><input name="name" required maxlength="120" placeholder="e.g. Town Centre car park" /></label>
-          <label class="inventory-address"><span>Address or place</span><input name="address" required maxlength="220" placeholder="Street, town, County Kildare" /></label>
+          <label class="inventory-address"><span>Address or place</span><input name="address" required maxlength="220" placeholder="Street, town, Ireland" /></label>
           <label><span>Region</span><select name="region"><option value="Kildare" selected>Kildare</option><option value="Cork">Cork</option></select></label>
           <label><span>Parking type</span><select name="parkingType"><option value="unknown_parking">General parking</option><option value="surface">Surface car park</option><option value="multistorey">Multi-storey</option><option value="street_side">Street-side</option><option value="park_and_ride">Park & Ride</option><option value="accessible">Accessible parking</option></select></label>
           <label><span>Capacity <small>optional</small></span><input name="capacity" type="number" min="0" max="20000" inputmode="numeric" placeholder="Unknown" /></label>
@@ -254,8 +284,7 @@
   }
 
   function regionSummary(canonical, candidates) {
-    const regions = ["Cork", "Kildare"];
-    return regions.map(region => {
+    return CONNECTED_REGIONS.map(region => {
       const inventory = canonical.filter(item => normalizeRegion(item) === region);
       const queue = candidates.filter(item => normalizeRegion(item) === region);
       if (!inventory.length && !queue.length) return null;
@@ -277,11 +306,16 @@
       const capacity = inventory.reduce((sum, item) => sum + (numeric(item.capacity) ?? 0), 0);
       const availableValues = inventory.map(item => numeric(item.available)).filter(value => value != null);
       const available = availableValues.length ? availableValues.reduce((sum, value) => sum + value, 0) : null;
-      const snapshot = snapshotForRegion(region);
-      const source = region === "Kildare"
-        ? "Kildare CoCo + OpenStreetMap"
-        : (snapshot?.source?.key ? String(snapshot.source.key).replaceAll("_", " ") : "Cork official snapshot");
-      const mode = region === "Kildare" ? "Network inventory" : "Live observation pilot";
+      const source = region === "Dublin"
+        ? "Four-authority County Dublin evidence"
+        : region === "Kildare"
+          ? "Kildare CoCo + OpenStreetMap"
+          : "Cork City + County Cork evidence";
+      const mode = region === "Dublin"
+        ? "Exact-boundary mapped network"
+        : region === "Kildare"
+          ? "Exact-county mapped network"
+          : "City live + county mapped";
       return `
         <article class="surface discover-region-card inventory-region-card" data-inventory-region-card="${escape(region.toLowerCase())}">
           <div class="discover-region-heading">
@@ -326,10 +360,7 @@
         <div class="discover-location-index">${String(index + 1).padStart(2, "0")}</div>
         <div class="discover-location-main">
           <div class="discover-location-title">
-            <div>
-              <h3>${escape(item.name || item.id)}</h3>
-              <p>${escape(item.area || region)} · ${escape(region)} · Ireland</p>
-            </div>
+            <div><h3>${escape(item.name || item.id)}</h3><p>${escape(item.area || item.settlement || region)} · ${escape(region)} · Ireland</p></div>
             <span class="discover-location-state${candidate ? " candidate" : ""}">${escape(stateLabel)}</span>
           </div>
           <div class="discover-location-meta">
@@ -360,8 +391,8 @@
         const region = normalizeRegion(item);
         const destination = {
           primary: item.name || "Parking location",
-          secondary: `${item.area || region}, Ireland`,
-          label: `${item.name || "Parking location"}, ${item.area || region}, Ireland`,
+          secondary: `${item.area || item.settlement || region}, Ireland`,
+          label: `${item.name || "Parking location"}, ${item.area || item.settlement || region}, Ireland`,
           lat: Number(item.lat),
           lng: Number(item.lng),
           type: item.candidate ? "parking_candidate" : "parking",
@@ -370,9 +401,7 @@
         if (typeof selectAddressSuggestion === "function") {
           selectAddressSuggestion(destination, { runRanking: true });
           if (typeof setView === "function") setView("find");
-          if (!item.candidate && typeof selectParking === "function") {
-            window.setTimeout(() => selectParking(item.id), 350);
-          }
+          if (!item.candidate && typeof selectParking === "function") window.setTimeout(() => selectParking(item.id), 350);
         }
       });
     });
@@ -381,8 +410,7 @@
       button.addEventListener("click", event => {
         event.stopPropagation();
         const id = button.dataset.removeCandidate;
-        const next = readCandidates().filter(item => item.id !== id);
-        writeCandidates(next);
+        writeCandidates(readCandidates().filter(item => item.id !== id));
         renderInventoryCoverage();
       });
     });
@@ -398,7 +426,7 @@
     const records = filteredRecords(canonical, candidates);
     const shown = records.slice(0, DISPLAY_LIMIT);
 
-    const regionNames = [...new Set(canonical.map(normalizeRegion).filter(region => region === "Cork" || region === "Kildare"))];
+    const regionNames = CONNECTED_REGIONS.filter(region => canonical.some(item => normalizeRegion(item) === region));
     const totalCapacity = canonical.reduce((sum, item) => sum + (numeric(item.capacity) ?? 0), 0);
     const availableValues = canonical.map(item => numeric(item.available)).filter(value => value != null);
     const totalAvailable = availableValues.length ? availableValues.reduce((sum, value) => sum + value, 0) : null;
@@ -417,7 +445,7 @@
     if (capacityValue) capacityValue.textContent = totalCapacity ? formatInteger(totalCapacity) : "—";
     if (availabilityValue) availabilityValue.textContent = totalAvailable == null ? "—" : formatInteger(totalAvailable);
     if (syncValue) syncValue.textContent = freshnessLabel(latestSnapshotTime());
-    if (regionName) regionName.textContent = regionNames.length > 1 ? "Cork + Kildare" : (regionNames[0] || "Loading…");
+    if (regionName) regionName.textContent = regionNames.length ? regionNames.join(" + ") : "Loading…";
     if (status) status.textContent = `${formatInteger(canonical.length)} inventory locations · ${formatInteger(candidates.length)} candidates`;
     if (count) {
       const suffix = records.length > DISPLAY_LIMIT ? ` · showing first ${DISPLAY_LIMIT}` : "";
@@ -427,7 +455,7 @@
     renderRegionCoverage(canonical, candidates);
 
     if (!records.length) {
-      list.innerHTML = `<div class="surface discover-empty">No parking inventory matches this search.${ui.region === "kildare" ? " You can propose a Kildare parking location using “Add parking location”." : ""}</div>`;
+      list.innerHTML = '<div class="surface discover-empty">No parking inventory matches this search.</div>';
       return;
     }
 
@@ -447,7 +475,6 @@
     if (!response.ok) throw new Error(`Address lookup returned ${response.status}`);
     const payload = await response.json();
     const features = Array.isArray(payload?.features) ? payload.features : [];
-
     const candidates = features.map(feature => {
       const props = feature?.properties || {};
       const coordinates = feature?.geometry?.coordinates || [];
@@ -547,16 +574,24 @@
     }
   }
 
+  function regionalLoadingComplete() {
+    const statuses = [state.corkCountyNetworkStatus, state.kildareNetworkStatus, state.dublinNetworkStatus]
+      .filter(value => value != null);
+    return statuses.length >= 2 && statuses.every(value => value !== "loading");
+  }
+
   function scheduleRegionalRefresh() {
     let attempts = 0;
     const timer = window.setInterval(() => {
       attempts += 1;
       renderInventoryCoverage();
-      if (state.kildareNetworkStatus === "ready" || attempts >= 30) window.clearInterval(timer);
+      const canonicalRegions = new Set(canonicalInventory().map(normalizeRegion).filter(region => CONNECTED_REGIONS.includes(region)));
+      if ((canonicalRegions.size === 3 && regionalLoadingComplete()) || attempts >= 60) window.clearInterval(timer);
     }, 500);
   }
 
   document.addEventListener("whiteblock:data-ready", renderInventoryCoverage);
+  document.addEventListener("whiteblock:region-inventory-ready", renderInventoryCoverage);
   document.querySelectorAll('[data-view="discover"]').forEach(button => {
     button.addEventListener("click", () => window.setTimeout(renderInventoryCoverage, 0));
   });
