@@ -65,7 +65,7 @@ jobs:
           python scripts/build_imagery_review_targets.py \
             --input-dir web/data \
             --output imagery-review/targets.json \
-            --max-per-region 20
+            --max-per-region 8
 
       - name: Fetch aerial imagery review batch
         run: |
