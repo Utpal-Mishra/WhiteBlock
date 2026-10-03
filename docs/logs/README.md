@@ -18,6 +18,11 @@ This directory is the repo-backed audit trail for material WHITEBLOCK decisions 
 - Decision Log
 - Validation / QA Log
 - Change / Release Log
+- Governance / Compliance Log
+- Dependency Log
+- Documentation Log
+- Model / Analytics Log
+- Issue / Incident Log
 
 ## Logging standard
 
