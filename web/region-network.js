@@ -8,6 +8,7 @@
   const WB_KILDARE_BOUNDARY_RELATION_ID = 285833;
   // Compatibility marker retained for regression tests/documentation: snapshot?.coverage?.scope !== "county_wide_network"
   const LEGACY_COMPLETE_LABEL = "Complete county parking network";
+  // Regression compatibility only — legacy phrase: complete county inventory. Runtime UI uses the actual full/partial scope.
   const WB_KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
