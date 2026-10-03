@@ -20,3 +20,12 @@
   - do not describe a feature as synced/live until the Pages deployment has completed successfully;
   - include branch, commit and deployment state in release-log entries.
 - Status: corrective code merge complete; Pages deployment in progress at time of entry.
+
+## INC-20261003-002 — Kildare snapshot omitted after Overpass timeout
+
+- Date: 2026-10-03
+- Detection: latest deployed Pages artifact contained Dublin, Cork and Bray regional snapshots but no Kildare snapshot.
+- Root cause: the County Kildare exact-boundary Overpass request timed out/failed across public endpoints and the deployment workflow removed the optional snapshot.
+- Corrective action: add bounded exact-boundary refresh, tiled exact-boundary fallback capability, and an explicitly partial Kildare County Council/maintained-anchor snapshot if the full refresh still fails.
+- Product control: partial Kildare coverage is visibly labelled and is not described as complete county coverage.
+- Status: corrective implementation included in PR #32.

@@ -145,6 +145,18 @@
     return "";
   }
 
+  function imageryCopy(item) {
+    const review = item?.imageryReview || item?.imagery_review;
+    if (!review) return "";
+    const state = String(review.review_result || "");
+    const date = review.imagery_acquisition_date ? ` · imagery ${review.imagery_acquisition_date}` : "";
+    if (state === "physical_parking_visible") return `Aerial evidence: physical parking visible${date}. This does not establish live occupancy or change access rules.`;
+    if (state === "visible_but_stale_imagery") return `Aerial evidence: parking visible in older imagery${date}; fresh verification is required.`;
+    if (state === "parking_context_visible_extent_ambiguous") return `Aerial evidence: parking context visible but footprint is ambiguous${date}.`;
+    if (state === "no_distinct_parking_footprint") return `Aerial evidence: reviewed, but no distinct parking footprint was confirmed${date}.`;
+    return `Aerial evidence reviewed${date}.`;
+  }
+
   function annotateCards() {
     document.querySelectorAll(".parking-card[data-parking-id]").forEach(card => {
       const id = card.dataset.parkingId;
@@ -165,6 +177,14 @@
         const note = document.createElement("p");
         note.className = `wb-access-warning wb-access-warning-${info.group}`;
         note.textContent = copy;
+        card.appendChild(note);
+      }
+
+      const imagery = imageryCopy(item);
+      if (imagery && !card.querySelector(".wb-imagery-evidence")) {
+        const note = document.createElement("p");
+        note.className = "reason wb-imagery-evidence";
+        note.innerHTML = `<strong>Imagery:</strong> ${escape(imagery)}`;
         card.appendChild(note);
       }
     });
@@ -395,22 +415,80 @@
       <p class="wb-access-evidence-note">Restricted assets remain in the evidence inventory but are excluded from normal recommendations. Unknown access remains unknown until a source verifies it; it is never promoted to public parking by absence of a restriction tag.</p>`;
   }
 
+  function reviewedImageryRows() {
+    const inventories = state.regionInventories || {};
+    const seen = new Set();
+    const rows = [];
+    Object.entries(inventories).forEach(([region, items]) => {
+      if (!Array.isArray(items)) return;
+      items.forEach(item => {
+        const id = String(item?.id || "");
+        if (!id || seen.has(id)) return;
+        const review = item?.imageryReview || item?.imagery_review;
+        if (!review) return;
+        seen.add(id);
+        rows.push({ ...item, __imageryRegion: region, __imageryReview: review });
+      });
+    });
+    return rows;
+  }
+
+  function renderImageryEvidenceSummary() {
+    const host = document.getElementById("view-evidence");
+    if (!host) return;
+    const rows = reviewedImageryRows();
+    let panel = document.getElementById("imagery-evidence-panel");
+    if (!rows.length) {
+      panel?.remove();
+      return;
+    }
+    if (!panel) {
+      panel = document.createElement("section");
+      panel.id = "imagery-evidence-panel";
+      panel.className = "surface wb-access-evidence-panel";
+      const table = host.querySelector(".evidence-table");
+      if (table) host.insertBefore(panel, table);
+      else host.appendChild(panel);
+    }
+    const regions = ["cork", "kildare", "dublin", "bray"];
+    const label = { cork: "Cork", kildare: "Kildare", dublin: "Dublin", bray: "Bray" };
+    const cards = regions.map(region => {
+      const regional = rows.filter(item => item.__imageryRegion.toLowerCase().includes(region));
+      if (!regional.length) return "";
+      const visible = regional.filter(item => item.__imageryReview.review_result === "physical_parking_visible").length;
+      const ambiguous = regional.filter(item => item.__imageryReview.review_result === "parking_context_visible_extent_ambiguous").length;
+      const notConfirmed = regional.filter(item => item.__imageryReview.review_result === "no_distinct_parking_footprint").length;
+      const stale = regional.filter(item => item.__imageryReview.review_result === "visible_but_stale_imagery").length;
+      return `<article class="wb-access-evidence-card"><span>${escape(label[region])}</span><strong>${regional.length}</strong><small>${visible} visible · ${ambiguous} ambiguous · ${notConfirmed} not confirmed${stale ? ` · ${stale} older` : ""}</small></article>`;
+    }).join("");
+    panel.innerHTML = `
+      <div class="wb-access-evidence-head">
+        <div><p class="eyebrow">Aerial imagery evidence</p><h3>Physical parking is reviewed separately from access and availability.</h3></div>
+        <span>${rows.length.toLocaleString()} reviewed assets</span>
+      </div>
+      <div class="wb-access-evidence-grid">${cards}</div>
+      <p class="wb-access-evidence-note">Imagery can support physical-supply evidence and geometry follow-up. It does not prove public/legal access and is never treated as live occupancy. No parking polygon was automatically created by this review.</p>`;
+  }
+
   function refreshAccessLayer() {
     ensureAccessControl();
     applyMapFilter();
     annotateCards();
     renderEvidenceSummary();
+    renderImageryEvidenceSummary();
   }
 
   document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(refreshAccessLayer, 0));
-  document.addEventListener("whiteblock:region-inventory-ready", () => window.setTimeout(renderEvidenceSummary, 0));
+  document.addEventListener("whiteblock:region-inventory-ready", () => window.setTimeout(() => { renderEvidenceSummary(); renderImageryEvidenceSummary(); }, 0));
   document.addEventListener("whiteblock:data-ready", () => window.setTimeout(() => {
     annotateCards();
     renderEvidenceSummary();
+    renderImageryEvidenceSummary();
   }, 0));
 
   window.addEventListener("DOMContentLoaded", () => window.setTimeout(() => {
     ensureAccessControl();
     renderEvidenceSummary();
+    renderImageryEvidenceSummary();
   }, 0));
 })();

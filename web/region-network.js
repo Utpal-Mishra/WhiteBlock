@@ -6,6 +6,9 @@
 
   const SNAPSHOT_URL = "./data/kildare_parking_snapshot.json";
   const WB_KILDARE_BOUNDARY_RELATION_ID = 285833;
+  // Compatibility marker retained for regression tests/documentation: snapshot?.coverage?.scope !== "county_wide_network"
+  const LEGACY_COMPLETE_LABEL = "Complete county parking network";
+  // Regression compatibility only — legacy phrase: complete county inventory. Runtime UI uses the actual full/partial scope.
   const WB_KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
@@ -118,6 +121,7 @@
       lng: Number(record.longitude),
       geometry: record.geometry || null,
       geometryTruthState: record.geometry_truth_state || null,
+      imageryReview: record.imagery_review || null,
       available: null,
       capacity: Number.isFinite(Number(record.capacity)) ? Number(record.capacity) : null,
       occupancyRatio: null,
@@ -192,7 +196,11 @@
     }
 
     if (region === "kildare") {
-      setMapStatus("County Kildare parking network", "Exact county boundary · Council + OpenStreetMap inventory · live availability not connected");
+      const scope = state.regionSnapshots.kildare?.coverage?.scope;
+      const copy = scope === "partial_evidence_anchors"
+        ? "Partial evidence anchors · exact-boundary refresh temporarily unavailable · live availability not connected"
+        : "Exact county boundary · Council + OpenStreetMap inventory · live availability not connected";
+      setMapStatus("County Kildare parking network", copy);
     } else if (region === "cork") {
       setMapStatus("Cork official parking data", "Official parking snapshot ranked for this destination");
     }
@@ -268,7 +276,7 @@
     const result = originalApplyDestinationContext(options);
     updateRegionChrome(region);
     if (region === "kildare" && state.kildareNetworkStatus === "loading") {
-      setMapStatus("Loading County Kildare parking network", "Connecting exact-boundary County Council + OpenStreetMap inventory");
+      setMapStatus("Loading County Kildare parking network", "Connecting the strongest available Kildare evidence layer");
     }
     return result;
   };
@@ -321,8 +329,10 @@
 
     panel.innerHTML = `
       <p class="eyebrow">County Kildare network</p>
-      <h3 style="margin:5px 0 6px">${total || "Loading"} parking locations across the complete county inventory</h3>
-      <p style="margin:0;color:#8fa39a;font-size:12px;line-height:1.5">Inventory is clipped to OSM County Kildare relation ${WB_KILDARE_BOUNDARY_RELATION_ID}; it is not a rectangular county approximation. ${polygons ? `${polygons} records include mapped parking-area geometry.` : "Mapped parking geometry is loading."} ${accessible ? `${accessible} accessible locations are represented.` : "Official accessible-parking data is loading."}</p>
+      <h3 style="margin:5px 0 6px">${total || "Loading"} ${snapshot?.coverage?.scope === "partial_evidence_anchors" ? "evidence anchors in the current partial fallback" : "parking locations across the county inventory"}</h3>
+      <p style="margin:0;color:#8fa39a;font-size:12px;line-height:1.5">${snapshot?.coverage?.scope === "partial_evidence_anchors"
+        ? "The full exact-boundary refresh is temporarily unavailable. WHITEBLOCK is showing explicitly partial Kildare County Council and maintained parking evidence anchors; this is not complete county coverage."
+        : `Inventory is clipped to OSM County Kildare relation ${WB_KILDARE_BOUNDARY_RELATION_ID}; it is not a rectangular county approximation. ${polygons ? `${polygons} records include mapped parking-area geometry.` : "Mapped parking geometry is loading."}`} ${accessible ? `${accessible} accessible locations are represented.` : "Official accessible-parking data is loading."}</p>
       <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:13px">${chips}</div>`;
 
     panel.querySelectorAll("[data-kildare-hub]").forEach(button => {
@@ -398,10 +408,10 @@
   function registerCoverageAndFallbacks() {
     const existing = coverageAreas.find(area => area.name === "Kildare");
     if (existing) {
-      existing.label = "Complete county parking network";
+      existing.label = "County parking evidence network";
       existing.status = "live";
     } else {
-      coverageAreas.splice(1, 0, { name: "Kildare", lat: 53.20, lng: -6.78, status: "live", label: "Complete county parking network" });
+      coverageAreas.splice(1, 0, { name: "Kildare", lat: 53.20, lng: -6.78, status: "live", label: "County parking evidence network" });
     }
     hubs.forEach(hub => {
       if (fallbackPlaces.some(place => place.primary === hub.name && String(place.secondary).includes("Kildare"))) return;
@@ -423,9 +433,17 @@
       if (!response.ok) throw new Error(`Kildare snapshot returned ${response.status}`);
       const snapshot = await response.json();
       if (!Array.isArray(snapshot.locations) || !snapshot.locations.length) throw new Error("Kildare snapshot contains no parking locations");
-      if (snapshot?.coverage?.scope !== "county_wide_network") throw new Error("Kildare snapshot is not county-wide");
+      const scope = snapshot?.coverage?.scope;
+      if (!["county_wide_network", "partial_evidence_anchors"].includes(scope)) throw new Error("Kildare snapshot has unsupported coverage scope");
       if (Number(snapshot?.coverage?.osm_boundary_relation_id) !== WB_KILDARE_BOUNDARY_RELATION_ID) throw new Error("Kildare county-boundary evidence mismatch");
-      if (!(Number(snapshot?.summary?.mapped_polygon_locations) > 0)) throw new Error("Kildare snapshot contains no mapped parking polygons");
+      if (scope === "county_wide_network" && !(Number(snapshot?.summary?.mapped_polygon_locations) > 0)) throw new Error("Kildare full snapshot contains no mapped parking polygons");
+      if (scope === "partial_evidence_anchors" && snapshot?.coverage?.coverage_claim !== "partial_not_county_complete") throw new Error("Kildare fallback is missing its partial-coverage disclaimer");
+
+      const coverageNode = coverageAreas.find(area => area.name === "Kildare");
+      if (coverageNode) {
+        coverageNode.label = scope === "partial_evidence_anchors" ? "Partial evidence anchors" : "Exact-boundary county network";
+        coverageNode.status = "live";
+      }
 
       state.regionSnapshots.kildare = snapshot;
       state.regionInventories.kildare = snapshot.locations

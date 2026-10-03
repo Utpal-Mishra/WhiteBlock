@@ -39,14 +39,14 @@
       </nav>
 
       <div class="sidebar-foot">
-        <div class="pilot-card"><span class="status-dot"></span><div><strong>Ireland Pilot</strong><small>Cork + Bray evidence</small></div></div>
+        <div class="pilot-card"><span class="status-dot"></span><div><strong>Ireland Network</strong><small>Cork · Kildare · Dublin · Bray</small></div></div>
         <button class="icon-button" type="button" aria-label="Settings">⚙</button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <div><p class="eyebrow">Ireland · Cork + Bray intelligence pilots</p><h1 id="view-title">Find the best place to park.</h1></div>
+        <div><p class="eyebrow">Ireland · connected parking evidence network</p><h1 id="view-title">Find the best place to park.</h1></div>
         <div class="top-actions">
           <div class="mode-switch" aria-label="Application mode">
             <button type="button" class="mode active" data-mode="driver">Driver</button>
@@ -136,7 +136,7 @@
         <div id="discover-region-list" class="discover-region-list"><div class="surface discover-empty">Loading region coverage…</div></div>
 
         <div class="discover-section-head">
-          <div><p class="eyebrow">Parking inventory</p><h2>Locations added</h2><p>Browse evidence-backed parking across Cork, Kildare and Dublin. Unknown access remains unknown until a source verifies it.</p></div>
+          <div><p class="eyebrow">Parking inventory</p><h2>Locations added</h2><p>Browse evidence-backed parking across Cork, Kildare, Dublin and Bray. Unknown access remains unknown until a source verifies it.</p></div>
           <span class="prototype-badge" id="discover-filter-match-count">Loading matches</span>
         </div>
 
@@ -148,6 +148,7 @@
               <button class="chip" type="button" data-discover-filter="cork">Cork</button>
               <button class="chip" type="button" data-discover-filter="kildare">Kildare</button>
               <button class="chip" type="button" data-discover-filter="dublin">Dublin</button>
+              <button class="chip" type="button" data-discover-filter="bray">Bray</button>
             </div>
           </div>
           <div class="discover-filter-group" data-discover-filter-group="access">
@@ -227,9 +228,12 @@
   <script src="./app.js"></script>
   <script src="./live-data.js"></script>
   <script src="./session-rules.js"></script>
-  <script src="./parking-access-layer.js?v=20260923-1"></script>
   <script src="./api-adapter.js"></script>
-  <script src="./bray-adapter.js?v=20261003-1"></script>
+  <script src="./cork-county-network.js?v=20261003-1"></script>
+  <script src="./region-network.js?v=20261003-1"></script>
+  <script src="./dublin-network.js?v=20261003-1"></script>
+  <script src="./bray-adapter.js?v=20261003-2"></script>
+  <script src="./parking-access-layer.js?v=20260923-1"></script>
   <script src="./discover.js"></script>
   <script src="./map-fix.js?v=20260918-xplore2"></script>
   <script src="./parking-layout.js?v=20260919-1"></script>

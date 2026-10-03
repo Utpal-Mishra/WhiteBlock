@@ -123,6 +123,7 @@
       lng: numeric(record.longitude),
       geometry: record.geometry || null,
       geometryTruthState: record.geometry_truth_state || null,
+      imageryReview: record.imagery_review || null,
       available: null,
       capacity: numeric(record.capacity),
       occupancyRatio: null,

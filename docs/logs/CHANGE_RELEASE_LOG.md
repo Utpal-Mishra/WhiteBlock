@@ -27,3 +27,13 @@
 - Current deployment state at log time: in progress; Cork City refresh and Dublin evidence acquisition completed successfully, County Cork snapshot build in progress.
 - Integrity check: main now contains `web/bray-adapter.js` and the Bray script reference in `web/index.html`.
 - Status: code synchronized to main; production Pages publication in progress.
+
+## CHANGE-20261003-003 — Cross-region aerial evidence integration
+
+- Date: 2026-10-03
+- PR: #32.
+- Added: imagery review target builder, temporary imagery review workflow, permanent imagery evidence sidecar, snapshot overlay script, imagery runbook and Kildare partial fallback builder.
+- Changed: Pages deployment, Cork/Kildare/Dublin/Bray regional adapters, Discover, access/evidence UI and regional runtime wiring.
+- Data change: 31 reviewed records receive imagery-review metadata at deployment; Bray stores the reviewed metadata directly as well.
+- Release gates: tests + imagery workflow + merge + Pages deployment + deployed-artifact verification.
+- Release state: feature branch pending final CI at entry time.

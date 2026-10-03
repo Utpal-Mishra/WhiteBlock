@@ -34,3 +34,14 @@
   - Pages workflow #181 is running from merge commit `b9269d82fd7d659a8843f861262f099403cc6b4a`.
 - Remaining gate: workflow must complete the upload/deploy steps before the public Pages URL reflects the Bray build.
 - Status: repository sync passed; public deployment pending completion.
+
+## QA-20261003-003 — Cross-region imagery review integrity checks
+
+- Date: 2026-10-03
+- Reviewed records: 31; County Dublin, County Cork, County Kildare and Bray are all represented.
+- Imagery artifact workflow: successful review artifact generated with per-record frames, metadata and region contact sheets.
+- Review outcomes: 17 physical parking visible; 9 footprint ambiguous; 3 distinct footprint not confirmed; 2 visible only in older imagery.
+- Data integrity: no imagery pixels committed; no available/occupied-space values created; no access-type values changed; no automatic geometry created.
+- Negative evidence preserved: ambiguous/not-confirmed outcomes remain explicit.
+- App regression: legacy runtime/test contracts preserved while adding four-region runtime wiring and imagery metadata.
+- Status: evidence validation passed; final CI/deployment validation tracked on PR #32.

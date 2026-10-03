@@ -14,9 +14,12 @@ on:
       - "scripts/ingest_kildare_county_parking_stable.py"
       - "scripts/enrich_kildare_snapshot.py"
       - "scripts/finalize_kildare_county_snapshot.py"
+      - "scripts/build_kildare_fallback_snapshot.py"
       - "scripts/ingest_dublin_county_parking.py"
       - "scripts/ingest_dublin_county_parking_stable.py"
       - "scripts/build_dublin_coverage_ledger.py"
+      - "scripts/apply_imagery_review_evidence.py"
+      - "config/imagery_review_evidence.json"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -140,14 +143,23 @@ jobs:
 
       - name: Build County Kildare network snapshot
         run: |
-          if python scripts/ingest_kildare_county_parking_stable.py --output web/data/kildare_parking_snapshot.json \
+          rm -f web/data/kildare_parking_snapshot.json
+          if timeout 210s python scripts/ingest_kildare_county_parking_stable.py --output web/data/kildare_parking_snapshot.json \
             && python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json \
             && python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json; then
-            echo "County Kildare network snapshot built"
+            echo "County Kildare exact-boundary network snapshot built"
           else
-            echo "::warning::County Kildare network snapshot unavailable; deploying without the optional county snapshot"
+            echo "::warning::County Kildare exact-boundary refresh unavailable; publishing explicitly partial evidence anchors"
             rm -f web/data/kildare_parking_snapshot.json
+            python scripts/build_kildare_fallback_snapshot.py --output web/data/kildare_parking_snapshot.json
           fi
+
+      - name: Apply reviewed imagery evidence
+        run: |
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/dublin_parking_snapshot.json --region Dublin
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/cork_county_parking_snapshot.json --region Cork
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/kildare_parking_snapshot.json --region Kildare
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/bray_parking_snapshot.json --region Bray
 
       - name: Validate regional snapshots
         run: |
@@ -195,17 +207,25 @@ jobs:
               kildare_summary = kildare.get("summary", {})
               kildare_coverage = kildare.get("coverage", {})
               kildare_osm = kildare.get("sources", {}).get("openstreetmap_kildare_parking", {})
-              if kildare_coverage.get("scope") != "county_wide_network":
-                  raise SystemExit("Kildare snapshot is not marked as complete county-wide coverage")
+              kildare_scope = kildare_coverage.get("scope")
+              if kildare_scope not in {"county_wide_network", "partial_evidence_anchors"}:
+                  raise SystemExit(f"Unsupported Kildare coverage scope: {kildare_scope!r}")
               if int(kildare_coverage.get("osm_boundary_relation_id") or 0) != 285833:
-                  raise SystemExit("Kildare snapshot does not reference the canonical County Kildare OSM boundary")
-              if kildare_osm.get("query_mode") != "exact_county_boundary" or kildare_osm.get("status") != "ok":
-                  raise SystemExit("Kildare OSM inventory was not built from the exact county boundary")
-              if int(kildare_osm.get("admin_level") or 0) != 6:
-                  raise SystemExit("Kildare OSM inventory did not resolve the Irish county admin level")
+                  raise SystemExit("Kildare snapshot does not reference the canonical County Kildare boundary provenance")
+
               kildare_polygon_count = kildare_summary.get("mapped_polygon_locations", 0) or 0
-              if kildare_polygon_count <= 0:
-                  raise SystemExit("County Kildare snapshot contains no mapped parking polygons")
+              if kildare_scope == "county_wide_network":
+                  if kildare_osm.get("query_mode") not in {"exact_county_boundary", "exact_county_boundary_tiled"} or kildare_osm.get("status") != "ok":
+                      raise SystemExit("Kildare full inventory was not built from the exact county boundary")
+                  if int(kildare_osm.get("admin_level") or 0) != 6:
+                      raise SystemExit("Kildare OSM inventory did not resolve the Irish county admin level")
+                  if kildare_polygon_count <= 0:
+                      raise SystemExit("County Kildare full snapshot contains no mapped parking polygons")
+              else:
+                  if kildare_coverage.get("coverage_claim") != "partial_not_county_complete":
+                      raise SystemExit("Kildare fallback must explicitly declare partial coverage")
+                  if kildare_summary.get("coverage_complete") is not False:
+                      raise SystemExit("Kildare fallback must not claim complete coverage")
 
               ids = {item.get("parking_id") for item in kildare_locations}
               required = {
@@ -218,7 +238,7 @@ jobs:
                   raise SystemExit("Critical Kildare parking anchors missing: " + ", ".join(missing))
               if not any((item.get("ev_spaces") or 0) > 0 for item in kildare_locations):
                   raise SystemExit("Kildare snapshot contains no EV-enabled parking")
-              print(f"Validated optional County Kildare snapshot with {len(kildare_locations)} locations / {kildare_polygon_count} polygons")
+              print(f"Validated County Kildare {kildare_scope} snapshot with {len(kildare_locations)} locations / {kildare_polygon_count} polygons")
           else:
               print("County Kildare optional snapshot unavailable; browser will expose the source-unavailable state")
 
