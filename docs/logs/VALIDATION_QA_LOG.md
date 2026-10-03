@@ -18,4 +18,19 @@
   - verify Ireland overview shows Bray;
   - verify mobile layout and map layers;
   - verify no console error if Bray snapshot fails.
-- Status: static design checks completed; browser/deployment regression pending.
+- Status: static design checks completed; PR tests passed; deployment regression in progress.
+
+
+## QA-20261003-002 — Main/deployment synchronization check
+
+- Date: 2026-10-03
+- Check: verify Bray implementation exists on the deployed source branch rather than only a feature branch.
+- Result: PASS for repository synchronization.
+- Evidence:
+  - PR #31 tests completed successfully.
+  - PR #31 merged into main.
+  - main `web/index.html` references `./bray-adapter.js?v=20261003-1`.
+  - main `web/bray-adapter.js` exists.
+  - Pages workflow #181 is running from merge commit `b9269d82fd7d659a8843f861262f099403cc6b4a`.
+- Remaining gate: workflow must complete the upload/deploy steps before the public Pages URL reflects the Bray build.
+- Status: repository sync passed; public deployment pending completion.
