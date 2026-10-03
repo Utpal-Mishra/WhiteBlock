@@ -199,6 +199,27 @@ Important evidence rules:
 
 The repo-backed audit trail for this expansion is under `docs/logs/`.
 
+## Cross-region aerial imagery evidence
+
+WHITEBLOCK now has a repeatable aerial-imagery review layer for open/missing-geometry parking evidence across County Cork, County Kildare, County Dublin and Bray.
+
+The first review batch (2026-10-03, review ID **WB-IMG-20261003-001**) human-reviewed 31 high-priority records:
+
+- Dublin: 8
+- Cork: 8
+- Kildare: 8
+- Bray: 7
+
+Across the batch, 17 records had clearly visible physical parking, 9 had parking context but ambiguous extent, 3 did not show a distinct parking footprint at the mapped point, and 2 relied on older imagery and were explicitly marked stale. Seven clear surface-lot records are eligible for a later geometry-digitisation task; **no polygons were automatically invented**.
+
+Permanent conclusions live in **config/imagery_review_evidence.json**. Deployment overlays those conclusions onto the regional parking snapshots with **scripts/apply_imagery_review_evidence.py**. The UI can then surface the aerial-review state in Find, Discover and Evidence without confusing imagery with live availability.
+
+The temporary review imagery itself is not committed to the repository. See [Aerial Imagery Review Runbook](docs/IMAGERY_REVIEW_RUNBOOK.md).
+
+### Kildare continuity
+
+County Kildare prefers the exact-boundary county inventory. If external Overpass infrastructure cannot complete that refresh inside the deployment time budget, WHITEBLOCK publishes an explicitly partial Kildare evidence-anchor snapshot rather than silently dropping Kildare from the app. The UI labels that state as partial and does not claim complete county coverage.
+
 ## Secondary-source reconciliation
 
 Normalize a secondary parking dataset into JSON/JSONL records containing at minimum:
