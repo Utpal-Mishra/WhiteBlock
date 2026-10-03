@@ -14,3 +14,12 @@
 - Data semantics: stable asset facts and rule evidence can be added; live occupancy must remain separate and absent when unsupported.
 - Future path: migrate Bray into the persistent reconciliation/PostGIS layer once an automated source pipeline is available.
 - Status: accepted for evidence-pilot stage.
+
+## ARCH-20261003-002 — Imagery evidence is a sidecar, not a replacement source of truth
+
+- Date: 2026-10-03
+- Decision: store human-reviewed conclusions as metadata sidecar evidence and overlay them onto regional snapshots at build time.
+- Rationale: keeps imagery provenance separate from legal/access and live-observation domains; avoids copying provider imagery into the repository.
+- Architecture: regional source → canonical asset → imagery-review sidecar → deployment overlay → UI evidence.
+- Geometry policy: candidate_polygon_allowed creates a later digitisation task only; geometry remains null until independently digitised/reconciled.
+- Status: accepted.
