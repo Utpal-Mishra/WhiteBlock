@@ -34,7 +34,7 @@ def now_z() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def request(url: str, timeout: int = 35) -> bytes:
+def request(url: str, timeout: int = 15) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"})
     with urllib.request.urlopen(req, timeout=timeout) as response:
         return response.read()
