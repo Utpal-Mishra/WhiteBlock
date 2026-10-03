@@ -1,0 +1,100 @@
+name: WHITEBLOCK imagery review
+
+on:
+  pull_request:
+    paths:
+      - "scripts/build_imagery_review_targets.py"
+      - "scripts/fetch_imagery_review.py"
+      - "scripts/ingest_kildare_county_parking_stable.py"
+      - ".github/workflows/imagery-review.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  imagery-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install image tooling
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Reuse latest deployed regional evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p web/data /tmp/pages-artifact /tmp/pages-site
+          RUN_ID="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/pages.yml/runs?branch=main&status=success&per_page=1" --jq '.workflow_runs[0].id // empty')"
+          test -n "${RUN_ID}" || { echo "No successful Pages deployment available"; exit 1; }
+          echo "Using Pages run ${RUN_ID}"
+          gh run download "${RUN_ID}" -R "${GITHUB_REPOSITORY}" -n github-pages -D /tmp/pages-artifact
+          tar -xf /tmp/pages-artifact/artifact.tar -C /tmp/pages-site
+          cp -f /tmp/pages-site/data/dublin_parking_snapshot.json web/data/
+          cp -f /tmp/pages-site/data/cork_county_parking_snapshot.json web/data/
+          if [[ -s /tmp/pages-site/data/bray_parking_snapshot.json ]]; then
+            cp -f /tmp/pages-site/data/bray_parking_snapshot.json web/data/
+          fi
+
+      - name: Rebuild County Kildare with resilient exact-boundary traversal
+        run: |
+          set +e
+          python scripts/ingest_kildare_county_parking_stable.py --output web/data/kildare_parking_snapshot.json
+          status=$?
+          if [[ $status -eq 0 ]]; then
+            python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
+            python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
+          else
+            echo "::warning::Kildare county rebuild still unavailable; imagery review will use the repository's evidence-backed Kildare anchors."
+            rm -f web/data/kildare_parking_snapshot.json
+          fi
+          exit 0
+
+      - name: Build open-location imagery queue
+        run: |
+          python scripts/build_imagery_review_targets.py \
+            --input-dir web/data \
+            --output imagery-review/targets.json \
+            --max-per-region 20
+
+      - name: Fetch aerial imagery review batch
+        run: |
+          python scripts/fetch_imagery_review.py \
+            --targets imagery-review/targets.json \
+            --output-dir imagery-review/output
+
+      - name: Validate review artifact
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          targets = json.loads(Path("imagery-review/targets.json").read_text())
+          manifest = json.loads(Path("imagery-review/output/manifest.json").read_text())
+          selected = {r: x["selected_for_imagery_review"] for r, x in targets["summary"].items()}
+          ready = [x for x in manifest["records"] if x["review_status"] == "imagery_ready_for_human_review"]
+          print("selected:", selected)
+          print("imagery ready:", len(ready), "of", len(manifest["records"]))
+          for region in selected:
+              if selected[region] and not any(x["region"] == region and x["review_status"] == "imagery_ready_for_human_review" for x in manifest["records"]):
+                  raise SystemExit(f"No imagery was retrieved for {region}")
+          PY
+
+      - name: Upload internal imagery review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whiteblock-imagery-review
+          path: |
+            imagery-review/targets.json
+            imagery-review/output/
+          retention-days: 7
