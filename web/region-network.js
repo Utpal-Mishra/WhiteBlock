@@ -118,6 +118,7 @@
       lng: Number(record.longitude),
       geometry: record.geometry || null,
       geometryTruthState: record.geometry_truth_state || null,
+      imageryReview: record.imagery_review || null,
       available: null,
       capacity: Number.isFinite(Number(record.capacity)) ? Number(record.capacity) : null,
       occupancyRatio: null,
