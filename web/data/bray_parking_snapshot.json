@@ -58,7 +58,23 @@
           "url": "https://www.wicklow.ie/Portals/0/Documents/Roads%20%26%20Transport/Parking-Bye-Laws/Wicklow%20Co%20Co%20Parking%20Bye%20Laws.pdf",
           "note": "Schedule A Zone H names North Beach Carpark and sets the listed charge/control period."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "physical_parking_visible",
+        "physical_parking_evidence": true,
+        "geometry_action": "keep_point_or_corridor",
+        "confidence": 0.9,
+        "note": "Dense linear seafront parking is clearly visible; exact bay count is not inferred.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "retain_existing_point_or_corridor_semantics"
+      }
     },
     {
       "parking_id": "WB-PARK-IE-WW-BRAY-000002",
@@ -110,7 +126,23 @@
           "url": "https://brayairdisplay.com/getting-here/traffic-management-plan/",
           "note": "2026 Air Display traffic plan demonstrates temporary no-parking closures can supersede baseline rules."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "physical_parking_visible",
+        "physical_parking_evidence": true,
+        "geometry_action": "keep_point_or_corridor",
+        "confidence": 0.9,
+        "note": "Continuous curbside/seafront parking is clearly visible; retain corridor evidence.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "retain_existing_point_or_corridor_semantics"
+      }
     },
     {
       "parking_id": "WB-PARK-IE-WW-BRAY-000003",
@@ -146,7 +178,23 @@
           "url": "https://mapcarta.com/W237791159",
           "note": "OSM-derived parking area at 53.20353,-6.10039."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "physical_parking_visible",
+        "physical_parking_evidence": true,
+        "geometry_action": "candidate_polygon_allowed",
+        "confidence": 0.8,
+        "note": "Rows of station parking are visible; exact canonical footprint needs reconciliation before digitising.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "physical_supply_confirmed_geometry_not_digitized"
+      }
     },
     {
       "parking_id": "WB-PARK-IE-WW-BRAY-000004",
@@ -187,7 +235,23 @@
           "url": "https://ie.near-place.com/parking-nearby-bray-daly-station-carpark-2-quinsborough-road-bray/pl",
           "note": "Bray (Daly) Station Carpark 2 coordinates 53.2052716,-6.1014224."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "physical_parking_visible",
+        "physical_parking_evidence": true,
+        "geometry_action": "candidate_polygon_allowed",
+        "confidence": 0.8,
+        "note": "Substantial station-area parking is visible; exact boundary alignment needs reconciliation.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "physical_supply_confirmed_geometry_not_digitized"
+      }
     },
     {
       "parking_id": "WB-PARK-IE-WW-BRAY-000005",
@@ -228,7 +292,23 @@
           "url": "https://ie.near-place.com/florence-road-car-park-2-14-florence-road-bray",
           "note": "Coordinates 53.2035243,-6.10699."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "parking_context_visible_extent_ambiguous",
+        "physical_parking_evidence": false,
+        "geometry_action": "field_verification_required",
+        "confidence": 0.62,
+        "note": "No distinct car-park footprint is unambiguous around the mapped point in this frame.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "field_or_fresh_imagery_verification_required"
+      }
     },
     {
       "parking_id": "WB-PARK-IE-WW-BRAY-000006",
@@ -269,7 +349,23 @@
           "url": "https://www.parkme.com/lot/352743/dargle-car-park-bray-ireland",
           "note": "Secondary listing reports 48 spaces, 2 accessible spaces and current tariff details."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "physical_parking_visible",
+        "physical_parking_evidence": true,
+        "geometry_action": "candidate_polygon_allowed",
+        "confidence": 0.86,
+        "note": "A paved parking area with parked vehicles is clearly visible.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "physical_supply_confirmed_geometry_not_digitized"
+      }
     },
     {
       "parking_id": "WB-PARK-IE-WW-BRAY-000007",
@@ -305,7 +401,23 @@
           "url": "https://ie.near-place.com/parking-nearby-car-park-bray-head-raheen-park-bray",
           "note": "Coordinates 53.195171,-6.0888649."
         }
-      ]
+      ],
+      "imagery_review": {
+        "review_id": "WB-IMG-20261003-001",
+        "reviewed_at": "2026-10-03T17:40:00Z",
+        "provider": "Esri World Imagery",
+        "imagery_product": "Vivid Advanced",
+        "imagery_acquisition_date": "2025-05-13",
+        "imagery_resolution_m": 0.34,
+        "review_result": "physical_parking_visible",
+        "physical_parking_evidence": true,
+        "geometry_action": "candidate_polygon_allowed",
+        "confidence": 0.85,
+        "note": "A clear surface lot with parked vehicles is visible. Existing access remains unknown.",
+        "access_caveat": "Imagery supports physical-supply review only; existing legal/access classification is unchanged.",
+        "occupancy_caveat": "Vehicles visible in imagery are historical scene content, not live occupancy.",
+        "candidate_status": "physical_supply_confirmed_geometry_not_digitized"
+      }
     }
   ],
   "candidates": [
@@ -317,5 +429,28 @@
       "status": "field_or_fresh_imagery_validation_required",
       "evidence_note": "Historical aerial imagery and present-day visual observation indicate substantially more bay-level supply than current structured datasets expose. Do not publish a capacity total until fresh imagery/field verification and sign-by-sign rule capture are complete."
     }
-  ]
+  ],
+  "summary": {
+    "imagery_review": {
+      "reviewed_assets": 7,
+      "physical_parking_visible": 6,
+      "parking_context_visible_extent_ambiguous": 1,
+      "no_distinct_parking_footprint": 0,
+      "visible_but_stale_imagery": 0,
+      "automatic_geometry_created": 0,
+      "live_occupancy_inferred": false
+    }
+  },
+  "sources": {
+    "whiteblock_imagery_review_20261003": {
+      "status": "reviewed",
+      "review_id": "WB-IMG-20261003-001",
+      "provider": "Esri World Imagery",
+      "role": "physical_supply_validation_only",
+      "stored_imagery": false,
+      "matched_records": 7,
+      "legal_access_inferred": false,
+      "live_occupancy_inferred": false
+    }
+  }
 }
