@@ -172,6 +172,33 @@ Generated pilot data is excluded from Git; the Pages artifact contains only the 
 
 See [Cork Ingestion Runbook](docs/CORK_INGESTION_RUNBOOK.md).
 
+## Bray seafront evidence pilot
+
+Bray, County Wicklow is the first expansion beyond Cork. The Bray layer intentionally combines **legal-rule evidence, mapped parking assets and aerial/street imagery evidence** without pretending that imagery is a live availability feed.
+
+The browser loads:
+
+```text
+web/data/bray_parking_snapshot.json
+        ↓
+web/bray-adapter.js
+        ↓
+shared WHITEBLOCK ranking / map / evidence UI
+```
+
+The initial Bray sweep covers the seafront/Strand Road corridor, North Beach, Bray (Daly) station parking, Florence Road, Dargle and the Bray Head/Raheen Park edge of the seafront network.
+
+Important evidence rules:
+
+- Wicklow County Council parking by-laws are the primary source for baseline public-road/car-park rules.
+- OpenStreetMap-derived geometry and current parking listings are secondary location/capacity evidence.
+- Historical aerial/street imagery may confirm that physical parking supply exists, but does **not** prove present legal access, current capacity or live occupancy.
+- Ambiguous duplicate listings are reconciled instead of double-counted.
+- Special-event restrictions and on-site signs override the baseline layer.
+- Bay-level capacity along Strand Road remains a validation task until fresh imagery/field evidence is available.
+
+The repo-backed audit trail for this expansion is under `docs/logs/`.
+
 ## Secondary-source reconciliation
 
 Normalize a secondary parking dataset into JSON/JSONL records containing at minimum:
