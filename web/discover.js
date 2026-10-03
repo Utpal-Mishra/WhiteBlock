@@ -8,7 +8,8 @@
 
   const PAGE_SIZE = 100;
   const GENERIC_NAMES = new Set(["parking", "car park", "surface parking", "street side parking", "lane parking"]);
-  const REGION_LABELS = { cork: "Cork", kildare: "Kildare", dublin: "Dublin", bray: "Bray" };
+  const REGION_LABELS = { cork: "Cork", kildare: "Kildare", dublin: "Dublin" };
+  REGION_LABELS.bray = "Bray";
 
   state.discoveryInventory = [];
   state.discoveryVisibleLimit = PAGE_SIZE;
