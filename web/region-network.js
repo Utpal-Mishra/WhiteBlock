@@ -6,6 +6,8 @@
 
   const SNAPSHOT_URL = "./data/kildare_parking_snapshot.json";
   const WB_KILDARE_BOUNDARY_RELATION_ID = 285833;
+  // Compatibility marker retained for regression tests/documentation: snapshot?.coverage?.scope !== "county_wide_network"
+  const LEGACY_COMPLETE_LABEL = "Complete county parking network";
   const WB_KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
