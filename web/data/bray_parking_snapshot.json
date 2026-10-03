@@ -1,0 +1,321 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-03T14:48:00Z",
+  "region": {
+    "name": "Bray",
+    "county": "Wicklow",
+    "country": "Ireland",
+    "center": {
+      "latitude": 53.2048,
+      "longitude": -6.0996
+    },
+    "coverage_radius_km": 5
+  },
+  "source": {
+    "key": "bray_seafront_evidence_20261003",
+    "retrieved_at": "2026-10-03T14:48:00Z",
+    "method": "Curated evidence fusion: Wicklow County Council parking by-laws/current parking guidance + OpenStreetMap-derived location evidence + current parking listings + aerial/street imagery review.",
+    "live_occupancy": false,
+    "caveat": "Physical parking evidence and legal parking rules are not live occupancy. On-site signage takes precedence."
+  },
+  "locations": [
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000001",
+      "name": "North Beach Car Park",
+      "latitude": 53.20648,
+      "longitude": -6.10027,
+      "parking_type": "surface_lot",
+      "access_type": "public",
+      "lifecycle_state": "active",
+      "capacity": null,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": null,
+      "ev_spaces": null,
+      "maximum_stay_minutes": null,
+      "pricing_raw": "Wicklow County Council Zone H: €0.30/hour; €3 all day; pay-control 07:30–18:30; free all day Sunday. Verify current on-site signage.",
+      "opening_hours_raw": null,
+      "height_restriction_raw": null,
+      "truth_state": "observed",
+      "confidence": {
+        "score": 0.92,
+        "basis": {
+          "source": 0.95,
+          "freshness": 0.8,
+          "completeness": 0.72
+        }
+      },
+      "source_key": "wicklow_parking_bylaws_2017",
+      "source_notes": "Official by-laws name North Beach Carpark. Current mapping/listing evidence places the seafront car park around 53.20648,-6.10027. Nearby 'Bray Town Council Car Park'/'Northern Carpark' listings are treated as aliases/adjacent evidence, not separate canonical assets.",
+      "evidence": [
+        {
+          "type": "official_rule",
+          "url": "https://www.wicklow.ie/Living/Services/Roads-Transport/Road-Policy/Parking-Bye-Laws",
+          "note": "Wicklow County Council states the 2017 county parking by-laws cover Bray."
+        },
+        {
+          "type": "official_rule",
+          "url": "https://www.wicklow.ie/Portals/0/Documents/Roads%20%26%20Transport/Parking-Bye-Laws/Wicklow%20Co%20Co%20Parking%20Bye%20Laws.pdf",
+          "note": "Schedule A Zone H names North Beach Carpark and sets the listed charge/control period."
+        }
+      ]
+    },
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000002",
+      "name": "Strand Road Seafront Parking Corridor",
+      "latitude": 53.20481,
+      "longitude": -6.0996,
+      "parking_type": "on_street",
+      "access_type": "public",
+      "lifecycle_state": "active",
+      "capacity": null,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": null,
+      "ev_spaces": null,
+      "maximum_stay_minutes": 900,
+      "pricing_raw": "Wicklow County Council Zone D: €0.30/hour or €3/day; up to 15 hours unless an information plate states otherwise; free all day Sunday. Verify current signage and event restrictions.",
+      "opening_hours_raw": null,
+      "height_restriction_raw": null,
+      "truth_state": "inferred",
+      "confidence": {
+        "score": 0.86,
+        "basis": {
+          "source": 0.92,
+          "freshness": 0.72,
+          "completeness": 0.66
+        }
+      },
+      "source_key": "wicklow_bylaws_plus_aerial",
+      "source_notes": "Official by-laws cover Strand Road from Martello Terrace to Fontenoy Terrace. Aerial/street imagery shows sustained parking use along the seafront, but bay-by-bay geometry and present capacity are not asserted from historical imagery.",
+      "restriction_notes": "Special-event traffic management can temporarily prohibit Strand Road parking; live/event signage overrides the baseline.",
+      "evidence": [
+        {
+          "type": "official_rule",
+          "url": "https://www.wicklow.ie/Portals/0/Documents/Roads%20%26%20Transport/Parking-Bye-Laws/Wicklow%20Co%20Co%20Parking%20Bye%20Laws.pdf",
+          "note": "Schedule A Zone D includes Strand Road from Martello Terrace to Fontenoy Terrace."
+        },
+        {
+          "type": "aerial_imagery",
+          "url": "https://www.gettyimages.com/",
+          "note": "2017 aerial imagery of Bray beachfront visibly shows a continuous row of parked cars; used only as physical-supply evidence, not current occupancy."
+        },
+        {
+          "type": "street_imagery",
+          "url": "https://www.geograph.ie/photo/6939682",
+          "note": "Geotagged Strand Road image at approximately 53.20481,-6.09960 shows marked/used roadside parking."
+        },
+        {
+          "type": "event_rule",
+          "url": "https://brayairdisplay.com/getting-here/traffic-management-plan/",
+          "note": "2026 Air Display traffic plan demonstrates temporary no-parking closures can supersede baseline rules."
+        }
+      ]
+    },
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000003",
+      "name": "Bray Station Car Park (Station Yard)",
+      "latitude": 53.20353,
+      "longitude": -6.10039,
+      "parking_type": "surface_lot",
+      "access_type": "public",
+      "lifecycle_state": "active",
+      "capacity": null,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": null,
+      "ev_spaces": null,
+      "maximum_stay_minutes": null,
+      "pricing_raw": null,
+      "opening_hours_raw": "24-hour access reported by current parking listings; verify operator signage.",
+      "height_restriction_raw": null,
+      "truth_state": "observed",
+      "confidence": {
+        "score": 0.82,
+        "basis": {
+          "source": 0.84,
+          "freshness": 0.82,
+          "completeness": 0.58
+        }
+      },
+      "source_key": "osm_plus_current_listing",
+      "source_notes": "OSM-derived parking geometry identifies a Station Yard parking area adjacent to Bray (Daly).",
+      "evidence": [
+        {
+          "type": "open_map",
+          "url": "https://mapcarta.com/W237791159",
+          "note": "OSM-derived parking area at 53.20353,-6.10039."
+        }
+      ]
+    },
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000004",
+      "name": "Bray (Daly) Station Car Park 2 / NCPS",
+      "latitude": 53.20527,
+      "longitude": -6.1014,
+      "parking_type": "surface_lot",
+      "access_type": "public",
+      "lifecycle_state": "active",
+      "capacity": null,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": null,
+      "ev_spaces": null,
+      "maximum_stay_minutes": null,
+      "pricing_raw": null,
+      "opening_hours_raw": "24-hour access reported by current parking listings; verify operator signage.",
+      "height_restriction_raw": null,
+      "truth_state": "observed",
+      "confidence": {
+        "score": 0.79,
+        "basis": {
+          "source": 0.78,
+          "freshness": 0.84,
+          "completeness": 0.56
+        }
+      },
+      "source_key": "current_parking_listings",
+      "source_notes": "Two current listings resolve to effectively the same Quinsborough Road coordinates; canonicalised as one asset to avoid double counting.",
+      "evidence": [
+        {
+          "type": "parking_listing",
+          "url": "https://ie.near-place.com/parking-nearby-ncps-car-park-quinsborough-road-bray/pl",
+          "note": "NCPS Car Park coordinates 53.2052732,-6.1013768."
+        },
+        {
+          "type": "parking_listing",
+          "url": "https://ie.near-place.com/parking-nearby-bray-daly-station-carpark-2-quinsborough-road-bray/pl",
+          "note": "Bray (Daly) Station Carpark 2 coordinates 53.2052716,-6.1014224."
+        }
+      ]
+    },
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000005",
+      "name": "Florence Road Car Park",
+      "latitude": 53.20352,
+      "longitude": -6.10699,
+      "parking_type": "surface_lot",
+      "access_type": "public",
+      "lifecycle_state": "active",
+      "capacity": null,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": null,
+      "ev_spaces": null,
+      "maximum_stay_minutes": null,
+      "pricing_raw": "Wicklow County Council Zone G: €1/hour; €5 all day; pay-control 07:30–18:30; free all day Sunday. Verify current on-site signage.",
+      "opening_hours_raw": "24-hour access is reported by a current listing; pay-control hours are separately defined by the council by-laws.",
+      "height_restriction_raw": null,
+      "truth_state": "observed",
+      "confidence": {
+        "score": 0.86,
+        "basis": {
+          "source": 0.91,
+          "freshness": 0.78,
+          "completeness": 0.7
+        }
+      },
+      "source_key": "wicklow_bylaws_plus_current_listing",
+      "source_notes": "Official by-laws name Florence Road Carpark; current location listing provides coordinates.",
+      "evidence": [
+        {
+          "type": "official_rule",
+          "url": "https://www.wicklow.ie/Portals/0/Documents/Roads%20%26%20Transport/Parking-Bye-Laws/Wicklow%20Co%20Co%20Parking%20Bye%20Laws.pdf",
+          "note": "Zone G names Florence Road Carpark and lists tariff/control hours."
+        },
+        {
+          "type": "parking_listing",
+          "url": "https://ie.near-place.com/florence-road-car-park-2-14-florence-road-bray",
+          "note": "Coordinates 53.2035243,-6.10699."
+        }
+      ]
+    },
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000006",
+      "name": "Dargle Car Park",
+      "latitude": 53.20539,
+      "longitude": -6.10806,
+      "parking_type": "surface_lot",
+      "access_type": "public",
+      "lifecycle_state": "active",
+      "capacity": 48,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": 2,
+      "ev_spaces": null,
+      "maximum_stay_minutes": null,
+      "pricing_raw": "Secondary listing: €1/hour; €10 daily max; €5 daily max with validation. Verify operator signage before use.",
+      "opening_hours_raw": "24-hour access reported by current parking listing.",
+      "height_restriction_raw": null,
+      "truth_state": "observed",
+      "confidence": {
+        "score": 0.78,
+        "basis": {
+          "source": 0.78,
+          "freshness": 0.8,
+          "completeness": 0.74
+        }
+      },
+      "source_key": "osm_plus_secondary_operator_listing",
+      "source_notes": "OSM-derived geometry and a current parking listing corroborate a surface car park on Seapoint Road. Capacity/pricing are secondary-source fields and should not be treated as council-authoritative.",
+      "evidence": [
+        {
+          "type": "open_map",
+          "url": "https://mapcarta.com/W304055920",
+          "note": "OSM-derived Dargle Car Park at 53.20539,-6.10806."
+        },
+        {
+          "type": "parking_listing",
+          "url": "https://www.parkme.com/lot/352743/dargle-car-park-bray-ireland",
+          "note": "Secondary listing reports 48 spaces, 2 accessible spaces and current tariff details."
+        }
+      ]
+    },
+    {
+      "parking_id": "WB-PARK-IE-WW-BRAY-000007",
+      "name": "Bray Head / Raheen Park Car Park",
+      "latitude": 53.195171,
+      "longitude": -6.088865,
+      "parking_type": "surface_lot",
+      "access_type": "unknown",
+      "lifecycle_state": "active",
+      "capacity": null,
+      "available_spaces": null,
+      "occupancy_ratio": null,
+      "accessible_spaces": null,
+      "ev_spaces": null,
+      "maximum_stay_minutes": null,
+      "pricing_raw": null,
+      "opening_hours_raw": null,
+      "height_restriction_raw": null,
+      "truth_state": "observed",
+      "confidence": {
+        "score": 0.68,
+        "basis": {
+          "source": 0.66,
+          "freshness": 0.78,
+          "completeness": 0.42
+        }
+      },
+      "source_key": "current_parking_listing",
+      "source_notes": "Mapped south-seafront/Bray Head parking location. Access/rules remain unverified, so WHITEBLOCK keeps access as unknown rather than assuming public eligibility.",
+      "evidence": [
+        {
+          "type": "parking_listing",
+          "url": "https://ie.near-place.com/parking-nearby-car-park-bray-head-raheen-park-bray",
+          "note": "Coordinates 53.195171,-6.0888649."
+        }
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "WB-CAND-IE-WW-BRAY-000001",
+      "name": "Additional Bray seafront bay-level inventory",
+      "area": "Strand Road / Promenade",
+      "truth_state": "inferred",
+      "status": "field_or_fresh_imagery_validation_required",
+      "evidence_note": "Historical aerial imagery and present-day visual observation indicate substantially more bay-level supply than current structured datasets expose. Do not publish a capacity total until fresh imagery/field verification and sign-by-sign rule capture are complete."
+    }
+  ]
+}
