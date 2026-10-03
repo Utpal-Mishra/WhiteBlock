@@ -14,3 +14,14 @@
   - unsupported access remains unknown.
 - Next validation: field/photo verification of Strand Road bay geometry, signs, accessible/EV bays and capacities.
 - Status: implementation ready for validation.
+
+## EXP-20261003-002 — Four-region aerial review batch
+
+- Date: 2026-10-03
+- Review ID: WB-IMG-20261003-001.
+- Scope: 8 Dublin + 8 Cork + 8 Kildare + 7 Bray = 31 records.
+- Results: 17 physical parking visible; 9 parking context visible/extent ambiguous; 3 no distinct footprint confirmed; 2 visible but stale.
+- Geometry follow-up: 7 candidate-polygon tasks identified; 0 polygons automatically created.
+- Occupancy result: 0 live occupancy/free-space values inferred.
+- Outcome: supports imagery as a useful physical-supply validation layer with explicit uncertainty.
+- Status: completed.
