@@ -47,19 +47,18 @@ jobs:
             cp -f /tmp/pages-site/data/bray_parking_snapshot.json web/data/
           fi
 
-      - name: Rebuild County Kildare with resilient exact-boundary traversal
+      - name: Prepare Kildare imagery anchors
         run: |
-          set +e
-          python scripts/ingest_kildare_county_parking_stable.py --output web/data/kildare_parking_snapshot.json
-          status=$?
-          if [[ $status -eq 0 ]]; then
-            python scripts/enrich_kildare_snapshot.py --input web/data/kildare_parking_snapshot.json
-            python scripts/finalize_kildare_county_snapshot.py --input web/data/kildare_parking_snapshot.json
+          # The imagery review must not wait for a whole-county Overpass traversal.
+          # If the latest Pages artifact has no Kildare snapshot, the target builder
+          # uses official KCC accessible-parking points plus maintained anchors.
+          if [[ -s /tmp/pages-site/data/kildare_parking_snapshot.json ]]; then
+            cp -f /tmp/pages-site/data/kildare_parking_snapshot.json web/data/
+            echo "Using latest published Kildare snapshot for imagery target selection"
           else
-            echo "::warning::Kildare county rebuild still unavailable; imagery review will use the repository's evidence-backed Kildare anchors."
             rm -f web/data/kildare_parking_snapshot.json
+            echo "Using official KCC + maintained Kildare anchors for imagery target selection"
           fi
-          exit 0
 
       - name: Build open-location imagery queue
         run: |
