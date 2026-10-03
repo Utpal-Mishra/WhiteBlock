@@ -17,6 +17,8 @@ on:
       - "scripts/ingest_dublin_county_parking.py"
       - "scripts/ingest_dublin_county_parking_stable.py"
       - "scripts/build_dublin_coverage_ledger.py"
+      - "scripts/apply_imagery_review_evidence.py"
+      - "config/imagery_review_evidence.json"
       - ".github/workflows/pages.yml"
   schedule:
     - cron: "17 * * * *"
@@ -157,6 +159,13 @@ jobs:
               rm -f web/data/kildare_parking_snapshot.json
             fi
           fi
+
+      - name: Apply reviewed imagery evidence
+        run: |
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/dublin_parking_snapshot.json --region Dublin
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/cork_county_parking_snapshot.json --region Cork
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/kildare_parking_snapshot.json --region Kildare
+          python scripts/apply_imagery_review_evidence.py --snapshot web/data/bray_parking_snapshot.json --region Bray
 
       - name: Validate regional snapshots
         run: |
