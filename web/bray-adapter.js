@@ -70,6 +70,7 @@
       accessType: record.access_type || "unknown",
       parkingType: record.parking_type || "unknown",
       lifecycleState: record.lifecycle_state || "active",
+      imageryReview: record.imagery_review || null,
       evidenceCount: Array.isArray(record.evidence) ? record.evidence.length : 0,
       __brayRegion: true
     };
