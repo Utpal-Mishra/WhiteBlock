@@ -92,12 +92,31 @@ def score(item: Dict[str, Any]) -> float:
 
 
 def fallback_kildare() -> List[Dict[str, Any]]:
-    # Reuse the four evidence-backed anchors already maintained by WHITEBLOCK.
+    # Combine the maintained high-confidence Kildare anchors with current Kildare
+    # County Council accessible-parking points. Accessible-bay points are used as
+    # spatial review anchors for the surrounding parking footprint; the imagery
+    # review does not claim that one accessible-bay point defines a whole car park.
+    rows: List[Dict[str, Any]] = []
     try:
         from enrich_kildare_snapshot import critical_anchors
-        return critical_anchors(now_z())
+        rows.extend(critical_anchors(now_z()))
     except Exception:
-        return []
+        pass
+    try:
+        from ingest_kildare_parking import kcc_accessible_locations, utc_now
+        accessible, _ = kcc_accessible_locations(utc_now())
+        for item in accessible:
+            copy = dict(item)
+            copy["network_role"] = "parking_context_anchor"
+            copy["parking_type"] = "accessible_bay_context"
+            copy["evidence_note"] = "Official accessible-bay point used only to inspect surrounding parking supply in imagery."
+            rows.append(copy)
+    except Exception:
+        pass
+    unique = {}
+    for item in rows:
+        unique[str(item.get("parking_id"))] = item
+    return list(unique.values())
 
 
 def load_locations(input_dir: Path, region: str, filename: str) -> List[Dict[str, Any]]:
