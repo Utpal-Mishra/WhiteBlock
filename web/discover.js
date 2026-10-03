@@ -8,7 +8,7 @@
 
   const PAGE_SIZE = 100;
   const GENERIC_NAMES = new Set(["parking", "car park", "surface parking", "street side parking", "lane parking"]);
-  const REGION_LABELS = { cork: "Cork", kildare: "Kildare", dublin: "Dublin" };
+  const REGION_LABELS = { cork: "Cork", kildare: "Kildare", dublin: "Dublin", bray: "Bray" };
 
   state.discoveryInventory = [];
   state.discoveryVisibleLimit = PAGE_SIZE;
@@ -64,7 +64,7 @@
   }
 
   function latestSourceTime() {
-    const values = ["cork", "kildare", "dublin"]
+    const values = ["cork", "kildare", "dublin", "bray"]
       .map(key => regionSnapshot(key))
       .flatMap(snapshot => [snapshot?.generated_at, snapshot?.source?.retrieved_at])
       .filter(Boolean)
@@ -155,6 +155,9 @@
     const dublin = Array.isArray(inventories.dublin) ? inventories.dublin : [];
     if (dublin.length) mergeUnique(output, dublin.map(item => enrichForDiscover(item, "dublin")));
 
+    const bray = Array.isArray(inventories.bray) ? inventories.bray : [];
+    if (bray.length) mergeUnique(output, bray.map(item => enrichForDiscover(item, "bray")));
+
     // Static startup fallback before regional adapters finish. It is replaced as
     // soon as canonical regional inventories become available.
     if (!output.length && Array.isArray(parkingData) && parkingData.length) {
@@ -202,6 +205,7 @@
     if (region === "Cork") return "City live + county mapped";
     if (region === "Dublin") return "Exact-boundary mapped network";
     if (region === "Kildare") return "Exact-county mapped network";
+    if (region === "Bray") return "Seafront evidence pilot + imagery review";
     return "Evidence-backed inventory";
   }
 
@@ -248,6 +252,17 @@
     return item.discoverSupplyState === "candidate" ? "Candidate · not verified" : "Mapped inventory";
   }
 
+  function imageryLabel(item) {
+    const review = item.imageryReview || item.imagery_review;
+    if (!review) return null;
+    const state = String(review.review_result || "");
+    if (state === "physical_parking_visible") return "Aerial check · physical parking visible";
+    if (state === "visible_but_stale_imagery") return "Aerial check · visible, older imagery";
+    if (state === "parking_context_visible_extent_ambiguous") return "Aerial check · footprint ambiguous";
+    if (state === "no_distinct_parking_footprint") return "Aerial check · footprint not confirmed";
+    return "Aerial check · reviewed";
+  }
+
   function locationCard(item, index) {
     const capacity = numeric(item.capacity);
     const available = numeric(item.available);
@@ -269,6 +284,7 @@
             <span class="discover-location-state ${item.discoverSupplyState === "candidate" ? "candidate" : ""}">${escapeHtml(supplyLabel(item))}</span>
           </div>
           <div class="discover-rule-line">${escapeHtml(rule)}</div>
+          ${imageryLabel(item) ? `<div class="discover-rule-line"><strong>${escapeHtml(imageryLabel(item))}</strong>${(item.imageryReview || item.imagery_review)?.imagery_acquisition_date ? ` · ${escapeHtml((item.imageryReview || item.imagery_review).imagery_acquisition_date)}` : ""}</div>` : ""}
           <div class="discover-location-meta">
             <span><small>Asset ID</small><b>${escapeHtml(item.id)}</b></span>
             <span><small>Capacity</small><b>${capacity == null ? "—" : formatInteger(capacity)}</b></span>
