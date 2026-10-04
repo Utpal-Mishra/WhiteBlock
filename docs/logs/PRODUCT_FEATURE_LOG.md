@@ -19,3 +19,13 @@
 - Kildare: app accepts a clearly labelled partial evidence-anchor fallback when full county refresh is unavailable.
 - UX principle: imagery evidence is described as physical-supply evidence, never as live availability.
 - Status: implemented on PR #32.
+
+## PROD-20261004-001 — Hierarchical parking coverage map and compact controls
+
+- Date: 2026-10-04.
+- Feature: hierarchical national parking exploration.
+- Flow: Ireland overview → connected region/county → city/town/settlement group → individual mapped parking points.
+- National nodes: show mapped location count plus published/known capacity where available; live free-space totals appear only when a source reports them.
+- Mobile control: Street is visible/default; Terrain, Satellite, Street View and Parking Layout are available from a + menu.
+- Readability: long Discover parking names wrap; evidence research rows collapse from four columns to two/one columns on narrow screens.
+- Status: implemented in PR #33.
