@@ -188,7 +188,7 @@
       <p class="eyebrow">Dublin coverage evidence</p>
       <h3 style="margin:5px 0 10px">Settlement-level uncertainty queue</h3>
       <div style="display:grid;gap:7px">${rows.map(row => `
-        <div style="display:grid;grid-template-columns:minmax(130px,1.3fr) minmax(110px,1fr) 90px 110px;gap:8px;padding:9px 0;border-top:1px solid rgba(255,255,255,.055);font-size:11px">
+        <div class="dublin-evidence-row dublin-evidence-row--settlement">
           <span><strong>${escape(row.settlement)}</strong><small style="display:block;color:#71877e">${escape(row.local_authority)}</small></span>
           <span>${escape((row.anchor_place_types || ["place"]).join(", "))}</span>
           <span>${formatInteger(row.mapped_parking_assets)} assets</span>
