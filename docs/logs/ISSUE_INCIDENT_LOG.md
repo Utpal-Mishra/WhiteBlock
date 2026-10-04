@@ -29,3 +29,22 @@
 - Corrective action: add bounded exact-boundary refresh, tiled exact-boundary fallback capability, and an explicitly partial Kildare County Council/maintained-anchor snapshot if the full refresh still fails.
 - Product control: partial Kildare coverage is visibly labelled and is not described as complete county coverage.
 - Status: corrective implementation included in PR #32.
+
+## INC-20261004-001 — Mobile coverage map and evidence layout defects
+
+- Date: 2026-10-04.
+- Severity: medium.
+- Scope: Find/coverage map, Discover cards and Evidence queues on narrow mobile viewports.
+- Symptoms:
+  - national coverage nodes did not communicate regional inventory/capacity clearly and region focus stopped at a single regional marker;
+  - map-view controls consumed excessive horizontal map space;
+  - long parking names could collide with the inventory-state badge;
+  - Dublin evidence queue rows used fixed minimum column widths and escaped the card boundary.
+- Root causes:
+  - Ireland overview had a one-level region marker model and hard-coded three-region totals;
+  - parking-layout startup explicitly selected Terrain despite Street being the intended product default;
+  - Discover title CSS forced a single-line ellipsis beside a fixed badge;
+  - evidence integrations embedded fixed-width four-column inline grids.
+- Corrective action: PR #33 introduces national → region/county → locality → individual-point drilldown, responsive text/table contracts, a compact + map menu and Street-default preservation.
+- Data-integrity control: missing capacity or live availability remains unknown and is never estimated by the UI.
+- Status: implemented on branch; CI/production deployment validation pending.
