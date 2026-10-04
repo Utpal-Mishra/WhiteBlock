@@ -49,3 +49,13 @@
 - Impact: Kildare previously disappeared from the deployed snapshot.
 - Mitigation: bounded exact-boundary attempt plus explicitly partial KCC/maintained-anchor fallback; UI must label partial coverage.
 - Status: mitigated in PR #32.
+
+## RISK-20261004-001 — Aggregated map totals can be misread as complete or live
+
+- Date: 2026-10-04.
+- Risk: users may interpret a regional location/capacity total as complete real-world supply or current availability.
+- Likelihood: medium.
+- Impact: high for recommendation trust.
+- Mitigation: label capacity as known/published only; display live free-space values only when reported; retain Bray as an explicit pilot; locality groups are derived from existing mapped evidence and never create new parking records.
+- Residual risk: source inventories remain incomplete in some areas and subarea labels depend on available settlement/area metadata.
+- Status: controlled; continue evidence enrichment and deployed UX review.
