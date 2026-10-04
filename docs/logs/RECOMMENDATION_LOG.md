@@ -18,3 +18,12 @@
 - Use fresh/authoritative Irish orthophotography where licensing permits; treat older imagery as lower-confidence evidence.
 - Records with ambiguous or unconfirmed footprints remain points/corridors until corroborated.
 - Status: adopted.
+
+## REC-20261004-001 — Use progressive disclosure for national parking exploration
+
+- Date: 2026-10-04.
+- Recommendation: keep the national map concise and progressively reveal detail only after a user selects a region and then a locality.
+- Display order: county/region inventory and known-space total → locality location count/known spaces → exact mapped parking points.
+- Reason: this prevents national-marker overlap while retaining useful evidence density at each zoom level.
+- Mobile rule: controls that change context but are not required for the main parking task should sit behind the + menu.
+- Status: adopted in PR #33.
