@@ -172,3 +172,43 @@
   }
 }
 
+/* Dublin evidence queues share a responsive row contract rather than fixed
+   pixel columns, preventing the right-most values from escaping the card. */
+.dublin-evidence-row {
+  display: grid;
+  gap: 8px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(255,255,255,.055);
+  font-size: 11px;
+  min-width: 0;
+}
+
+.dublin-evidence-row--settlement {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(74px, .58fr) minmax(92px, .78fr);
+}
+
+.dublin-evidence-row--restriction {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(76px, .65fr) minmax(84px, .68fr);
+}
+
+.dublin-evidence-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .dublin-evidence-row--settlement,
+  .dublin-evidence-row--restriction {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 430px) {
+  .dublin-evidence-row--settlement,
+  .dublin-evidence-row--restriction {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+    padding: 11px 0;
+  }
+}
+
