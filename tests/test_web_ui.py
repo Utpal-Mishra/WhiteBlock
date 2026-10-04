@@ -104,8 +104,22 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("whiteblock:data-ready", js)
         self.assertNotIn("activeTileLayer.redraw", js)
         self.assertIn("wb-map-layer-button", css)
+        self.assertIn("wb-map-more-button", js)
+        self.assertIn("wb-map-layer-menu", js)
+        self.assertIn("wb-map-layer-menu", css)
         self.assertIn("wb-map-satellite", css)
         self.assertIn("wb-map-terrain", css)
+
+
+    def test_mobile_alignment_contracts(self):
+        discover_css = (WEB / "discover.css").read_text(encoding="utf-8")
+        settlement = (WEB / "dublin-settlement-integration.js").read_text(encoding="utf-8")
+        restriction = (WEB / "dublin-restriction-integration.js").read_text(encoding="utf-8")
+        self.assertIn("overflow-wrap: anywhere", discover_css)
+        self.assertIn(".dublin-evidence-row--settlement", discover_css)
+        self.assertIn(".dublin-evidence-row--restriction", discover_css)
+        self.assertIn('class="dublin-evidence-row dublin-evidence-row--settlement"', settlement)
+        self.assertIn('class="dublin-evidence-row dublin-evidence-row--restriction"', restriction)
 
 
 if __name__ == "__main__":
