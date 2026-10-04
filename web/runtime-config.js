@@ -55,7 +55,7 @@ function loadWhiteblockMapEngineV2() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './map-engine-v2.js?v=20260921-3';
+  script.src = './map-engine-v2.js?v=20261004-1';
   script.async = false;
   script.dataset.whiteblockMapEngineV2 = 'true';
   script.addEventListener('load', loadWhiteblockParkingGeometry, { once: true });
@@ -119,7 +119,7 @@ function loadWhiteblockDublinRestrictionIntegration() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './dublin-restriction-integration.js?v=20260922-1';
+  script.src = './dublin-restriction-integration.js?v=20261004-1';
   script.defer = true;
   script.dataset.whiteblockDublinRestrictionIntegration = 'true';
   script.addEventListener('load', loadWhiteblockDublinVenueKnowledge, { once: true });
@@ -134,7 +134,7 @@ function loadWhiteblockDublinSettlementIntegration() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './dublin-settlement-integration.js?v=20260922-1';
+  script.src = './dublin-settlement-integration.js?v=20261004-1';
   script.defer = true;
   script.dataset.whiteblockDublinSettlementIntegration = 'true';
   script.addEventListener('load', loadWhiteblockDublinRestrictionIntegration, { once: true });
@@ -212,13 +212,13 @@ function loadWhiteblockIrelandOverview() {
   if (!document.querySelector('link[data-whiteblock-ireland-overview]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = './ireland-overview.css?v=20260923-1';
+    style.href = './ireland-overview.css?v=20261004-1';
     style.dataset.whiteblockIrelandOverview = 'true';
     document.head.appendChild(style);
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20260923-1';
+  script.src = './ireland-overview.js?v=20261004-1';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);

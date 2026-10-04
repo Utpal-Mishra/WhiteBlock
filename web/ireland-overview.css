@@ -1,1 +1,107 @@
 .ireland-region-switcher{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 14px;padding:10px 12px;border:1px solid rgba(120,230,170,.12);background:rgba(8,20,15,.46);border-radius:16px}.ireland-region-switcher-label{font:700 10px/1 'DM Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#789187;margin-right:4px}.ireland-region-button{border:1px solid rgba(120,230,170,.16);background:#0a1712;color:#9cb1a7;border-radius:999px;padding:8px 13px;font:600 12px/1 'DM Sans',sans-serif;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease,color .18s ease}.ireland-region-button:hover{transform:translateY(-1px);border-color:rgba(120,230,170,.34);color:#eaf6ef}.ireland-region-button.active{background:linear-gradient(135deg,#c8f56b,#79e6ab);color:#07110d;border-color:transparent;box-shadow:0 8px 24px rgba(120,230,170,.12)}.wb-ireland-region-wrapper{background:transparent!important;border:0!important}.wb-ireland-region-node{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:86px;min-height:48px;padding:7px 11px;border:1px solid rgba(120,230,170,.42);border-radius:16px;background:rgba(5,16,11,.92);box-shadow:0 10px 30px rgba(0,0,0,.25);backdrop-filter:blur(8px);transform-origin:center;transition:transform .2s ease,border-color .2s ease}.wb-ireland-region-wrapper:hover .wb-ireland-region-node,.wb-ireland-region-wrapper.focused .wb-ireland-region-node{transform:scale(1.06);border-color:#c8f56b}.wb-ireland-region-node strong{font:700 12px/1.1 'Manrope',sans-serif;color:#eef8f2}.wb-ireland-region-node span{margin-top:4px;font:700 11px/1 'DM Sans',sans-serif;color:#82eab0}.wb-national-region-card{padding:18px;border-radius:20px}.wb-national-region-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.wb-national-region-top h3{margin:4px 0 3px;font:700 20px/1.1 'Manrope',sans-serif}.wb-national-region-top small{color:#83998f}.wb-national-region-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(120,230,170,.10)}.wb-national-region-stats span,.wb-region-browse-stats span{display:flex;flex-direction:column;gap:5px}.wb-national-region-stats small,.wb-region-browse-stats small{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#71867d}.wb-national-region-stats strong,.wb-region-browse-stats strong{font-size:14px;color:#eef8f2}.wb-national-region-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;color:#7f958b;font-size:11px}.wb-national-region-foot button{border:0;background:transparent;color:#82eab0;font:700 11px 'DM Sans',sans-serif;cursor:pointer;padding:4px}.wb-region-browse-message{padding:22px;border-radius:20px}.wb-region-browse-message h3{margin:5px 0 8px;font:700 21px/1.2 'Manrope',sans-serif}.wb-region-browse-message>p:not(.eyebrow){margin:0;color:#8ca098;font-size:12px;line-height:1.6}.wb-region-browse-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(120,230,170,.10)}@media(max-width:780px){.ireland-region-switcher{margin-top:8px;overflow-x:auto;flex-wrap:nowrap}.ireland-region-switcher-label{display:none}.ireland-region-button{white-space:nowrap}.wb-national-region-stats,.wb-region-browse-stats{grid-template-columns:1fr}.wb-national-region-foot{align-items:flex-start;flex-direction:column}}
+
+/* 2026-10-04 national -> county/region -> locality map hierarchy. */
+.wb-ireland-region-node {
+  box-sizing: border-box;
+  width: 132px;
+  min-height: 68px;
+  padding: 8px 10px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.wb-ireland-region-node strong {
+  width: 100%;
+  font-size: 11px;
+  white-space: normal;
+  line-height: 1.18;
+}
+
+.wb-ireland-region-node span {
+  margin-top: 5px;
+  font-size: 10px;
+}
+
+.wb-ireland-region-node small {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  color: #8fa39a;
+  font: 600 8px/1.25 "DM Sans", sans-serif;
+  white-space: normal;
+}
+
+.wb-region-settlement-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.wb-region-settlement-node {
+  box-sizing: border-box;
+  width: 126px;
+  min-height: 62px;
+  padding: 8px 10px;
+  border: 1px solid rgba(120,230,170,.34);
+  border-radius: 14px;
+  background: rgba(5,16,11,.94);
+  box-shadow: 0 9px 24px rgba(0,0,0,.26);
+  backdrop-filter: blur(8px);
+  text-align: left;
+  transition: transform .16s ease, border-color .16s ease;
+}
+
+.wb-region-settlement-wrapper:hover .wb-region-settlement-node {
+  transform: scale(1.04);
+  border-color: #c8f56b;
+}
+
+.wb-region-settlement-node strong,
+.wb-region-settlement-node span,
+.wb-region-settlement-node small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.wb-region-settlement-node strong {
+  color: #eef8f2;
+  font: 700 11px/1.2 "Manrope", sans-serif;
+}
+
+.wb-region-settlement-node span {
+  margin-top: 4px;
+  color: #82eab0;
+  font: 700 9px/1.2 "DM Sans", sans-serif;
+}
+
+.wb-region-settlement-node small {
+  margin-top: 3px;
+  color: #82978e;
+  font: 600 8px/1.2 "DM Sans", sans-serif;
+}
+
+@media (max-width: 520px) {
+  .wb-ireland-region-node {
+    width: 116px;
+    min-height: 64px;
+    padding: 7px 8px;
+  }
+
+  .wb-ireland-region-node strong {
+    font-size: 10px;
+  }
+
+  .wb-ireland-region-node span {
+    font-size: 9px;
+  }
+
+  .wb-ireland-region-node small {
+    font-size: 7.5px;
+  }
+
+  .wb-region-settlement-node {
+    width: 112px;
+    min-height: 58px;
+    padding: 7px 8px;
+  }
+}
+

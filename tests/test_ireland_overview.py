@@ -10,10 +10,11 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('cork: {', js)
         self.assertIn('kildare: {', js)
         self.assertIn('dublin: {', js)
+        self.assertIn('bray: {', js)
         self.assertIn('state.overviewMode = true', js)
         self.assertIn('Ireland · Connected parking intelligence', js)
         self.assertIn('Connected parking across Ireland', js)
-        self.assertIn('Cork · Kildare · Dublin connected', js)
+        self.assertIn('Cork · Kildare · Dublin · Bray connected', js)
 
     def test_live_availability_is_not_inferred(self):
         js = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
@@ -27,7 +28,9 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('state.regionFocus = key', js)
         self.assertIn('state.destination = null', js)
         self.assertIn('choose a destination to rank suitable parking', js)
-        self.assertIn('state.map.flyTo(region.center, region.zoom', js)
+        self.assertIn('renderRegionSettlementNodes(key)', js)
+        self.assertIn('focusSubarea', js)
+        self.assertIn('parking locations', js)
 
     def test_discover_receives_common_region_ready_events(self):
         js = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
@@ -37,8 +40,8 @@ class IrelandOverviewTests(unittest.TestCase):
 
     def test_runtime_loads_overview_assets(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn('ireland-overview.css?v=20260923-1', runtime)
-        self.assertIn('ireland-overview.js?v=20260923-1', runtime)
+        self.assertIn('ireland-overview.css?v=20261004-1', runtime)
+        self.assertIn('ireland-overview.js?v=20261004-1', runtime)
         self.assertIn('loadWhiteblockIrelandOverview()', runtime)
 
 

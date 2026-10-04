@@ -19,3 +19,13 @@
 - Integrity rules: no access change, no capacity inference, no availability/occupancy inference and no automatic polygon creation.
 - UI: regional inventory objects expose imageryReview; Find cards, Discover and Evidence can surface the review state.
 - Status: implemented on PR #32.
+
+## SYS-20261004-001 — Coverage browse state and responsive map controls
+
+- Date: 2026-10-04.
+- System change: Ireland overview now derives locality clusters from `state.regionInventories` and can render individual canonical parking points without manufacturing a destination.
+- Event contract: `whiteblock:coverage-browse` clears stale Map Engine destination/parking footprint overlays when entering national or regional browse mode.
+- Map startup: persistent Street vector basemap remains active unless the user explicitly selects another layer from +.
+- Region accounting: connected-region KPI is derived from the configured region set rather than hard-coded to three; Bray load status participates in readiness tracking.
+- Failure semantics: unknown capacity/availability remains unknown; absent subarea metadata falls back to the regional label rather than fabricating a locality.
+- Status: implemented in PR #33.

@@ -316,35 +316,96 @@
 
     const toolbar = document.createElement("div");
     toolbar.className = "wb-map-toolbar";
-    toolbar.setAttribute("aria-label", "Map layers and street context");
+    toolbar.setAttribute("aria-label", "Map views and street context");
 
-    Object.entries(layerDefinitions).forEach(([key, definition]) => {
+    const streetLayer = layerDefinitions.street;
+    const street = document.createElement("button");
+    street.type = "button";
+    street.className = "wb-map-layer-button wb-map-primary-layer";
+    street.dataset.layer = "street";
+    street.textContent = streetLayer.label;
+    street.setAttribute("aria-pressed", "true");
+    street.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      activateLayer("street");
+    });
+    toolbar.appendChild(street);
+
+    const moreButton = document.createElement("button");
+    moreButton.type = "button";
+    moreButton.className = "wb-map-more-button";
+    moreButton.textContent = "+";
+    moreButton.setAttribute("aria-label", "More map views");
+    moreButton.setAttribute("aria-haspopup", "true");
+    moreButton.setAttribute("aria-expanded", "false");
+    moreButton.title = "More map views";
+    toolbar.appendChild(moreButton);
+
+    const menu = document.createElement("div");
+    menu.className = "wb-map-layer-menu";
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-label", "Additional map views");
+
+    ["terrain", "satellite"].forEach(key => {
+      const definition = layerDefinitions[key];
       const button = document.createElement("button");
       button.type = "button";
       button.className = "wb-map-layer-button";
       button.dataset.layer = key;
       button.textContent = definition.label;
-      button.setAttribute("aria-pressed", String(key === activeLayerKey));
+      button.setAttribute("aria-pressed", "false");
+      button.setAttribute("role", "menuitem");
       button.addEventListener("click", event => {
         event.preventDefault();
         event.stopPropagation();
         activateLayer(key);
       });
-      toolbar.appendChild(button);
+      menu.appendChild(button);
     });
 
-    const streetButton = document.createElement("button");
-    streetButton.type = "button";
-    streetButton.className = "wb-street-view-button";
-    streetButton.textContent = "Street View ↗";
-    streetButton.title = "Open Street View near the selected parking location or destination";
-    streetButton.addEventListener("click", event => {
+    const streetViewButton = document.createElement("button");
+    streetViewButton.type = "button";
+    streetViewButton.className = "wb-street-view-button";
+    streetViewButton.textContent = "Street View ↗";
+    streetViewButton.title = "Open Street View near the selected parking location or destination";
+    streetViewButton.setAttribute("role", "menuitem");
+    streetViewButton.addEventListener("click", event => {
       event.preventDefault();
       event.stopPropagation();
       openStreetView();
     });
-    toolbar.appendChild(streetButton);
+    menu.appendChild(streetViewButton);
+    toolbar.appendChild(menu);
     mapEl.appendChild(toolbar);
+
+    const setMenuOpen = open => {
+      toolbar.classList.toggle("menu-open", open);
+      moreButton.setAttribute("aria-expanded", String(open));
+      if (open) menu.querySelector("button")?.focus({ preventScroll: true });
+    };
+
+    moreButton.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      setMenuOpen(!toolbar.classList.contains("menu-open"));
+    });
+
+    // Capture runs before map-engine-v3's layer takeover, so the menu closes
+    // even when the map engine stops propagation while switching basemaps.
+    toolbar.addEventListener("click", event => {
+      if (event.target.closest?.(".wb-map-layer-menu button")) setMenuOpen(false);
+    }, true);
+
+    document.addEventListener("click", event => {
+      if (!toolbar.contains(event.target)) setMenuOpen(false);
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        moreButton.focus({ preventScroll: true });
+      }
+    });
 
     L.DomEvent.disableClickPropagation(toolbar);
     L.DomEvent.disableScrollPropagation(toolbar);

@@ -9,7 +9,7 @@ WEB = ROOT / "web"
 class MapEngineV3Tests(unittest.TestCase):
     def test_runtime_loads_cache_busted_persistent_engine(self):
         runtime = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("map-engine-v2.js?v=20260921-3", runtime)
+        self.assertIn("map-engine-v2.js?v=20261004-1", runtime)
         self.assertIn("loadWhiteblockMapEngineV2", runtime)
 
     def test_one_persistent_maplibre_layer_switches_styles(self):

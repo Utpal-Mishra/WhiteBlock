@@ -20,3 +20,13 @@
 - Implementation: metadata-only evidence sidecar + human review + build-time overlay.
 - Consequence: negative and ambiguous imagery evidence is retained rather than forcing every mapped point into a parking polygon.
 - Status: accepted.
+
+## DEC-20261004-001 — Make Street the only always-visible map mode
+
+- Date: 2026-10-04.
+- Decision: keep Street as the startup and always-visible map mode; move Terrain, Satellite, Street View and Parking Layout behind a compact + control.
+- Rationale: mobile map space is more valuable than permanently exposing infrequently used basemap/context controls.
+- Alternative rejected: horizontally scrolling the existing five-button toolbar, because it obscures the map and makes the primary/default mode visually ambiguous.
+- Related decision: regional clicks should reveal locality-level parking groups rather than a second single regional marker.
+- Accessibility: + uses aria-label/expanded/haspopup and Escape closes the menu.
+- Status: accepted/implemented in PR #33.

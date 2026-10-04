@@ -177,3 +177,100 @@
     padding: 0 8px;
   }
 }
+
+/* 2026-10-04 compact map-view control.
+   Street stays visible/default; secondary basemaps and contextual tools are
+   intentionally tucked behind the + menu so the map itself keeps priority. */
+.wb-map-toolbar {
+  left: auto;
+  right: 12px;
+  width: auto;
+  max-width: none;
+  overflow: visible;
+}
+
+.wb-map-primary-layer {
+  min-width: 64px;
+}
+
+.wb-map-more-button {
+  width: 36px;
+  min-width: 36px;
+  min-height: 34px;
+  padding: 0;
+  border: 1px solid rgba(120, 230, 170, .18);
+  border-radius: 9px;
+  background: rgba(120, 230, 170, .06);
+  color: #78E6AA;
+  font: 700 20px/1 "DM Sans", sans-serif;
+  cursor: pointer;
+}
+
+.wb-map-more-button:hover,
+.wb-map-more-button:focus-visible,
+.wb-map-toolbar.menu-open .wb-map-more-button {
+  color: #EDF7F1;
+  background: rgba(120, 230, 170, .12);
+  outline: 1px solid rgba(120, 230, 170, .38);
+}
+
+.wb-map-layer-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 3;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  width: max-content;
+  min-width: 152px;
+  padding: 6px;
+  border: 1px solid rgba(143, 163, 154, .25);
+  border-radius: 13px;
+  background: rgba(7, 17, 13, .97);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .36);
+  backdrop-filter: blur(16px);
+}
+
+.wb-map-toolbar.menu-open .wb-map-layer-menu {
+  display: flex;
+}
+
+.wb-map-layer-menu .wb-map-layer-button,
+.wb-map-layer-menu .wb-street-view-button,
+.wb-map-layer-menu .wb-parking-layout-button {
+  width: 100%;
+  min-height: 36px;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0 11px;
+}
+
+@media (max-width: 820px) {
+  .wb-map-toolbar {
+    top: 8px;
+    right: 8px;
+    left: auto;
+    width: auto;
+    max-width: none;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 520px) {
+  .wb-map-toolbar {
+    top: 7px;
+    right: 7px;
+    left: auto;
+    max-width: none;
+  }
+
+  .wb-map-primary-layer {
+    min-width: 58px;
+  }
+
+  .wb-map-layer-menu {
+    min-width: 146px;
+  }
+}
+

@@ -180,7 +180,8 @@
       event.stopPropagation();
       setLayoutMode(!layoutMode);
     });
-    toolbar.appendChild(layoutButton);
+    const target = toolbar.querySelector(".wb-map-layer-menu") || toolbar;
+    target.appendChild(layoutButton);
 
     toolbar.querySelectorAll(".wb-map-layer-button[data-layer]").forEach(button => {
       button.addEventListener("click", () => setLayoutMode(false));
@@ -188,16 +189,15 @@
     return true;
   }
 
-  function preferTerrainDefault() {
-    const terrain = document.querySelector('.wb-map-layer-button[data-layer="terrain"]');
-    if (!terrain) return;
-    terrain.click();
-    mapEl.dataset.preferredBasemap = "terrain";
+  function preserveStreetDefault() {
+    // Street is the product default. Secondary basemaps are explicit opt-in
+    // choices from the compact + menu and must never take over at startup.
+    mapEl.dataset.preferredBasemap = "street";
   }
 
   createPanel();
   installLayoutButton();
-  window.requestAnimationFrame(preferTerrainDefault);
+  window.requestAnimationFrame(preserveStreetDefault);
 
   const parkingList = document.getElementById("parking-list");
   if (parkingList && typeof MutationObserver !== "undefined") {

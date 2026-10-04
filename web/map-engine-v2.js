@@ -601,6 +601,17 @@
     renderParkingAreas();
     window.setTimeout(resizeBasemap, 40);
   });
+  document.addEventListener("whiteblock:coverage-browse", () => {
+    // Ireland/region browsing owns the visible overlay while there is no
+    // destination. Remove stale recommendation footprints from the prior search.
+    clearLayer(parkingAreaLayer);
+    clearLayer(selectedFootprintLayer);
+    clearLayer(destinationContextLayer);
+    parkingAreaLayer = null;
+    selectedFootprintLayer = null;
+    destinationContextLayer = null;
+    window.setTimeout(resizeBasemap, 30);
+  });
   document.addEventListener("whiteblock:kildare-attributes-ready", renderParkingAreas);
   document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(resizeBasemap, 30));
 
