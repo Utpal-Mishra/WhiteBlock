@@ -649,10 +649,15 @@
       renderBrowseResults();
     }
 
-    const resolved = [state.corkCountyNetworkStatus, state.kildareNetworkStatus, state.dublinNetworkStatus]
-      .filter(value => value != null)
-      .every(value => value !== "loading");
-    if ((announced.size === 3 && resolved) || checks >= 120) window.clearInterval(regionalWatcher);
+    const resolved = [
+      state.corkCountyNetworkStatus,
+      state.kildareNetworkStatus,
+      state.dublinNetworkStatus,
+      state.regionStatus?.bray
+    ].filter(value => value != null).every(value => value !== "loading");
+    if ((announced.size === Object.keys(CONNECTED_REGIONS).length && resolved) || checks >= 120) {
+      window.clearInterval(regionalWatcher);
+    }
   }, 500);
 
   document.addEventListener("whiteblock:data-ready", () => {
