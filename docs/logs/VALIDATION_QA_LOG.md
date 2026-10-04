@@ -45,3 +45,22 @@
 - Negative evidence preserved: ambiguous/not-confirmed outcomes remain explicit.
 - App regression: legacy runtime/test contracts preserved while adding four-region runtime wiring and imagery metadata.
 - Status: evidence validation passed; final CI/deployment validation tracked on PR #32.
+
+## QA-20261004-001 — Mobile map/alignment regression suite
+
+- Date: 2026-10-04.
+- PR: #33.
+- Static contracts added/updated:
+  - Street is the preferred/default basemap; Terrain is no longer auto-selected.
+  - compact map toolbar contains a + menu for secondary map views/tools;
+  - Ireland overview includes Bray and exposes locality drilldown functions;
+  - Discover parking titles allow multi-line wrapping;
+  - Dublin settlement/access evidence rows use responsive CSS classes rather than fixed-width inline columns;
+  - cache-busted runtime references match the changed assets.
+- Manual acceptance targets after deployment:
+  - national map shows separated connected-region nodes with totals;
+  - selecting Dublin exposes locality groups and a second click exposes individual parking points;
+  - long Bray/Dublin location names remain readable beside/below state badges;
+  - Evidence queues remain fully inside a 360–430 px viewport;
+  - + menu opens/closes and all secondary map options still work.
+- Status: feature-branch validation implemented; GitHub Actions and deployed-mobile checks pending.
