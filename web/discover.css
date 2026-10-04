@@ -130,3 +130,45 @@
   .discover-location-index { width:30px; height:30px; }
   .discover-location-foot { align-items:flex-start; flex-direction:column; }
 }
+
+/* 2026-10-04 mobile result-card alignment.
+   Long parking names wrap naturally instead of disappearing below the state badge. */
+.discover-location-title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 12px;
+  align-items: start;
+}
+
+.discover-location-title > div {
+  min-width: 0;
+}
+
+.discover-location-title h3 {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.28;
+}
+
+.discover-location-state {
+  max-width: 132px;
+  white-space: normal;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .discover-location-title {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .discover-location-state {
+    justify-self: start;
+    max-width: 100%;
+  }
+}
+
