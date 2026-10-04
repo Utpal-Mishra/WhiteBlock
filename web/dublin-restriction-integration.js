@@ -134,7 +134,7 @@
       <h3 style="margin:5px 0 6px">Unknown-access research queue</h3>
       <p style="margin:0 0 10px;color:#8fa39a;font-size:12px;line-height:1.5">Prioritised settlements where mapped parking exists but source-published public/customer/private access is still incomplete.</p>
       <div style="display:grid;gap:6px">${queue.map(row => `
-        <div style="display:grid;grid-template-columns:minmax(135px,1.35fr) minmax(110px,1fr) 90px 90px;gap:8px;padding:9px 0;border-top:1px solid rgba(255,255,255,.055);font-size:11px">
+        <div class="dublin-evidence-row dublin-evidence-row--restriction">
           <span><strong>${escape(row.settlement)}</strong><small style="display:block;color:#71877e">${escape(row.local_authority)}</small></span>
           <span>${integer(row.parking_assets)} mapped assets</span>
           <span>${integer(row.unknown_access_assets)} unknown</span>
