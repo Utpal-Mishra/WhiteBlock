@@ -29,3 +29,12 @@
 - Mobile control: Street is visible/default; Terrain, Satellite, Street View and Parking Layout are available from a + menu.
 - Readability: long Discover parking names wrap; evidence research rows collapse from four columns to two/one columns on narrow screens.
 - Status: implemented in PR #33.
+
+## PROD-20261018-001 — Persistent regional count cards in Ireland overview
+
+- Date: 2026-10-18.
+- Feature correction: regional map cards now persistently expose mapped/evidence-backed location totals for Cork, Kildare, Dublin and Bray.
+- Count source order: hydrated canonical regional inventory first; validated deployment snapshot rows/summary as fallback.
+- Visual hierarchy: location total is the strongest line in the regional card; published capacity and reported free-space totals remain secondary and appear only where evidence exists.
+- Browse behaviour: individual clustered parking markers are intentionally suppressed until the user drills into a region/locality or commits a destination.
+- Status: implemented; deployment validation pending.
