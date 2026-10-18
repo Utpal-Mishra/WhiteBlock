@@ -46,3 +46,15 @@
   4. Destination search may reactivate the full inventory cluster layer.
 - Layer contract: `wbOverviewPane` is reserved for browse hierarchy markers.
 - Status: accepted/implemented.
+
+## ARCH-20261018-002 — Asset registry and partnership layer are independent
+
+- Date: 2026-10-18.
+- Decision: keep canonical parking identity/evidence separate from commercial integration state.
+- Architecture:
+  1. discovery/evidence sources create or reconcile a parking candidate/asset;
+  2. verification resolves physical existence, access, rules and lifecycle;
+  3. recommendation eligibility is derived from evidence/rules;
+  4. partnership connectors enrich the same canonical asset with operational/commercial capabilities.
+- Benefit: a partnership can be added/removed without deleting the underlying parking record or losing its history.
+- Status: accepted.
