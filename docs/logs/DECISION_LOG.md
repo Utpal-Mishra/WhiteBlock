@@ -30,3 +30,12 @@
 - Related decision: regional clicks should reveal locality-level parking groups rather than a second single regional marker.
 - Accessibility: + uses aria-label/expanded/haspopup and Escape closes the menu.
 - Status: accepted/implemented in PR #33.
+
+## DEC-20261018-001 — Never use the full inventory cluster layer as the national summary
+
+- Date: 2026-10-18.
+- Decision: the Ireland default map must use explicit regional summary cards, not incidental MarkerCluster counts, to communicate coverage.
+- Reason: cluster counts depend on zoom/radius and can combine nearby regions, so they are not reliable county-level figures.
+- Count semantics: regional location totals are evidence-backed inventory counts; Kildare must retain its partial-fallback label when the exact-boundary refresh is unavailable.
+- Consequence: clustered parking is deferred to destination/detail context, while national navigation remains stable and interpretable.
+- Status: accepted.
