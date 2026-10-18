@@ -59,3 +59,12 @@
 - Mitigation: label capacity as known/published only; display live free-space values only when reported; retain Bray as an explicit pilot; locality groups are derived from existing mapped evidence and never create new parking records.
 - Residual risk: source inventories remain incomplete in some areas and subarea labels depend on available settlement/area metadata.
 - Status: controlled; continue evidence enrichment and deployed UX review.
+
+## RISK-20261018-001 — Map cluster counts can be mistaken for county totals
+
+- Date: 2026-10-18.
+- Risk: a MarkerCluster number near Dublin/Kildare/Bray can look like a regional parking count even though it is only a zoom-dependent grouping of visible markers.
+- Likelihood: high on mobile at national zoom.
+- Impact: high for coverage interpretation.
+- Mitigation: hide the cluster layer during national/region browsing, use dedicated summary cards with explicit region labels and evidence-derived totals, and keep partial-coverage wording for Kildare.
+- Status: mitigated in the 2026-10-18 fix.
