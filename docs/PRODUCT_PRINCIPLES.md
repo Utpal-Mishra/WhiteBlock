@@ -131,3 +131,11 @@ Users and operators should be able to tell whether a value is:
 Cork is the proving ground.
 
 Expansion should follow once the ingestion, verification, prediction and recommendation process is sufficiently repeatable—not merely once the UI is attractive.
+
+## 16. Inventory before partnership
+
+WHITEBLOCK should record a parking asset or plausible parking candidate independently of whether the operator has a commercial relationship with WHITEBLOCK.
+
+Partnership status must remain separate from physical existence and access classification. A partnership may add trusted operational data, booking, payment, access or commercial benefits, but should not be the mechanism that creates the underlying parking record.
+
+The strategic objective is to build the broadest evidence-backed parking universe first, then let partnerships enrich and activate that universe. Literal 100% completeness cannot be guaranteed because parking changes over time, so source coverage, geographic gaps, unresolved candidates and record freshness must be measured continuously.
