@@ -68,3 +68,17 @@
 - Impact: high for coverage interpretation.
 - Mitigation: hide the cluster layer during national/region browsing, use dedicated summary cards with explicit region labels and evidence-derived totals, and keep partial-coverage wording for Kildare.
 - Status: mitigated in the 2026-10-18 fix.
+
+## RISK-20261018-002 — Treating “all parking” as a static-completeness claim
+
+- Date: 2026-10-18.
+- Risk: stating that WHITEBLOCK has every parking spot could create false confidence because parking is created, removed, reconfigured, restricted or temporarily closed.
+- Likelihood: high over time.
+- Impact: high for trust and recommendation safety.
+- Mitigation: define completeness against known source/geographic coverage; retain unresolved candidates; continuously revalidate rules/lifecycle; expose freshness and uncertainty.
+- Status: controlled by Parking Universe Coverage design.
+
+## ASM-20261018-001 — Partnership is enrichment, not inventory discovery
+
+- Assumption: commercial/operator partnerships should primarily add operational/commercial capability to already-known parking assets.
+- Control: if a partner exposes previously unknown physical parking, ingest it through the same canonical reconciliation/evidence workflow rather than bypassing the registry.
