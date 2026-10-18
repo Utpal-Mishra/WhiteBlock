@@ -47,3 +47,9 @@
 - Recommendation boundary: only assets meeting access/rule/evidence criteria may be recommended; candidate/restricted records remain visible to the evidence and coverage systems.
 - Partnership boundary: partnership status enriches an asset rather than creating the asset.
 - Status: roadmap/design adopted.
+
+## FEAT-20261019-WW01 — Wicklow browse and search
+- Date: 2026-10-19; status: feature branch awaiting integration validation.
+- UI: Wicklow connected-region summary, selectable focus, town grouping, destination parking markers, Discover filtering and search inventory.
+- Labels: mapped/evidence-backed inventory, not live parking availability or county completeness.
+- Regression controls: existing Bray pilot and other regional views retained.
