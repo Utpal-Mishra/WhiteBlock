@@ -39,3 +39,9 @@
 - Layering: regional/locality browse markers use dedicated `wbOverviewPane` above ordinary inventory markers.
 - Bray isolation: loading Bray evidence no longer changes `parkingData` unless the active destination is actually in Bray coverage.
 - Status: implemented.
+
+## SYS-20261019-WW01 — Wicklow regional loader
+- Date: 2026-10-19; status: implemented in feature branch, production validation pending.
+- Change: independent browser adapter hydrates Wicklow JSON inventory on demand and renders destination markers/KPIs without invented occupancy.
+- Isolation: preserves Bray's existing curated 5 km pilot; keeps Cork/Kildare/Dublin regions unchanged.
+- Recovery: source outage surfaces a missing-inventory state rather than substitute records.
