@@ -84,3 +84,10 @@
   - selecting a region still drills into locality groups;
   - destination search still restores exact inventory markers/clustering.
 - Status: branch implementation complete; CI and live mobile verification pending.
+
+### QA deployment result — 2026-10-18
+
+- PR #34 test run: PASS.
+- Main deployment run #254: PASS, including snapshot build, imagery overlay, regional validation, artifact upload and GitHub Pages publication.
+- Deployed source counts: Cork 4,251 locations; Kildare 128 partial evidence anchors; Dublin 9,336 locations.
+- Status: automated deployment validation passed; user-facing mobile visual confirmation remains the final observational check.
