@@ -43,3 +43,12 @@
 - Kildare exact-boundary refresh timed out and correctly fell back to 128 explicitly partial evidence anchors.
 - Dublin remained validated at 9,336 mapped locations.
 - The national overview consumes these deployed values dynamically; no regional count is hard-coded in the UI.
+
+## DATA-20261018-002 — Separate canonical asset identity from partnership metadata
+
+- Date: 2026-10-18.
+- Data-model direction: canonical `WB-PARK-*` identity persists independently of operator/partner relationship.
+- Asset layer: geometry, physical existence, lifecycle, access class, rules, capacity evidence, accessibility/EV attributes, provenance and confidence.
+- Partnership layer: partner/operator ID, verified relationship, booking/payment URL/API, live feed capability, commercial access/benefits and session-management support.
+- Candidate policy: plausible physical parking remains representable even when access or partnership status is unresolved.
+- Status: adopted for future schema/reconciliation work.
