@@ -9,10 +9,12 @@ WEB = ROOT / "web"
 class ConnectedCoverageSearchRegressionTests(unittest.TestCase):
     def test_inventory_coverage_includes_all_connected_regions(self):
         source = (WEB / "inventory-coverage.js").read_text(encoding="utf-8")
-        self.assertIn('const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin"]', source)
+        self.assertIn('const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin", "Wicklow", "Bray"]', source)
         self.assertIn("regions.cork", source)
         self.assertIn("regions.kildare", source)
         self.assertIn("regions.dublin", source)
+        self.assertIn("regions.wicklow", source)
+        self.assertIn("regions.bray", source)
         self.assertIn('if (regionKey === "dublin") return "Dublin"', source)
         self.assertIn('<option value="dublin">Dublin</option>', source)
         self.assertIn("state.discoveryInventory", source)
