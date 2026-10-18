@@ -36,6 +36,15 @@
       nationalAnchor: [0, 78],
       mode: "Four-authority exact-boundary network"
     },
+    wicklow: {
+      label: "Wicklow",
+      countyLabel: "Wicklow",
+      detail: "County Wicklow outside the Bray seafront pilot",
+      center: [52.94, -6.34],
+      zoom: 10.0,
+      nationalAnchor: [65, -8],
+      mode: "Exact-county mapped inventory · not exhaustive"
+    },
     bray: {
       label: "Bray",
       countyLabel: "Wicklow",
@@ -153,7 +162,7 @@
       : "no live occupancy feeds loaded yet";
 
     const regionCount = Object.keys(CONNECTED_REGIONS).length;
-    setKpiCard("coverage", "Connected inventory", formatInteger(stats.locations), "Cork + Kildare + Dublin + Bray evidence-backed assets");
+    setKpiCard("coverage", "Connected inventory", formatInteger(stats.locations), "Cork + Kildare + Dublin + Wicklow + Bray mapped/evidence-backed assets");
     setKpiCard("availability", "Reported available now", stats.availableAssets ? formatInteger(stats.available) : "—", reportingLabel);
     setKpiCard("confidence", "Published capacity", stats.capacityAssets ? formatInteger(stats.capacity) : "—", "known capacity only · missing capacity is not estimated");
     setKpiCard("pressure", "Connected regions", formatInteger(regionCount), `${stats.loadedRegions}/${regionCount} regional inventories loaded`);
@@ -434,7 +443,8 @@
       <button type="button" class="ireland-region-button" data-ireland-scope="cork">Cork</button>
       <button type="button" class="ireland-region-button" data-ireland-scope="kildare">Kildare</button>
       <button type="button" class="ireland-region-button" data-ireland-scope="dublin">Dublin</button>
-      <button type="button" class="ireland-region-button" data-ireland-scope="bray">Bray</button>`;
+      <button type="button" class="ireland-region-button" data-ireland-scope="wicklow">Wicklow</button>
+       <button type="button" class="ireland-region-button" data-ireland-scope="bray">Bray</button>`;
     target.insertAdjacentElement("afterend", switcher);
 
     switcher.addEventListener("click", event => {
@@ -455,7 +465,7 @@
       const strong = pilotCard.querySelector("strong");
       const small = pilotCard.querySelector("small");
       if (strong) strong.textContent = "Ireland Network";
-      if (small) small.textContent = "Cork · Kildare · Dublin · Bray connected";
+      if (small) small.textContent = "Cork · Kildare · Dublin · Wicklow · Bray connected";
     }
 
     const legend = document.querySelector(".map-head .legend");
@@ -575,7 +585,7 @@
       const stats = nationalStats();
       setMapStatus(
         "Ireland connected coverage",
-        `${formatInteger(stats.locations)} mapped/evidence-backed assets across Cork, Kildare, Dublin and Bray · availability shown only where reported`
+        `${formatInteger(stats.locations)} mapped/evidence-backed assets across Cork, Kildare, Dublin, Wicklow and Bray · availability shown only where reported`
       );
     }
     const title = document.getElementById("view-title");
@@ -670,6 +680,7 @@
       state.corkCountyNetworkStatus,
       state.kildareNetworkStatus,
       state.dublinNetworkStatus,
+      state.wicklowNetworkStatus,
       state.regionStatus?.bray
     ].filter(value => value != null).every(value => value !== "loading");
     if ((announced.size === Object.keys(CONNECTED_REGIONS).length && resolved) || checks >= 120) {

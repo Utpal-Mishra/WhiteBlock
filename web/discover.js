@@ -10,6 +10,7 @@
   const GENERIC_NAMES = new Set(["parking", "car park", "surface parking", "street side parking", "lane parking"]);
   const REGION_LABELS = { cork: "Cork", kildare: "Kildare", dublin: "Dublin" };
   REGION_LABELS.bray = "Bray";
+  REGION_LABELS.wicklow = "Wicklow";
 
   state.discoveryInventory = [];
   state.discoveryVisibleLimit = PAGE_SIZE;
@@ -65,7 +66,7 @@
   }
 
   function latestSourceTime() {
-    const values = ["cork", "kildare", "dublin", "bray"]
+    const values = ["cork", "kildare", "dublin", "wicklow", "bray"]
       .map(key => regionSnapshot(key))
       .flatMap(snapshot => [snapshot?.generated_at, snapshot?.source?.retrieved_at])
       .filter(Boolean)
@@ -155,6 +156,9 @@
 
     const dublin = Array.isArray(inventories.dublin) ? inventories.dublin : [];
     if (dublin.length) mergeUnique(output, dublin.map(item => enrichForDiscover(item, "dublin")));
+
+    const wicklow = Array.isArray(inventories.wicklow) ? inventories.wicklow : [];
+    if (wicklow.length) mergeUnique(output, wicklow.map(item => enrichForDiscover(item, "wicklow")));
 
     const bray = Array.isArray(inventories.bray) ? inventories.bray : [];
     if (bray.length) mergeUnique(output, bray.map(item => enrichForDiscover(item, "bray")));
@@ -422,7 +426,7 @@
   const regionalRefresh = window.setInterval(() => {
     checks += 1;
     refreshDiscoveryInventory();
-    const statuses = [state.corkCountyNetworkStatus, state.kildareNetworkStatus, state.dublinNetworkStatus];
+    const statuses = [state.corkCountyNetworkStatus, state.kildareNetworkStatus, state.dublinNetworkStatus, state.wicklowNetworkStatus];
     const resolved = statuses.every(value => value && value !== "loading");
     if (resolved || checks >= 40) window.clearInterval(regionalRefresh);
   }, 500);

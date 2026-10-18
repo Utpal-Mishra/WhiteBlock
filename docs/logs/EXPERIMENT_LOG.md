@@ -25,3 +25,9 @@
 - Occupancy result: 0 live occupancy/free-space values inferred.
 - Outcome: supports imagery as a useful physical-supply validation layer with explicit uncertainty.
 - Status: completed.
+
+## EXP-20261019-WW01 — Wicklow multi-area smoke test
+- Date: 2026-10-19; status: automated offline tests added; live map QA pending.
+- Hypothesis: an OSM county snapshot plus Bray deduplication will expose useful parking records in major and rural localities without false occupancy.
+- Method: unit-test boundary selectors, null policy, open-way geometry and Bray radius; after deployment compare five sample destination queries and counts to real source records.
+- Pass gate: no fabricated live figures; no Bray duplication; exact county attribution; usable town drill-down.

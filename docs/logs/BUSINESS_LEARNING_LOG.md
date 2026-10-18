@@ -28,3 +28,9 @@
 - User value: a driver can understand the full parking landscape, including non-partner options, while partner assets can offer richer booking/payment/live capabilities.
 - Business value: partnership negotiations enrich an existing spatial asset rather than controlling WHITEBLOCK's basic coverage.
 - Status: adopted.
+
+## BIZ-20261019-WW01 — County expansion before partnerships
+- Date: 2026-10-19; status: implementation branch.
+- Learning: public/open mapped parking can seed a practical geographic registry independently of live operators. Council rules are location-specific; catalogue of physical parking is not a claim of driver eligibility.
+- Evidence: County Wicklow parking by-laws and OSM County Wicklow relation 282760 (see docs/WICKLOW_NETWORK.md).
+- Next validation: identify what proportion of real visitor/retail/rural parking remains unrecorded, before prioritising partnerships.

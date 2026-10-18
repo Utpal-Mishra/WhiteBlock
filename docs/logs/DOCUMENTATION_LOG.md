@@ -7,3 +7,8 @@
 - Covers: review purpose, four evidence states, geometry actions, target-selection rules, provider/provenance policy, app integration, Kildare fallback, and QA checklist.
 - README: updated with the first cross-region review summary and Kildare continuity policy.
 - Status: current for review ID WB-IMG-20261003-001.
+
+## DOC-20261019-WW01 — Wicklow network documentation
+- Date: 2026-10-19; status: feature branch.
+- Added docs/WICKLOW_NETWORK.md with scope, provenance, no-live policy, priority town/seasonal locations, official rule references and acceptance tests.
+- Follow-up: record exact deployment asset counts, source freshness, missing localities and human verification evidence once produced.

@@ -20,3 +20,9 @@
 - Current first-pass selection: up to 8 spatially distributed targets per region; Bray had 7 total records.
 - Future automation: expand in repeatable batches while retaining human or separately validated CV review before any geometry promotion.
 - Status: operational.
+
+## AUTO-20261019-WW01 — Scheduled Wicklow snapshot generation
+- Date: 2026-10-19; status: configured, awaits successful Pages run.
+- Source refresh: existing Pages deployment workflow invokes County Wicklow OSM builder; validates relation ID, source integrity, non-live semantics and Bray exclusion.
+- Failure path: no snapshot released if the external feed fails. No invented fallback counts.
+- Evidence: GitHub Actions log and per-snapshot generated_at/source metadata.

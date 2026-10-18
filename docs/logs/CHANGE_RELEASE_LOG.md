@@ -69,3 +69,8 @@
   - County Kildare: 128 partial evidence anchors / 0 polygons;
   - County Dublin: 9,336 mapped locations.
 - Release state: deployed successfully.
+
+## RELEASE-20261019-WW01 — Wicklow county network feature
+- Date: 2026-10-19; status: feature branch pending review/deployment.
+- Change scope: exact-county builder, browser adapter, national map, Discover, Inventory Coverage, Pages generation and validation, unit tests, public source notes.
+- Rollback: disable Wicklow script include / snapshot build if QA identifies wrongly promoted access, duplicates or broken regional navigation.

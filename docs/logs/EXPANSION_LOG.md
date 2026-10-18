@@ -32,3 +32,9 @@
 - Geography exit metric: no material known source or spatial gap remains unprocessed; remaining uncertainty is explicitly measured.
 - Commercial consequence: partnership rollout should enrich the geographic registry rather than define it.
 - Status: adopted.
+
+## EXPAND-20261019-WW01 — Bray pilot to County Wicklow evidence network
+- Date: 2026-10-19; status: implementation branch; deployment pending.
+- Geography: County Wicklow outside existing 5 km Bray pilot, sourced from exact OSM County Wicklow administrative relation.
+- Priority audit areas: Wicklow Town, Greystones, Arklow, Glendalough/Laragh, Brittas Bay, Blessington, Baltinglass and inland/rural towns.
+- Exit: successful network snapshot, source reconciliation, missing-location audit and location-specific access/rule checks; no assertion of exhaustive coverage.

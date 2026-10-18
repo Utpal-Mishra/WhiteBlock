@@ -14,6 +14,7 @@ This directory is the repo-backed audit trail for material WHITEBLOCK decisions 
 - Risk & Assumption Log
 - Data & Integration Log
 - Product / Feature Log
+- Merchant & Fulfilment Log
 - Expansion Log
 - Decision Log
 - Validation / QA Log
@@ -32,4 +33,6 @@ Project-specific conversation details are not part of the repository log. Logs r
 
 ## Current expansion
 
-2026-10-03: Bray seafront, County Wicklow added as the first evidence-backed regional expansion beyond Cork. See the linked 2026-10-03 entry in each log.
+2026-10-03: Bray seafront, County Wicklow added as an evidence-backed regional pilot beyond Cork.
+
+2026-10-19: County Wicklow mapped inventory expansion implemented on feature branch (outside the Bray pilot overlap). Code, source and QA evidence are tracked in the 2026-10-19 entries. Production data counts require a successful deployment.

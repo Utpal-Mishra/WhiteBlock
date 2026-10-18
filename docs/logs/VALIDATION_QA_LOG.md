@@ -91,3 +91,9 @@
 - Main deployment run #254: PASS, including snapshot build, imagery overlay, regional validation, artifact upload and GitHub Pages publication.
 - Deployed source counts: Cork 4,251 locations; Kildare 128 partial evidence anchors; Dublin 9,336 locations.
 - Status: automated deployment validation passed; user-facing mobile visual confirmation remains the final observational check.
+
+## QA-20261019-WW01 — Wicklow safeguards
+- Date: 2026-10-19; status: offline tests authored, CI and production smoke tests pending.
+- Assertions: exact County Wicklow relation 282760; no Bray overlap; no generated available_spaces; correct null capacity/access semantics; never create polygon from non-closed way.
+- Post-build gate: nonempty source-backed snapshot, non-exhaustive flag, correct boundary metadata, no duplicated Bray records.
+- Manual test queue: Wicklow Town, Greystones, Arklow, Blessington and Glendalough map/search/locality.

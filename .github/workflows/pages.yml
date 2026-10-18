@@ -9,6 +9,7 @@ on:
       - "scripts/ingest_cork_county_parking.py"
       - "scripts/ingest_cork_county_parking_stable.py"
       - "scripts/export_web_snapshot.py"
+      - "scripts/ingest_wicklow_county_parking.py"
       - "scripts/ingest_kildare_parking.py"
       - "scripts/ingest_kildare_county_parking.py"
       - "scripts/ingest_kildare_county_parking_stable.py"
@@ -154,6 +155,18 @@ jobs:
             python scripts/build_kildare_fallback_snapshot.py --output web/data/kildare_parking_snapshot.json
           fi
 
+      - name: Build County Wicklow network snapshot
+        run: |
+          # Source failure is not replaced with fabricated parking: the county
+          # adapter will accurately display "inventory unavailable".
+          rm -f web/data/wicklow_parking_snapshot.json
+          if timeout 225s python scripts/ingest_wicklow_county_parking.py --output web/data/wicklow_parking_snapshot.json; then
+            echo "County Wicklow exact-boundary mapped inventory built (Bray pilot excluded)"
+          else
+            echo "::warning::Wicklow mapped source unavailable; no Wicklow snapshot will be deployed"
+            rm -f web/data/wicklow_parking_snapshot.json
+          fi
+
       - name: Apply reviewed imagery evidence
         run: |
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/dublin_parking_snapshot.json --region Dublin
@@ -197,6 +210,29 @@ jobs:
               print(f"Validated optional County Cork snapshot with {len(cork_locations)} locations / {cork_polygon_count} polygons")
           else:
               print("County Cork optional snapshot unavailable; browser will expose the source-unavailable state")
+
+          wicklow_path = Path("web/data/wicklow_parking_snapshot.json")
+          if wicklow_path.exists():
+              wicklow = json.loads(wicklow_path.read_text())
+              coverage = wicklow.get("coverage", {})
+              records = wicklow.get("locations", [])
+              if (not records or coverage.get("scope") != "county_mapped_inventory_excluding_bray_pilot"
+                      or coverage.get("coverage_complete") is not False
+                      or int(coverage.get("osm_boundary_relation_id") or 0) != 282760
+                      or wicklow.get("summary", {}).get("live_availability") is not False):
+                  raise SystemExit("Wicklow inventory failed exact-boundary provenance/non-live checks")
+              if any(record.get("available_spaces") is not None for record in records):
+                  raise SystemExit("Wicklow must never fabricate live available spaces")
+              from math import asin, cos, radians, sin, sqrt
+              def km(a, b, c, d):
+                  x = sin(radians(c-a)/2)**2 + cos(radians(a))*cos(radians(c))*sin(radians(d-b)/2)**2
+                  return 12742 * asin(sqrt(min(1, x)))
+              if any(km(float(r["latitude"]), float(r["longitude"]), 53.2048, -6.0996) <= 5
+                     for r in records):
+                  raise SystemExit("County Wicklow snapshot contains Bray-pilot duplicates")
+              print(f"Validated {len(records)} mapped Wicklow assets (exact county, non-live, non-exhaustive)")
+          else:
+              print("Wicklow Overpass source unavailable; explicitly no county snapshot was deployed")
 
           kildare_path = Path("web/data/kildare_parking_snapshot.json")
           if kildare_path.exists():
@@ -346,7 +382,7 @@ jobs:
               raise SystemExit("Could not configure WHITEBLOCK runtime API block")
           path.write_text(source, encoding="utf-8")
           print("WHITEBLOCK API mode:", "configured" if value else "snapshot fallback")
-          print("WHITEBLOCK regional loader: optional Cork City + optional County Cork + optional County Kildare + required validated County Dublin evidence snapshot")
+          print("WHITEBLOCK regional loader: optional Cork City + optional County Cork + optional County Kildare + optional County Wicklow + required County Dublin evidence snapshot")
           PY
 
       - name: Configure GitHub Pages

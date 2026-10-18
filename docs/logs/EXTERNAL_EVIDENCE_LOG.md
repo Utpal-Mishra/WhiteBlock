@@ -30,3 +30,12 @@
 - Production preference: appropriately licensed Tailte Éireann orthophotography for Irish geometry work where available; Tailte publishes national high-resolution orthophotography and higher-resolution Dublin metropolitan coverage.
 - Repository policy: provider imagery pixels are not committed; only source/date/resolution and review conclusions are persisted.
 - Status: evidence policy active.
+
+## EVID-20261019-WW01 — County Wicklow source package
+- Date: 2026-10-19; status: referenced and data-query configured.
+- Geographic provenance: https://www.openstreetmap.org/relation/282760 (County Wicklow admin level 6; ODbL).
+- Rules: https://www.wicklow.ie/Living/Services/Roads-Transport/Road-Policy/Parking-Bye-Laws
+- Greystones: https://www.wicklow.ie/Living/Your-Council/Municipal-Districts/Greystones/Pay-Parking
+- Wicklow Town: https://wicklowtown.ie/find-us
+- Glendalough: https://glendalough.ie/transport/parking-in-glendalough/
+- Important: links support candidate/rule research, not blanket current pricing or live vacancy claims.

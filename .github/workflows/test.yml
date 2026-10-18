@@ -71,6 +71,7 @@ jobs:
           node --check web/tile-resilience.js
           node --check web/parking-layout.js
           node --check web/region-network.js
+          node --check web/wicklow-network.js
           node --check web/dublin-network.js
           node --check web/dublin-settlement-integration.js
           node --check web/dublin-restriction-integration.js

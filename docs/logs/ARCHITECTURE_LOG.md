@@ -58,3 +58,9 @@
   4. partnership connectors enrich the same canonical asset with operational/commercial capabilities.
 - Benefit: a partnership can be added/removed without deleting the underlying parking record or losing its history.
 - Status: accepted.
+
+## ARCH-20261019-WW01 — Administrative-boundary county ingestion
+- Date: 2026-10-19; status: implementation branch.
+- Flow: OSM exact County Wicklow admin-level-6 relation 282760 -> source-labelled snapshot -> browser regional adapter -> Ireland Overview / Find / Discover / Inventory Coverage.
+- Boundary rule: exclude Bray pilot's 5 km coverage from new county snapshot to avoid duplicate totals.
+- Separation: mapped supply != current driver eligibility != live occupancy != commercial partnership.

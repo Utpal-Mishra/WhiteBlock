@@ -9,7 +9,7 @@
 
   const STORAGE_KEY = "whiteblock.inventoryCandidates.v1";
   const DISPLAY_LIMIT = 100;
-  const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin"];
+  const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin", "Wicklow", "Bray"];
   const KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
@@ -62,6 +62,8 @@
     if (regionKey === "dublin") return "Dublin";
     if (regionKey === "kildare") return "Kildare";
     if (regionKey === "cork") return "Cork";
+    if (regionKey === "wicklow") return "Wicklow";
+    if (regionKey === "bray") return "Bray";
 
     const haystack = [
       item?.area,
@@ -75,6 +77,8 @@
     if (haystack.includes("dublin") || haystack.includes("fingal") || haystack.includes("laoghaire") || haystack.includes("rathdown")) return "Dublin";
     if (haystack.includes("kildare") || haystack.includes("-kildare-")) return "Kildare";
     if (haystack.includes("cork") || haystack.includes("-cork-")) return "Cork";
+    if (haystack.includes("wicklow") || haystack.includes("-wicklow-")) return "Wicklow";
+    if (haystack.includes("bray") || haystack.includes("-ww-bray-")) return "Bray";
     return item?.area || "Other";
   }
 
@@ -103,6 +107,8 @@
     if (Array.isArray(regions.cork)) pools.push(...regions.cork);
     if (Array.isArray(regions.kildare)) pools.push(...regions.kildare);
     if (Array.isArray(regions.dublin)) pools.push(...regions.dublin);
+    if (Array.isArray(regions.wicklow)) pools.push(...regions.wicklow);
+    if (Array.isArray(regions.bray)) pools.push(...regions.bray);
 
     if (!pools.length && Array.isArray(parkingData)) pools.push(...parkingData);
     return dedupe(pools).map(item => ({ ...item, inventoryStatus: "inventory" }));
@@ -129,6 +135,8 @@
     const snapshots = state.regionSnapshots || {};
     if (region === "Dublin") return snapshots.dublin || null;
     if (region === "Kildare") return snapshots.kildare || null;
+    if (region === "Wicklow") return snapshots.wicklow || null;
+    if (region === "Bray") return snapshots.bray || null;
     if (region === "Cork") return snapshots.corkCounty || snapshots.cork || state.discoverySnapshot || state.parkingSnapshot || null;
     return null;
   }
@@ -224,6 +232,8 @@
             <option value="cork">Cork</option>
             <option value="kildare">Kildare</option>
             <option value="dublin">Dublin</option>
+            <option value="wicklow">Wicklow</option>
+            <option value="bray">Bray</option>
           </select>
         </label>
         <label class="inventory-filter-field">
@@ -238,7 +248,7 @@
       </div>
       <div class="inventory-search-summary">
         <span id="inventory-search-count">Loading connected regional inventory…</span>
-        <span>Cork, Kildare and Dublin remain source-backed; unknown access is never promoted to public.</span>
+        <span>Connected county inventories are source-backed; unknown access is never promoted to public, and live occupancy is never invented.</span>
       </div>
       <form id="inventory-candidate-form" class="inventory-candidate-form" hidden>
         <div class="inventory-form-head">
@@ -310,11 +320,15 @@
         ? "Four-authority County Dublin evidence"
         : region === "Kildare"
           ? "Kildare CoCo + OpenStreetMap"
+          : region === "Wicklow" ? "OpenStreetMap exact county boundary (excluding Bray pilot)"
+          : region === "Bray" ? "Curated Bray seafront pilot"
           : "Cork City + County Cork evidence";
       const mode = region === "Dublin"
         ? "Exact-boundary mapped network"
         : region === "Kildare"
           ? "Exact-county mapped network"
+          : region === "Wicklow" ? "Mapped county network · partial/non-live"
+          : region === "Bray" ? "Evidence pilot · non-live"
           : "City live + county mapped";
       return `
         <article class="surface discover-region-card inventory-region-card" data-inventory-region-card="${escape(region.toLowerCase())}">
@@ -575,7 +589,7 @@
   }
 
   function regionalLoadingComplete() {
-    const statuses = [state.corkCountyNetworkStatus, state.kildareNetworkStatus, state.dublinNetworkStatus]
+    const statuses = [state.corkCountyNetworkStatus, state.kildareNetworkStatus, state.dublinNetworkStatus, state.wicklowNetworkStatus, state.regionStatus?.bray]
       .filter(value => value != null);
     return statuses.length >= 2 && statuses.every(value => value !== "loading");
   }
@@ -586,7 +600,7 @@
       attempts += 1;
       renderInventoryCoverage();
       const canonicalRegions = new Set(canonicalInventory().map(normalizeRegion).filter(region => CONNECTED_REGIONS.includes(region)));
-      if ((canonicalRegions.size === 3 && regionalLoadingComplete()) || attempts >= 60) window.clearInterval(timer);
+      if ((canonicalRegions.size === CONNECTED_REGIONS.length && regionalLoadingComplete()) || attempts >= 60) window.clearInterval(timer);
     }, 500);
   }
 
