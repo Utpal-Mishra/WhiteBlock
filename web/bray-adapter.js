@@ -162,12 +162,15 @@
       state.regionInventories.bray = snapshot.locations.map(hydrate).filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng));
       state.regionStatus.bray = "ready";
 
-      mergeBrayIntoParkingData();
-      rebuildMarkers();
-      setKpiMode(isInCorkPilot(state.destination.lat, state.destination.lng));
-      renderParkingList();
-
+      // Loading a regional inventory must not mutate the active Find result set.
+      // Only hydrate Bray into parkingData after the user actually commits a Bray
+      // destination. This prevents the national Ireland view from showing a stray
+      // seven-item Bray marker/cluster near Dublin while county summaries are shown.
       if (state.destination && isInBrayCoverage(state.destination.lat, state.destination.lng)) {
+        mergeBrayIntoParkingData();
+        rebuildMarkers();
+        setKpiMode(true);
+        renderParkingList();
         setMapStatus("Bray seafront parking intelligence", state.regionInventories.bray.length + " evidence-backed assets · live occupancy not connected");
       }
 
@@ -182,12 +185,11 @@
 
   document.addEventListener("whiteblock:data-ready", event => {
     if (event && event.detail && event.detail.region === "bray") return;
+    if (!state.destination || !isInBrayCoverage(state.destination.lat, state.destination.lng)) return;
     if (mergeBrayIntoParkingData()) {
       rebuildMarkers();
-      if (state.destination && isInBrayCoverage(state.destination.lat, state.destination.lng)) {
-        setKpiMode(true);
-        renderParkingList();
-      }
+      setKpiMode(true);
+      renderParkingList();
     }
   });
 
