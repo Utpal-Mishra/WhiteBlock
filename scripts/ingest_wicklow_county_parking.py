@@ -59,7 +59,8 @@ def distance_km(a, b, c, d):
     x = sin(radians(c - a) / 2) ** 2 + cos(radians(a)) * cos(radians(c)) * sin(radians(d - b) / 2) ** 2
     return 12742 * asin(sqrt(min(1, x)))
 
-def osm_query():
+def osm_query(include_geometry=True):
+    output = 'out meta center geom;' if include_geometry else 'out meta center;'
     return f"""[out:json][timeout:90];
 rel({COUNTY_RELATION_ID})->.boundary;
 map_to_area.boundary->.searchArea;
@@ -67,23 +68,27 @@ map_to_area.boundary->.searchArea;
  nwr["amenity"="parking"](area.searchArea);
  nwr["parking"~"street_side|lane"](area.searchArea);
 );
-out meta center geom;"""
+{output}"""
 
 def fetch_osm():
-    payload = urllib.parse.urlencode({"data": osm_query()}).encode("utf-8")
     errors = []
-    for endpoint in OVERPASS_ENDPOINTS:
-        try:
-            req = urllib.request.Request(endpoint, data=payload, headers={
-                "User-Agent": USER_AGENT, "Accept": "application/json"
-            })
-            with urllib.request.urlopen(req, timeout=110) as response:
-                data = json.load(response)
-            if not isinstance(data.get("elements"), list) or not data["elements"]:
-                raise ValueError("empty Overpass elements")
-            return data["elements"], endpoint
-        except Exception as exc:
-            errors.append(f"{endpoint}: {exc}")
+    # Prefer true geometry, but recover from slow/large polygon payloads with a
+    # point-only county query rather than deploying an empty or invented snapshot.
+    stages = ((True, OVERPASS_ENDPOINTS[:2], 49), (False, OVERPASS_ENDPOINTS, 34))
+    for include_geometry, endpoints, timeout_seconds in stages:
+        payload = urllib.parse.urlencode({"data": osm_query(include_geometry)}).encode("utf-8")
+        for endpoint in endpoints:
+            try:
+                req = urllib.request.Request(endpoint, data=payload, headers={
+                    "User-Agent": USER_AGENT, "Accept": "application/json"
+                })
+                with urllib.request.urlopen(req, timeout=timeout_seconds) as response:
+                    data = json.load(response)
+                if not isinstance(data.get("elements"), list) or not data["elements"]:
+                    raise ValueError("empty Overpass elements")
+                return data["elements"], endpoint, ("geometry" if include_geometry else "point_only")
+            except Exception as exc:
+                errors.append(f"{endpoint} ({'geometry' if include_geometry else 'points'}): {exc}")
     raise RuntimeError("All exact-county Overpass queries failed: " + " | ".join(errors))
 
 def get_point(element):
@@ -169,7 +174,7 @@ def make_record(element, now):
         "network_role": "parking_asset",
     }
 
-def build_snapshot(elements, endpoint, now):
+def build_snapshot(elements, endpoint, now, geometry_mode="geometry"):
     unique = {}
     for element in elements:
         record = make_record(element, now)
@@ -190,7 +195,8 @@ def build_snapshot(elements, endpoint, now):
         },
         "sources": {"openstreetmap_wicklow_parking": {
             "status": "ok", "query_mode": "exact_county_boundary", "relation_id": COUNTY_RELATION_ID,
-            "endpoint": endpoint, "license": "ODbL", "retrieved_at": now
+            "endpoint": endpoint, "license": "ODbL", "retrieved_at": now,
+            "geometry_mode": geometry_mode
         }, "council_parking_rules": {
             "source_url": BYLAWS_URL,
             "status": "reference_only_not_automatically_joined",
@@ -209,9 +215,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=Path("web/data/wicklow_parking_snapshot.json"))
     args = parser.parse_args()
-    elements, endpoint = fetch_osm()
+    elements, endpoint, geometry_mode = fetch_osm()
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    snapshot = build_snapshot(elements, endpoint, now)
+    snapshot = build_snapshot(elements, endpoint, now, geometry_mode)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Wicklow mapped inventory: {len(snapshot['locations'])} places; "
