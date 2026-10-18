@@ -38,3 +38,12 @@
 - Visual hierarchy: location total is the strongest line in the regional card; published capacity and reported free-space totals remain secondary and appear only where evidence exists.
 - Browse behaviour: individual clustered parking markers are intentionally suppressed until the user drills into a region/locality or commits a destination.
 - Status: implemented; deployment validation pending.
+
+## PROD-20261018-002 — Parking Universe Registry
+
+- Date: 2026-10-18.
+- Product capability: represent all known/plausible parking supply in the canonical registry, including assets that are not currently recommendable.
+- Required states: verified public, customer/time-limited, permit/restricted, private/shared, temporary/event, unknown access, unverified candidate and closed/removed history.
+- Recommendation boundary: only assets meeting access/rule/evidence criteria may be recommended; candidate/restricted records remain visible to the evidence and coverage systems.
+- Partnership boundary: partnership status enriches an asset rather than creating the asset.
+- Status: roadmap/design adopted.
