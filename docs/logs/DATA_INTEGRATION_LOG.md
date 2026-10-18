@@ -36,3 +36,10 @@
 - No fabrication: missing capacity/availability stays unknown; only explicit values in inventory/snapshot rows are aggregated.
 - Current validated deployment reference: Cork 4,250 county locations; Kildare 128 partial evidence anchors; Dublin 9,336 locations; Bray 7 pilot assets.
 - Status: implemented.
+
+### DATA deployment refresh — 2026-10-18
+
+- Latest Pages build refreshed County Cork to 4,251 mapped locations / 4,087 polygons.
+- Kildare exact-boundary refresh timed out and correctly fell back to 128 explicitly partial evidence anchors.
+- Dublin remained validated at 9,336 mapped locations.
+- The national overview consumes these deployed values dynamically; no regional count is hard-coded in the UI.
