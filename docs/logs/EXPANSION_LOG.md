@@ -24,3 +24,11 @@
 - Promotion policy: this pass enriches existing canonical assets; it does not create new canonical parking solely from imagery.
 - Follow-up: digitise/reconcile only the seven records whose reviewed imagery supports a clear surface-lot geometry candidate.
 - Status: first batch complete; broader review backlog retained.
+
+## EXPAND-20261018-001 — Coverage-complete geography before partnership-led expansion
+
+- Date: 2026-10-18.
+- Expansion rule: for each target county/city, exhaust known official/open/map/imagery/source categories and retain unresolved candidates before treating the geography as partnership-ready.
+- Geography exit metric: no material known source or spatial gap remains unprocessed; remaining uncertainty is explicitly measured.
+- Commercial consequence: partnership rollout should enrich the geographic registry rather than define it.
+- Status: adopted.
