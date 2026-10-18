@@ -27,3 +27,11 @@
 - Reason: this prevents national-marker overlap while retaining useful evidence density at each zoom level.
 - Mobile rule: controls that change context but are not required for the main parking task should sit behind the + menu.
 - Status: adopted in PR #33.
+
+## REC-20261018-001 — Keep national parking counts stable and labelled
+
+- Date: 2026-10-18.
+- Recommendation: display one stable evidence-derived count per connected region on the Ireland map and reserve dynamic clustering for detailed/destination views.
+- Presentation: region name + mapped/evidence-backed location total should remain readable without requiring hover/tap; capacity may be shown only where published.
+- Kildare qualifier: when using the 128-anchor fallback, call it partial/evidence-anchor coverage rather than complete county inventory.
+- Status: adopted.

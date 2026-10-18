@@ -65,7 +65,7 @@ function loadWhiteblockMapEngineV2() {
 function loadWhiteblockInventoryMapLayer() {
   if (document.querySelector('script[data-whiteblock-inventory-map]')) return;
   const script = document.createElement('script');
-  script.src = './inventory-map-layer.js?v=20260923-dublin1';
+  script.src = './inventory-map-layer.js?v=20261018-1';
   script.defer = true;
   script.dataset.whiteblockInventoryMap = 'true';
   document.body.appendChild(script);
@@ -212,13 +212,13 @@ function loadWhiteblockIrelandOverview() {
   if (!document.querySelector('link[data-whiteblock-ireland-overview]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = './ireland-overview.css?v=20261004-1';
+    style.href = './ireland-overview.css?v=20261018-1';
     style.dataset.whiteblockIrelandOverview = 'true';
     document.head.appendChild(style);
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20261004-1';
+  script.src = './ireland-overview.js?v=20261018-1';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);

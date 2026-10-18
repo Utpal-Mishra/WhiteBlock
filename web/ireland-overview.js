@@ -84,19 +84,23 @@
 
   function regionStats(key) {
     const inventory = inventoryFor(key);
+    const snapshot = snapshotFor(key);
+    const snapshotRows = Array.isArray(snapshot?.locations) ? snapshot.locations : [];
+    const rows = inventory.length ? inventory : snapshotRows;
+    const publishedLocationCount = numeric(snapshot?.summary?.locations);
     let capacity = 0;
     let capacityAssets = 0;
     let available = 0;
     let availableAssets = 0;
     let unknownAccess = 0;
 
-    inventory.forEach(item => {
-      const cap = numeric(item.capacity);
+    rows.forEach(item => {
+      const cap = numeric(item.capacity ?? item.total_spaces ?? item.totalSpaces);
       if (cap != null && cap >= 0) {
         capacity += cap;
         capacityAssets += 1;
       }
-      const free = numeric(item.available);
+      const free = numeric(item.available ?? item.available_spaces ?? item.availableSpaces);
       if (free != null && free >= 0) {
         available += free;
         availableAssets += 1;
@@ -105,14 +109,15 @@
       if (["unknown", "designated", ""].includes(access)) unknownAccess += 1;
     });
 
+    const locations = rows.length || publishedLocationCount || 0;
     return {
-      locations: inventory.length,
+      locations,
       capacity,
       capacityAssets,
       available: availableAssets ? available : null,
       availableAssets,
       unknownAccess,
-      loaded: inventory.length > 0
+      loaded: locations > 0
     };
   }
 
@@ -178,6 +183,15 @@
     }
   }
 
+  function ensureOverviewPane() {
+    if (!state.map || typeof L === "undefined") return null;
+    let pane = state.map.getPane("wbOverviewPane");
+    if (!pane) pane = state.map.createPane("wbOverviewPane");
+    pane.style.zIndex = "640";
+    pane.style.pointerEvents = "auto";
+    return pane;
+  }
+
   function regionNodeHtml(key, stats) {
     const region = CONNECTED_REGIONS[key];
     const count = stats.loaded ? formatInteger(stats.locations) : "…";
@@ -193,6 +207,7 @@
 
   function renderNationalRegionNodes() {
     if (!state.map || typeof L === "undefined") return;
+    ensureOverviewPane();
     clearOverviewLayer();
     state.irelandOverviewLayer = L.layerGroup().addTo(state.map);
 
@@ -204,7 +219,7 @@
         iconSize: [132, 74],
         iconAnchor: region.nationalAnchor || [66, 37]
       });
-      const marker = L.marker(region.center, { icon, keyboard: true }).addTo(state.irelandOverviewLayer);
+      const marker = L.marker(region.center, { icon, keyboard: true, pane: "wbOverviewPane" }).addTo(state.irelandOverviewLayer);
       const availabilityCopy = stats.availableAssets
         ? `${formatInteger(stats.available)} spaces currently reported free`
         : "live availability not published/inferred";
@@ -320,6 +335,7 @@
       points.push([lat, lng]);
       const available = numeric(item.available);
       const marker = L.circleMarker([lat, lng], {
+        pane: "wbOverviewPane",
         radius: 6,
         color: "#07110D",
         weight: 2,
@@ -363,6 +379,7 @@
     const region = CONNECTED_REGIONS[key];
     if (!region || !state.map || typeof L === "undefined") return [];
 
+    ensureOverviewPane();
     const groups = groupRegionalInventory(key);
     clearOverviewLayer();
     state.irelandOverviewLayer = L.layerGroup().addTo(state.map);
@@ -374,7 +391,7 @@
         iconSize: [126, 66],
         iconAnchor: [63, 33]
       });
-      const marker = L.marker([group.lat, group.lng], { icon, keyboard: true }).addTo(state.irelandOverviewLayer);
+      const marker = L.marker([group.lat, group.lng], { icon, keyboard: true, pane: "wbOverviewPane" }).addTo(state.irelandOverviewLayer);
       marker.bindTooltip(
         `${group.label} · ${formatInteger(group.items.length)} parking locations · click to show individual parking`,
         { direction: "top", offset: [0, -22], className: "wb-tooltip" }

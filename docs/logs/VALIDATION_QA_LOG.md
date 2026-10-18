@@ -64,3 +64,23 @@
   - Evidence queues remain fully inside a 360–430 px viewport;
   - + menu opens/closes and all secondary map options still work.
 - Status: feature-branch validation implemented; GitHub Actions and deployed-mobile checks pending.
+
+## QA-20261018-001 — Regional count visibility regression checks
+
+- Date: 2026-10-18.
+- Automated contracts added/updated:
+  - inventory cluster layer contains `coverageBrowseActive` and responds to `whiteblock:coverage-browse`;
+  - Ireland overview supports snapshot-row/summary fallback via `snapshotRows` and `publishedLocationCount`;
+  - overview markers use `wbOverviewPane`;
+  - runtime cache keys reference the 2026-10-18 overview/inventory assets.
+- Expected deployed data from the latest validated Pages build before this fix:
+  - County Cork snapshot: 4,250 mapped locations;
+  - County Kildare fallback: 128 evidence anchors, explicitly partial;
+  - County Dublin snapshot: 9,336 mapped locations;
+  - Bray pilot: 7 evidence-backed assets.
+- Manual acceptance:
+  - Ireland default view visibly shows Cork and Kildare numeric cards;
+  - no stray seven-item/other inventory cluster obscures Dublin-region summary;
+  - selecting a region still drills into locality groups;
+  - destination search still restores exact inventory markers/clustering.
+- Status: branch implementation complete; CI and live mobile verification pending.

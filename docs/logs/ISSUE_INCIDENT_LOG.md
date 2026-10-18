@@ -48,3 +48,20 @@
 - Corrective action: PR #33 introduces national → region/county → locality → individual-point drilldown, responsive text/table contracts, a compact + map menu and Street-default preservation.
 - Data-integrity control: missing capacity or live availability remains unknown and is never estimated by the UI.
 - Status: implemented on branch; CI/production deployment validation pending.
+
+## INC-20261018-001 — Cork and Kildare counts missing from Ireland overview
+
+- Date: 2026-10-18.
+- Severity: medium.
+- Detection: mobile screenshot showed no regional count card over Cork or Kildare while an overlapping numeric cluster remained near Dublin.
+- Root cause:
+  - the all-inventory MarkerCluster layer was still allowed to render during national/region browse mode and could visually compete with the dedicated regional summary layer;
+  - Bray snapshot loading could mutate `parkingData` and rebuild markers even when no Bray destination had been committed;
+  - regional summary counts depended primarily on hydrated in-memory inventories, so a slower adapter could temporarily leave the national node without a numeric total.
+- Corrective action:
+  - suppress/remove the clustered inventory layer during Ireland/region browse mode;
+  - keep Bray inventory passive until a Bray destination is selected;
+  - allow regional totals to fall back to the validated snapshot rows/summary;
+  - render overview nodes in a dedicated high-priority Leaflet pane and visually emphasise the location count.
+- Data integrity: no counts are hard-coded; values remain derived from the deployed evidence snapshots/inventories.
+- Status: implemented on branch `fix/overview-region-counts-2026-10-18`; CI/deployment validation pending.

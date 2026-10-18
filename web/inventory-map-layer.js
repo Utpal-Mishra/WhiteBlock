@@ -15,6 +15,15 @@
   state.inventoryMarkersEnabled = true;
   state.inventoryMarkerControl = null;
 
+  function coverageBrowseActive() {
+    return state.overviewMode === true || Boolean(state.regionFocus);
+  }
+
+  function setControlVisibility(visible) {
+    const host = state.inventoryMarkerControl?.getContainer?.();
+    if (host) host.style.display = visible ? "" : "none";
+  }
+
   function ensureLink(href, marker) {
     if (document.querySelector(`link[data-${marker}]`)) return;
     const link = document.createElement("link");
@@ -198,6 +207,7 @@
   function ensureControl(count) {
     if (!state.map || state.inventoryMarkerControl) {
       updateControl(count);
+      setControlVisibility(!coverageBrowseActive());
       return;
     }
     const InventoryControl = L.Control.extend({
@@ -223,11 +233,24 @@
     state.inventoryMarkerControl = new InventoryControl();
     state.inventoryMarkerControl.addTo(state.map);
     updateControl(count);
+    setControlVisibility(!coverageBrowseActive());
   }
 
   function renderInventoryLayer() {
     if (!state.map || typeof L === "undefined") return;
     const items = connectedInventory();
+
+    // National/region browse mode owns the map with one readable summary layer.
+    // Do not let thousands of clustered parking markers cover the county totals
+    // or locality drill-down cards. Exact inventory markers return after a
+    // destination is committed and overviewMode/regionFocus are cleared.
+    if (coverageBrowseActive()) {
+      removeExistingInventoryLayer();
+      setControlVisibility(false);
+      return;
+    }
+
+    setControlVisibility(true);
     if (!items.length) return;
 
     removeUnclusteredRegionMarkers();
@@ -305,6 +328,10 @@
   wrapApplicationHooks();
   document.addEventListener("whiteblock:data-ready", () => window.setTimeout(renderInventoryLayer, 0));
   document.addEventListener("whiteblock:kildare-attributes-ready", () => window.setTimeout(renderInventoryLayer, 0));
+  document.addEventListener("whiteblock:coverage-browse", () => {
+    removeExistingInventoryLayer();
+    setControlVisibility(false);
+  });
   document.addEventListener("whiteblock:region-inventory-ready", event => {
     const region = String(event?.detail?.region || "").toLowerCase();
     if (!region) return;

@@ -105,3 +105,21 @@
   }
 }
 
+/* 2026-10-18: make regional inventory figures the strongest visual signal. */
+.wb-ireland-region-node span {
+  margin-top: 6px;
+  color: #c8f56b;
+  font: 800 15px/1.05 "Manrope", sans-serif;
+  letter-spacing: -.02em;
+}
+
+.wb-ireland-region-node small {
+  margin-top: 5px;
+}
+
+@media (max-width: 520px) {
+  .wb-ireland-region-node span {
+    font-size: 13px;
+  }
+}
+

@@ -33,3 +33,16 @@
 - UI state: coverage browsing emits `whiteblock:coverage-browse` so stale destination/recommendation overlays can be cleared without mutating source data.
 - Bray boundary: Bray participates as a regional evidence pilot with County Wicklow context; no whole-Wicklow inventory claim is made.
 - Status: accepted and implemented in PR #33.
+
+## ARCH-20261018-001 — National map has one authoritative browse layer at a time
+
+- Date: 2026-10-18.
+- Decision: national/region browsing and destination-level inventory clustering are mutually exclusive visible map states.
+- Rationale: displaying both summary cards and thousands of clustered assets at the same time creates overlap, ambiguous counts and poor mobile legibility.
+- Architecture:
+  1. Ireland overview renders regional summary nodes from canonical inventories or validated snapshot fallback.
+  2. Region focus renders locality groups.
+  3. Locality focus renders individual points.
+  4. Destination search may reactivate the full inventory cluster layer.
+- Layer contract: `wbOverviewPane` is reserved for browse hierarchy markers.
+- Status: accepted/implemented.
