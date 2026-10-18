@@ -58,3 +58,14 @@
   - Cork/Kildare counts remain available even while adapter hydration is catching up by using the validated regional snapshot as fallback;
   - clustered individual parking markers are hidden during national/region browsing and return after a destination is committed.
 - Release state: implementation complete on feature branch; PR/CI/Pages gates pending.
+
+### Deployment update — 2026-10-18
+
+- PR #34 merged to `main` as `a65e74ac6ca139fcdebc3fdc89c8c15a329b9fa5`.
+- Feature-branch CI: PASS.
+- GitHub Pages deployment run #254: PASS.
+- Latest deployed regional evidence:
+  - County Cork: 4,251 mapped locations / 4,087 mapped polygons;
+  - County Kildare: 128 partial evidence anchors / 0 polygons;
+  - County Dublin: 9,336 mapped locations.
+- Release state: deployed successfully.
