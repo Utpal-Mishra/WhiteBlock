@@ -52,3 +52,10 @@
 - Partnership layer: partner/operator ID, verified relationship, booking/payment URL/API, live feed capability, commercial access/benefits and session-management support.
 - Candidate policy: plausible physical parking remains representable even when access or partnership status is unresolved.
 - Status: adopted for future schema/reconciliation work.
+
+## DATA-20261019-WW01 — Wicklow mapped county ingestion
+- Date: 2026-10-19; status: code added, first live source count not yet confirmed.
+- Integration: OSM mapped parking via admin relation 282760 (ODbL) -> generated Wicklow JSON browser snapshot.
+- Preserved fields: OSM ID/URL/type, coordinates, optionally valid polygon, settlement/provenance, source timestamp, explicit access/fee/capacity/opening hours.
+- Null policy: available_spaces, occupancy and untagged capacity/rules remain null; OSM fee tags are textual, not verified monetary prices.
+- Deduplication: OSM ID and exclusion of Bray pilot circle.
