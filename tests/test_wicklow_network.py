@@ -65,6 +65,11 @@ class WicklowInventoryTests(unittest.TestCase):
         self.assertIn("wicklow-network.js", index)
         self.assertIn("wicklow: {", overview)
         self.assertIn("inventories.wicklow", discover)
+        runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
+        self.assertIn("function loadWhiteblockReattachBray()", runtime)
+        self.assertIn("function loadWhiteblockWicklowNetwork()", runtime)
+        self.assertIn("script.addEventListener('load', loadWhiteblockWicklowNetwork", runtime)
+
 
 
 if __name__ == "__main__":
