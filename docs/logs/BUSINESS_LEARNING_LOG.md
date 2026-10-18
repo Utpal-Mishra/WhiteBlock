@@ -19,3 +19,12 @@
 - Result: 17 clearly visible physical parking, 9 ambiguous-context records, 3 not confirmed as distinct footprints, 2 visible only in older imagery.
 - Business implication: WHITEBLOCK can improve supply confidence without waiting for a live occupancy feed, but should monetise/position this as spatial evidence and verification rather than real-time availability.
 - Status: validated learning.
+
+## BUS-20261018-001 — Inventory completeness is a stronger moat than partner-only coverage
+
+- Date: 2026-10-18.
+- Learning: if WHITEBLOCK only learns about parking through partners, coverage becomes dependent on commercial relationships and the product risks becoming another operator directory.
+- Strategic implication: build the parking universe independently from partnerships, then use partnerships to improve actionability, live data and monetisation.
+- User value: a driver can understand the full parking landscape, including non-partner options, while partner assets can offer richer booking/payment/live capabilities.
+- Business value: partnership negotiations enrich an existing spatial asset rather than controlling WHITEBLOCK's basic coverage.
+- Status: adopted.
