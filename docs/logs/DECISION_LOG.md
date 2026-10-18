@@ -49,3 +49,10 @@
 - Partnership role: enrich an existing asset with operator verification, booking/payment, trusted occupancy/capacity feeds, session management or partner-specific access/benefits.
 - Caveat: literal 100% real-world completeness cannot be guaranteed because parking supply and rules change; the operational target is source/geographic coverage completeness with continuous revalidation.
 - Status: accepted.
+
+## DEC-20261019-WW01 — Wicklow inventory separate from Bray pilot
+- Date: 2026-10-19; decision: include exact-county OSM mapped parking outside the existing Bray 5 km evidence pilot, preserving Bray as an independent region.
+- Rationale: broaden useful parking knowledge without duplicating Bray records or implying live availability.
+- Alternatives rejected: approximate rectangular OSM county query; invented capacity/occupancy; wholesale application of town-wide by-law rates; partnership-dependent initial inventory.
+- Risk accepted: current OSM coverage is incomplete, and some records have unresolved access/restriction evidence.
+- Status: implemented on branch, subject to live-source and CI validation.
