@@ -47,3 +47,14 @@
 - Behavioural change: the Ireland map now exposes regional/county totals, then locality clusters, then individual parking points; Street remains the startup basemap and secondary views are opened from a compact + menu.
 - Coverage change: Bray is counted as a connected evidence pilot while remaining explicitly labelled as a Bray/County Wicklow pilot rather than whole-county coverage.
 - Release state: implementation complete on feature branch; CI and Pages deployment gates pending.
+
+## CHANGE-20261018-001 — Restore Cork/Kildare regional figures on national map
+
+- Date: 2026-10-18.
+- Branch: `fix/overview-region-counts-2026-10-18`.
+- Changed: `ireland-overview.js/css`, `inventory-map-layer.js`, `bray-adapter.js`, runtime/index cache keys, tests and audit logs.
+- Behavioural change:
+  - national coverage view prioritises one regional summary card per connected region;
+  - Cork/Kildare counts remain available even while adapter hydration is catching up by using the validated regional snapshot as fallback;
+  - clustered individual parking markers are hidden during national/region browsing and return after a destination is committed.
+- Release state: implementation complete on feature branch; PR/CI/Pages gates pending.
