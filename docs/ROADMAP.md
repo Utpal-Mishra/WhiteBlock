@@ -44,6 +44,69 @@ Exit condition:
 - duplicates and conflicts are traceable;
 - data-quality gaps are quantified.
 
+## Phase 1.5 — Parking Universe Coverage
+
+**Goal:** make the canonical WHITEBLOCK registry as complete as practicable before commercial partnerships become a dependency.
+
+This phase is broader than verified public parking. The registry should preserve every known or plausible parking asset/candidate, while keeping its legal/use status explicit.
+
+Coverage classes should include, where evidence exists:
+
+- public off-street car parks;
+- on-street parking zones/bays;
+- accessible parking;
+- EV parking;
+- Park & Ride;
+- station/transport parking;
+- hospital/university/airport/event parking;
+- shopping-centre and grocery/retail customer parking;
+- private/shared parking that may become partner-accessible;
+- permit/restricted parking;
+- temporary/event parking;
+- imagery/GIS-detected parking candidates whose public access is not yet verified;
+- closed/removed/former parking retained as lifecycle history rather than silently deleted.
+
+Core rule:
+
+> A parking asset can exist in the WHITEBLOCK registry without being currently recommendable to a driver.
+
+Required state separation:
+
+- physical existence;
+- public/private/restricted/unknown access;
+- rules and maximum stay;
+- capacity/geometry confidence;
+- current recommendation eligibility;
+- partnership/commercial status;
+- live availability source.
+
+Coverage-completion work:
+
+- enumerate every authoritative/open/map/imagery source available for the target geography;
+- reconcile and deduplicate all discovered assets into canonical `WB-PARK-*` records;
+- scan geographic gaps rather than only known car-park names;
+- maintain unresolved candidates instead of dropping them;
+- measure source/geographic coverage and unresolved-access gaps;
+- establish automated change detection/revalidation for additions, removals and rule changes.
+
+Suggested completion metrics:
+
+- source-universe coverage;
+- geographic coverage;
+- candidate resolution rate;
+- verified-access rate;
+- stale-record rate;
+- unresolved-access rate;
+- percentage of known physical parking represented by canonical records.
+
+Exit condition:
+
+> No material known parking source or geographic coverage gap remains unprocessed for the target region, and unresolved assets are explicitly represented as candidates/restricted/unknown rather than omitted.
+
+Important:
+
+This is a **coverage-complete objective, not a claim of literal 100% real-world completeness**. Parking supply, rules and physical layouts change over time.
+
 ## Phase 2 — Destination-First Experience
 
 **Goal:** prove that WHITEBLOCK can make a better parking decision than a static parking map.
@@ -220,6 +283,24 @@ Across every phase:
 - user research;
 - cost/ROI measurement;
 - documentation.
+
+## Partnership-readiness gate
+
+Commercial/operator partnerships should enrich an already-existing parking registry rather than determine which parking assets exist in WHITEBLOCK.
+
+Partnership integrations should mainly add or improve:
+
+- verified operator/owner relationship;
+- reservability/bookability;
+- payment/deep-link capability;
+- partner-only access rules;
+- trusted capacity/occupancy feeds;
+- session-management capability;
+- commercial terms/benefits.
+
+The canonical parking asset should remain stable before and after a partnership. A partnership changes **how the asset can be used**, not whether WHITEBLOCK knows that the asset physically exists.
+
+After the coverage-completion gate, partnerships can become the principal **product-expansion** workstream. Inventory maintenance must still continue automatically for new/removed parking, rule changes, temporary closures and source freshness.
 
 ## Roadmap rule
 
