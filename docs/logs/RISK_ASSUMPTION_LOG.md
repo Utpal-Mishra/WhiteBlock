@@ -82,3 +82,11 @@
 
 - Assumption: commercial/operator partnerships should primarily add operational/commercial capability to already-known parking assets.
 - Control: if a partner exposes previously unknown physical parking, ingest it through the same canonical reconciliation/evidence workflow rather than bypassing the registry.
+
+## RISK-20261019-WW01 — Wicklow mapped parking coverage limitations
+- Date: 2026-10-19; status: open.
+- R1 incomplete OSM rural/retail mapping: high likelihood/medium impact; mitigation official sources and licensed imagery candidate queue; do not claim exhaustive county coverage.
+- R2 wrong legal/public-access classification: medium/high; method compare OSM access tags with official signage/operator evidence; mitigation keep unknown/restricted explicit and gate recommendations.
+- R3 temporary/seasonal coastal closures: medium/high; method check current on-site rules and event notices; mitigation timestamp rule evidence, no blanket year-round access promises.
+- R4 Overpass timeout: medium/medium; method inspect hourly build logs; mitigation remove optional snapshot and show source-unavailable state, no fake fallbacks.
+- R5 double counting Bray: high/medium if unmitigated; mitigation remove the existing 5 km Bray circle from Wicklow data and unit-test.
