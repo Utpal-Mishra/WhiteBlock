@@ -39,3 +39,13 @@
 - Count semantics: regional location totals are evidence-backed inventory counts; Kildare must retain its partial-fallback label when the exact-boundary refresh is unavailable.
 - Consequence: clustered parking is deferred to destination/detail context, while national navigation remains stable and interpretable.
 - Status: accepted.
+
+## DEC-20261018-002 — Build the parking universe before partnerships
+
+- Date: 2026-10-18.
+- Decision: WHITEBLOCK should maintain a canonical record for every known or plausible parking asset in the target geography before commercial partnerships become the main expansion lever.
+- Separation: physical existence, access, rules, recommendation eligibility and partnership/commercial status are distinct fields/states.
+- Consequence: a non-partner asset may still exist in the registry as verified public, customer-only, permit/restricted, private/shared, temporary, unknown-access, unverified candidate or closed/historical.
+- Partnership role: enrich an existing asset with operator verification, booking/payment, trusted occupancy/capacity feeds, session management or partner-specific access/benefits.
+- Caveat: literal 100% real-world completeness cannot be guaranteed because parking supply and rules change; the operational target is source/geographic coverage completeness with continuous revalidation.
+- Status: accepted.
