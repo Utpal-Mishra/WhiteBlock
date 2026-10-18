@@ -35,3 +35,12 @@
 - Presentation: region name + mapped/evidence-backed location total should remain readable without requiring hover/tap; capacity may be shown only where published.
 - Kildare qualifier: when using the 128-anchor fallback, call it partial/evidence-anchor coverage rather than complete county inventory.
 - Status: adopted.
+
+## REC-20261018-002 — Measure coverage completeness before adding more commercial features
+
+- Date: 2026-10-18.
+- Recommendation: prioritise a Parking Universe Coverage workstream before payment/reservation/operator features.
+- Coverage KPIs: source-universe coverage, geographic gap coverage, candidate resolution rate, verified-access rate, stale-record rate and unresolved-access rate.
+- Recommended operating rule: no material known source or geographic gap should remain unprocessed in the target region; unresolved parking should be represented explicitly rather than omitted.
+- After this gate: partnerships can become the main product-expansion workstream while automated inventory maintenance continues in parallel.
+- Status: adopted.
