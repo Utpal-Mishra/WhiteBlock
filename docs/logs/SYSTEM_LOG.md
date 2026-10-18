@@ -29,3 +29,13 @@
 - Region accounting: connected-region KPI is derived from the configured region set rather than hard-coded to three; Bray load status participates in readiness tracking.
 - Failure semantics: unknown capacity/availability remains unknown; absent subarea metadata falls back to the regional label rather than fabricating a locality.
 - Status: implemented in PR #33.
+
+## SYS-20261018-001 — Separate regional-summary browsing from full inventory clustering
+
+- Date: 2026-10-18.
+- Change: `inventory-map-layer.js` now recognises national/region coverage-browse state and removes/hides the full clustered inventory layer in that state.
+- Event contract: existing `whiteblock:coverage-browse` event is now consumed by the inventory layer as an explicit suppression signal.
+- Count resilience: Ireland overview reads snapshot data when a regional adapter has not yet populated `state.regionInventories`.
+- Layering: regional/locality browse markers use dedicated `wbOverviewPane` above ordinary inventory markers.
+- Bray isolation: loading Bray evidence no longer changes `parkingData` unless the active destination is actually in Bray coverage.
+- Status: implemented.
