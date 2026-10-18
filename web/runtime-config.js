@@ -96,18 +96,49 @@ function loadWhiteblockDestinationParkingFocus() {
   document.body.appendChild(script);
 }
 
+// A second regional load path runs on DOMContentLoaded. Reattach the local
+// Bray pilot and then County Wicklow *after* Kildare/Dublin wrappers, so the
+// asynchronously loaded adapters cannot silently overwrite these regions.
+function loadWhiteblockWicklowNetwork() {
+  const existing = document.querySelector('script[data-whiteblock-wicklow-rebind]');
+  if (existing) {
+    loadWhiteblockDestinationParkingFocus();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './wicklow-network.js?v=20261019-2';
+  script.defer = true;
+  script.dataset.whiteblockWicklowRebind = 'true';
+  script.addEventListener('load', loadWhiteblockDestinationParkingFocus, { once: true });
+  document.body.appendChild(script);
+}
+
+function loadWhiteblockReattachBray() {
+  const existing = document.querySelector('script[data-whiteblock-bray-rebind]');
+  if (existing) {
+    loadWhiteblockWicklowNetwork();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = './bray-adapter.js?v=20261018-1';
+  script.defer = true;
+  script.dataset.whiteblockBrayRebind = 'true';
+  script.addEventListener('load', loadWhiteblockWicklowNetwork, { once: true });
+  document.body.appendChild(script);
+}
+
 function loadWhiteblockDublinVenueKnowledge() {
   const existing = document.querySelector('script[data-whiteblock-dublin-venue-knowledge]');
   if (existing) {
-    if (typeof state !== 'undefined' && state.dublinVenueKnowledgeStatus) loadWhiteblockDestinationParkingFocus();
-    else existing.addEventListener('load', loadWhiteblockDestinationParkingFocus, { once: true });
+    if (typeof state !== 'undefined' && state.dublinVenueKnowledgeStatus) loadWhiteblockReattachBray();
+    else existing.addEventListener('load', loadWhiteblockReattachBray, { once: true });
     return;
   }
   const script = document.createElement('script');
   script.src = './dublin-venue-knowledge.js?v=20260923-1';
   script.defer = true;
   script.dataset.whiteblockDublinVenueKnowledge = 'true';
-  script.addEventListener('load', loadWhiteblockDestinationParkingFocus, { once: true });
+  script.addEventListener('load', loadWhiteblockReattachBray, { once: true });
   document.body.appendChild(script);
 }
 
