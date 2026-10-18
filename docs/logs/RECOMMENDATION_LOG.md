@@ -44,3 +44,9 @@
 - Recommended operating rule: no material known source or geographic gap should remain unprocessed in the target region; unresolved parking should be represented explicitly rather than omitted.
 - After this gate: partnerships can become the main product-expansion workstream while automated inventory maintenance continues in parallel.
 - Status: adopted.
+
+## REC-20261019-WW01 — County recommendation eligibility controls
+- Date: 2026-10-19; status: follow-up review open.
+- Guidance: prioritize Wicklow Town, Greystones, Arklow, Glendalough/Laragh, Brittas Bay and inland towns for access/stay/entrance verification.
+- Guardrail: do not promote OSM unknown/customer/private/permit-only parking to unrestricted public parking; on-site signage overrides general rules.
+- Action: enrich individual sites with maximum stay and tariff only after matching official evidence to location.
