@@ -27,3 +27,12 @@
 - Explicitly not persisted: imagery pixels, inferred live occupancy, inferred free spaces, automated polygon geometry.
 - Regional application: Dublin, Cork, Kildare and Bray snapshots receive nested imagery_review metadata.
 - Status: implemented.
+
+## DATA-20261018-001 — Regional map totals use validated snapshot fallback
+
+- Date: 2026-10-18.
+- Integration change: Ireland overview may read `state.regionSnapshots[region].locations` / snapshot summary when the corresponding hydrated `state.regionInventories[region]` is not yet available.
+- Priority: hydrated canonical inventory remains first choice; snapshot is a display-resilience fallback from the same deployed evidence pipeline.
+- No fabrication: missing capacity/availability stays unknown; only explicit values in inventory/snapshot rows are aggregated.
+- Current validated deployment reference: Cork 4,250 county locations; Kildare 128 partial evidence anchors; Dublin 9,336 locations; Bray 7 pilot assets.
+- Status: implemented.
