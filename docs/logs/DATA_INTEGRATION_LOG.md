@@ -75,3 +75,8 @@
 - Browser automatically builds county navigation where a new source-backed key is available; nested pilot aliases `bray` and `corkCounty` map to Wicklow and Cork.
 - Stable IDs, original latitude/longitude, source access restrictions, unknown availability and provenance preserved; presentation clusters are transient.
 
+## DATA-20261020-MAP03 — Map provider failover is not parking source failover
+- Only basemap rendering changes: map tiles served by OpenFreeMap vector when available, OpenStreetMap/CARTO raster fallback if not.
+- Source-backed parking inventory, availability unknowns, location coordinates, legal access and records stay unchanged.
+- Rendered compatibility map does not imply real-time vacancies or complete county supply.
+
