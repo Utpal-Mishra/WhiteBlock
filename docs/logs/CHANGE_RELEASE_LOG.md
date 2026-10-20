@@ -171,3 +171,10 @@
 - User-visible result: labelled aerial Hybrid is shown by default; all other modes are under +.
 - Data semantics: unchanged.
 - Status: feature branch implemented; CI/Pages/mobile validation pending.
+
+### MAP07 merge status — 2026-10-20
+- PR #45 merged to `main` as `2d447a8feb2101e3171e470f50fdd557d8f8178c`.
+- Feature-branch CI run #348: PASS.
+- Main CI run #349: PASS.
+- GitHub Pages deployment run #277 started from the merge and is rebuilding the regional deployment artifact.
+- Release state: merged and test-green; public Pages publication pending completion of run #277.
