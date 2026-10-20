@@ -49,7 +49,10 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('state.regionFocus = key', js)
         self.assertIn('state.destination = null', js)
         self.assertIn('choose a destination to rank suitable parking', js)
-        self.assertIn('renderRegionSettlementNodes(key)', js)
+        self.assertIn('renderCountyParkingMarkers(key, { fit: true })', js)
+        self.assertIn('fitCountyParking(key, rows)', js)
+        self.assertIn('countyParkingRows(key)', js)
+        self.assertIn('clusterGroups(visible, MARKER_POLICY.inventoryRadiusPx', js)
         self.assertIn('focusSubarea', js)
         self.assertIn('parking locations', js)
 
@@ -62,7 +65,7 @@ class IrelandOverviewTests(unittest.TestCase):
     def test_runtime_loads_overview_assets(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
         self.assertIn('ireland-overview.css?v=20261018-1', runtime)
-        self.assertIn('ireland-overview.js?v=20261020-2', runtime)
+        self.assertIn('ireland-overview.js?v=20261020-4', runtime)
         self.assertIn('loadWhiteblockIrelandOverview()', runtime)
 
 
