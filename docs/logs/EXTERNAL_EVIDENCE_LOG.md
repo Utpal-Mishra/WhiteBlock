@@ -60,3 +60,11 @@
 - Technical review: current `focusRegion` called `renderRegionSettlementNodes(key)` which required a second locality click before parking sites; current national node already computed evidence-backed location counts with guarded live vacant-bay aggregates.
 - Decision: preserve truth in labeling; total mapped parking locations per region on national overview, separately identify sourced real-time free bays.
 
+## EVID-20261020-MAP04 — Mobile screenshot confirms incomplete geographic tile grid
+
+- Date: 2026-10-20.
+- Evidence type: owner-supplied production/mobile screenshot.
+- Observation: the Ireland coverage map displayed only separated Street raster tiles over a grey map background while the map container itself remained correctly sized.
+- Interpretation: parking data/count UI was present; the failure was basemap rendering/transport rather than missing parking inventory.
+- Constraint: screenshot alone cannot identify whether individual requests errored or hung, so the corrective design covers both explicit tile errors and silent incomplete-grid stalls.
+- Status: incorporated into MAP04 regression design.
