@@ -88,13 +88,16 @@
     panel.id = "parking-layout-panel";
     panel.setAttribute("aria-label", "Relative parking layout around destination");
     mapEl.appendChild(panel);
+    panel.addEventListener("click", event => {
+      if (event.target.closest?.("[data-parking-layout-close]")) setLayoutMode(false);
+    });
     return panel;
   }
 
   function emptyLayout(title, copy) {
     createPanel().innerHTML = `
       <div class="parking-layout-grid"></div>
-      <div class="parking-layout-head"><div><strong>${escapeLayoutHtml(title)}</strong><small>${escapeLayoutHtml(copy)}</small></div></div>
+      <div class="parking-layout-head"><div><strong>${escapeLayoutHtml(title)}</strong><small>${escapeLayoutHtml(copy)}</small></div><button type="button" class="parking-layout-return" data-parking-layout-close>← Back to map</button></div>
       <div class="parking-layout-destination"><span>⌖</span></div>
       <div class="parking-layout-foot"><span>Schematic spatial layout</span><span>No parking footprint is inferred</span></div>`;
   }
@@ -139,6 +142,7 @@
       <div class="parking-layout-ring r3"><span>${ringLabel(maxRadius, 1)}</span></div>
       <div class="parking-layout-head">
         <div><strong>Parking Layout · ${results.length} nearby</strong><small>${escapeLayoutHtml(destinationLabel)}</small></div>
+        <button type="button" class="parking-layout-return" data-parking-layout-close>← Back to map</button>
       </div>
       <div class="parking-layout-destination"><span>⌖</span></div>
       ${nodes}
@@ -162,6 +166,12 @@
     mapEl.classList.toggle("layout-active", enabled);
     layoutButton?.classList.toggle("active", enabled);
     layoutButton?.setAttribute("aria-pressed", String(enabled));
+    // A schematic is a distinct mode, not the Street basemap selected state.
+    document.querySelectorAll(".wb-map-layer-button[data-layer]").forEach(button => {
+      const selected = !enabled && button.dataset.layer === (mapEl.dataset.basemap || "street");
+      button.classList.toggle("active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
     if (enabled) renderLayout();
     else if (state.map) window.setTimeout(() => state.map.invalidateSize({ pan: false, animate: false }), 20);
   }
@@ -183,9 +193,12 @@
     const target = toolbar.querySelector(".wb-map-layer-menu") || toolbar;
     target.appendChild(layoutButton);
 
-    toolbar.querySelectorAll(".wb-map-layer-button[data-layer]").forEach(button => {
-      button.addEventListener("click", () => setLayoutMode(false));
-    });
+    // Older map handlers and the newer MapLibre toolbar use capture listeners
+    // and may stopImmediatePropagation. Observe earlier in the event path.
+    document.addEventListener("click", event => {
+      if (event.target.closest?.(".wb-map-layer-button[data-layer]")) setLayoutMode(false);
+    }, true);
+    document.addEventListener("whiteblock:map-basemap-selected", () => setLayoutMode(false));
     return true;
   }
 

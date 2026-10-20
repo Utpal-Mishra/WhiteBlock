@@ -50,3 +50,8 @@
 - Root causes confirmed in source: ranked MapLibre layer remained on browse; locality drill-down drew unclustered circles. Both handled by shared policy work.
 - Status: mobile post-publication screenshot check remains pending.
 
+## EVID-20261020-MAP03 — Android geographical map absent
+- Owner-supplied 2026-10-20 screenshot depicts dark Parking Layout of 3 Cork City parking locations while Street appears active.
+- Code review confirmed a forced schematic takeover in `map-engine-v2.js` on vector renderer failure/style timeout.
+- Ambiguity: screenshot alone cannot tell whether the user manually selected Parking Layout; runtime code confirms forced takeover was possible. Device retest pending.
+

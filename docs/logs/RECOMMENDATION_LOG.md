@@ -61,3 +61,8 @@
 - Avoid external-only clustering dependencies; keep a local fallback if MarkerCluster does not load.
 - Use labels explicitly counting parking locations; preserve raw IDs, access restrictions and evidence.
 
+## REC-20261020-MAP03 — Never mask map failures with schematics
+- Street mode must show real-world roads, including a no-WebGL alternative.
+- User chooses Parking Layout explicitly from More map views; exit/Street control returns to geographical map.
+- Avoid silent ambiguity: mark compatibility raster street map and report outage if both tile sources fail.
+

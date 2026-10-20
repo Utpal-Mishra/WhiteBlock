@@ -24,6 +24,8 @@
   const STREET_STYLE = "https://tiles.openfreemap.org/styles/liberty";
   const TERRAIN_TILE = "https://a.tile.opentopomap.org/{z}/{x}/{y}.png";
   const SATELLITE_TILE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+  const STREET_RASTER_TILE = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const STREET_BACKUP_TILE = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
   const OVERPASS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter"
@@ -32,6 +34,9 @@
   const LAYER_LABELS = { street: "Street", terrain: "Terrain", satellite: "Satellite" };
   let basemapLayer = null;
   let glMap = null;
+  let rasterFallbackLayer = null;
+  let rasterFallbackSource = null;
+  let fallbackGeneration = 0;
   let activeBasemap = "street";
   let styleGeneration = 0;
   let styleHealthTimer = null;
@@ -109,7 +114,7 @@
 
   function removeLegacyBasemaps() {
     map.eachLayer(layer => {
-      if (layer === basemapLayer) return;
+      if (layer === basemapLayer || layer === rasterFallbackLayer) return;
       if (!(layer instanceof L.TileLayer) && !isMapLibreLayer(layer)) return;
       try { map.removeLayer(layer); } catch (_) {}
     });
@@ -138,18 +143,81 @@
     try { gl.resize(); } catch (_) {}
   }
 
-  function activateLayoutFallback(reason) {
-    mapEl.classList.remove("wb-map-repairing");
-    mapEl.dataset.basemapEngine = "layout-fallback";
-    if (typeof setMapStatus === "function") {
-      setMapStatus("Map renderer unavailable", reason || "Showing the parking layout instead");
-    }
-    const openLayout = () => {
-      const button = document.querySelector(".wb-parking-layout-button");
-      if (button && !mapEl.classList.contains("layout-active")) button.click();
+  // When WebGL or a vector style cannot load on a mobile browser, continue
+  // showing a *geographical* Leaflet tile map. A schematic must never replace
+  // the real map without an explicit user request.
+  function activateRasterFallback(reason, key = "street") {
+    const generation = ++fallbackGeneration;
+    ++styleGeneration; // invalidate style health callbacks from the failed GL map
+    clearStyleHealthTimer();
+    const selected = LAYER_LABELS[key] ? key : "street";
+    const source = selected === "terrain" ? "terrain"
+      : selected === "satellite" ? "satellite" : "street";
+    const configs = {
+      street: {
+        url: STREET_RASTER_TILE, maxNativeZoom: 19, maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+      },
+      backup: {
+        url: STREET_BACKUP_TILE, maxNativeZoom: 19, maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+      },
+      terrain: {
+        url: TERRAIN_TILE, maxNativeZoom: 17, maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors &copy; OpenTopoMap"
+      },
+      satellite: {
+        url: SATELLITE_TILE, maxNativeZoom: 19, maxZoom: 19,
+        attribution: "Tiles &copy; Esri and contributors"
+      }
     };
-    openLayout();
-    window.setTimeout(openLayout, 250);
+    function attachTiles(provider) {
+      if (generation !== fallbackGeneration) return;
+      if (rasterFallbackLayer && map.hasLayer(rasterFallbackLayer)) map.removeLayer(rasterFallbackLayer);
+      rasterFallbackLayer = null;
+      if (basemapLayer && map.hasLayer(basemapLayer)) {
+        try { map.removeLayer(basemapLayer); } catch (_) {}
+      }
+      basemapLayer = null;
+      glMap = null;
+      const config = configs[provider];
+      const layer = L.tileLayer(config.url, {
+        maxZoom: config.maxZoom,
+        maxNativeZoom: config.maxNativeZoom,
+        updateWhenIdle: true,
+        keepBuffer: 2,
+        attribution: config.attribution
+      });
+      rasterFallbackLayer = layer; // assigned before layeradd fires
+      rasterFallbackSource = provider;
+      let tileErrors = 0;
+      layer.on("tileerror", () => {
+        if (layer !== rasterFallbackLayer || generation !== fallbackGeneration) return;
+        tileErrors += 1;
+        if (tileErrors >= 3 && provider === "street") {
+          // Stay on an actual road map, even if OSM tile requests are blocked.
+          attachTiles("backup");
+        } else if (tileErrors >= 3 && (provider === "terrain" || provider === "satellite")) {
+          activateRasterFallback(LAYER_LABELS[selected] + " tiles unavailable · switched to Street", "street");
+        } else if (tileErrors >= 3 && provider === "backup" && typeof setMapStatus === "function") {
+          setMapStatus("Street tiles unavailable", "Both street-map tile sources failed · check network connectivity");
+        }
+      });
+      layer.on("load", () => {
+        if (layer === rasterFallbackLayer) mapEl.classList.remove("wb-map-repairing");
+      });
+      layer.addTo(map);
+      updateMapTheme(selected);
+      mapEl.dataset.basemapEngine = "raster-fallback";
+      mapEl.dataset.basemapSource = provider;
+      mapEl.classList.remove("wb-map-repairing");
+      if (typeof setMapStatus === "function") {
+        setMapStatus(selected === "street" ? "Street map · compatibility mode" : LAYER_LABELS[selected] + " map",
+          reason || "Geographical basemap shown without WebGL");
+      }
+      window.requestAnimationFrame(() => map.invalidateSize({ pan: false, animate: false }));
+    }
+    attachTiles(source);
   }
 
   function clearStyleHealthTimer() {
@@ -186,7 +254,7 @@
         }
         switchBasemap("street", { quiet: true });
       } else {
-        activateLayoutFallback("The device could not initialise the vector basemap; parking results remain usable.");
+        activateRasterFallback("Vector map unavailable · OpenStreetMap street tiles shown");
       }
     }, 4500);
   }
@@ -218,7 +286,7 @@
       basemapLayer.addTo(map);
     } catch (error) {
       console.warn("WHITEBLOCK MapLibre could not initialise", error);
-      activateLayoutFallback("MapLibre could not start on this device.");
+      activateRasterFallback("MapLibre could not start · showing geographical street tiles");
       return false;
     }
 
@@ -226,7 +294,7 @@
       glMap = getGlMap();
       if (!glMap) {
         if (attempt < 80) return window.setTimeout(() => connect(attempt + 1), 50);
-        activateLayoutFallback("The map canvas did not initialise; showing parking layout instead.");
+        activateRasterFallback("Map canvas unavailable · showing geographical street tiles");
         return;
       }
       bindGlHealth();
@@ -244,8 +312,10 @@
 
   function switchBasemap(key, { quiet = false } = {}) {
     if (!LAYER_LABELS[key]) key = "street";
+    // The toolbar always restores an actual map, even after a GL failure.
+    document.dispatchEvent(new CustomEvent("whiteblock:map-basemap-selected", { detail: { key } }));
     if (!glMap) {
-      updateMapTheme(key);
+      activateRasterFallback(LAYER_LABELS[key] + " geographic map", key);
       return;
     }
 
@@ -266,7 +336,7 @@
     } catch (error) {
       console.warn(`WHITEBLOCK could not switch to ${key}`, error);
       if (key !== "street") switchBasemap("street", { quiet: true });
-      else activateLayoutFallback("Street map style could not load; parking layout is available.");
+      else activateRasterFallback("Street vector style failed · showing geographical street tiles");
     }
     window.requestAnimationFrame(resizeBasemap);
   }
@@ -619,7 +689,7 @@
     if (layer === basemapLayer) return;
     if (layer instanceof L.TileLayer || isMapLibreLayer(layer)) {
       window.setTimeout(() => {
-        if (layer === basemapLayer) return;
+        if (layer === basemapLayer || layer === rasterFallbackLayer) return;
         try { if (map.hasLayer(layer)) map.removeLayer(layer); } catch (_) {}
       }, 0);
     }

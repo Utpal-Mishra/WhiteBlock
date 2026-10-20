@@ -49,3 +49,7 @@
 - Galway/Donegal used as test fixtures only; do not imply networks are live in those counties.
 - Existing county set remains Cork, Kildare, Dublin and Wicklow (Bray as locality).
 
+## EXP-20261020-MAP03 — One map failover for any county
+- Global Leaflet geographic raster fallback requires no region-specific implementation; applies to Cork, Kildare, Dublin, Wicklow and any future source-backed county.
+- Maintain provider/source attribution and verify acceptable production tile usage as traffic grows.
+

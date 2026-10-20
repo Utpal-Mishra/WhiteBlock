@@ -82,3 +82,9 @@
 - `web/inventory-map-layer.js` uses Leaflet.markercluster or an internal no-CDN clustering fallback; ranked MapLibre layer applies identical source-independent policy.
 - Constraint: never update true spatial source coordinates or interpret group counts as confirmed vacant bays.
 
+## ARCH-20261020-MAP03 — Vector primary, geographic raster fallback, schematic opt-in
+- Basemap chain: MapLibre OpenFreeMap vector Street → Leaflet OpenStreetMap street tile fallback → CARTO street tile backup if OSM requests fail repeatedly.
+- Terrain/Satellite: retain geographic tile fallbacks and return to Street if imagery tiles fail; never silently replace geography with a schematic diagram.
+- Renderer ownership: rasterFallbackLayer is preserved from layeradd cleanup; failed MapLibre layer removed, stale style watchdog generations invalidated.
+- Parking Layout remains a user-invoked optional presentation layer with a dedicated exit button.
+

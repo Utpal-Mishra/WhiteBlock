@@ -81,3 +81,10 @@
 - PR #39 integrated into `main`; branch CI passed on 2026-10-20.
 - All connected region and future county map marker renderers consume the shared zoom policy, with legacy renderer handoff and no-CDN fallback.
 - Release to GitHub Pages and mobile acceptance remain open at time of log entry.
+
+## FEAT-20261020-MAP03 — Geographic map first, optional parking diagram
+- Defect: Cork user's Spatial Layer showed “Parking Layout · 3 nearby” black radial schematic instead of streets even with Street selected.
+- Update: geographic Street map remains primary; on renderer failure use raster tiles; Parking Layout only opens on explicit user selection.
+- Added in-panel Back to map button and close-on-basemap click; Street state no longer appears simultaneously active with schematic.
+- Scope: all current/future geographical regions, not Cork-specific.
+

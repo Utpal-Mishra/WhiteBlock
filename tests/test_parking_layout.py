@@ -8,8 +8,8 @@ WEB = ROOT / "web"
 class ParkingLayoutContractTests(unittest.TestCase):
     def test_layout_assets_are_loaded(self):
         html = (WEB / "index.html").read_text(encoding="utf-8")
-        self.assertIn("parking-layout.css?v=20261004-1", html)
-        self.assertIn("parking-layout.js?v=20261004-1", html)
+        self.assertIn("parking-layout.css?v=20261020-2", html)
+        self.assertIn("parking-layout.js?v=20261020-2", html)
         self.assertLess(html.index("map-fix.js"), html.index("parking-layout.js"))
 
     def test_layout_is_destination_centred_and_data_driven(self):
@@ -26,6 +26,12 @@ class ParkingLayoutContractTests(unittest.TestCase):
         self.assertIn('preferredBasemap = "street"', js)
         self.assertNotIn("preferTerrainDefault", js)
         self.assertIn('toolbar.querySelector(".wb-map-layer-menu") || toolbar', js)
+        self.assertIn("data-parking-layout-close", js)
+        self.assertIn('"whiteblock:map-basemap-selected"', js)
+        self.assertIn("setLayoutMode(false)", js)
+        self.assertIn('document.addEventListener("click", event => {', js)
+        self.assertNotIn("activateLayoutFallback", js)
+
 
 
 if __name__ == "__main__":
