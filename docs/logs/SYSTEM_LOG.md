@@ -91,3 +91,10 @@
 - Camera: county parking points still fit immediately, then the exact county boundary may refine the frame when available.
 - Failure mode: if boundary GeoJSON is unavailable, parking inventory remains usable and the existing county parking fit is retained.
 - Status: implemented on feature branch.
+
+## SYS-20261020-MAP06 — Semantic marker states
+- Date: 2026-10-20.
+- Ranked destination overlay now carries independent fields for ordinal rank, cluster quantity and live availability.
+- Browse mode uses a separate LOCATIONS cluster component and keeps individual browse markers number-free.
+- Leaflet fallback mirrors the same semantics so WebGL/raster degradation does not change meaning.
+- Status: implemented on feature branch.
