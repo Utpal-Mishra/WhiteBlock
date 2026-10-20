@@ -65,3 +65,22 @@
   - render overview nodes in a dedicated high-priority Leaflet pane and visually emphasise the location count.
 - Data integrity: no counts are hard-coded; values remain derived from the deployed evidence snapshots/inventories.
 - Status: implemented on branch `fix/overview-region-counts-2026-10-18`; CI/deployment validation pending.
+
+## INC-20261020-MAP04 — Partial/checkerboard Street map on mobile
+
+- Date: 2026-10-20.
+- Severity: high for map usability.
+- Detection: owner mobile screenshot showed the Ireland Street view with only isolated raster tiles rendered while the rest of the map card remained blank/grey.
+- Technical diagnosis:
+  - mobile MapLibre can legitimately fall back to raster Street tiles;
+  - the raster fallback only failed over after repeated `tileerror` events, so hanging/incomplete requests could leave a persistent checkerboard without ever reaching the error threshold;
+  - both `map-fix.js` and the persistent v3 map engine could create basemap renderers during startup, introducing renderer ownership/race risk;
+  - the persistent engine resized MapLibre on responsive changes but did not independently revalidate Leaflet geometry with a `ResizeObserver`.
+- Corrective action:
+  - one startup basemap owner: legacy `map-fix.js` no longer creates its own MapLibre layer;
+  - add a 3.2 s raster visible-grid watchdog and early failover from OSM Street to CARTO Street;
+  - treat two tile errors as an incomplete provider rather than waiting for three;
+  - add central `repairMapGeometry()` using Leaflet `invalidateSize` + MapLibre resize;
+  - add persistent-engine `ResizeObserver`, orientation/visibility/resize repair and map-state repair hooks.
+- Data impact: none.
+- Status: implemented on branch `fix/mobile-map-tile-integrity-2026-10-20`; CI/device deployment validation pending.

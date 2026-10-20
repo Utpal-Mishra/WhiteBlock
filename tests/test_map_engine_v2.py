@@ -9,7 +9,7 @@ WEB = ROOT / "web"
 class MapEngineV3Tests(unittest.TestCase):
     def test_runtime_loads_cache_busted_persistent_engine(self):
         runtime = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("map-engine-v2.js?v=20261020-3", runtime)
+        self.assertIn("map-engine-v2.js?v=20261020-5", runtime)
         self.assertIn("loadWhiteblockMapEngineV2", runtime)
 
     def test_one_persistent_maplibre_layer_switches_styles(self):
@@ -24,6 +24,10 @@ class MapEngineV3Tests(unittest.TestCase):
         self.assertIn("L.tileLayer(config.url", source)
         self.assertIn("STREET_RASTER_TILE", source)
         self.assertIn("STREET_BACKUP_TILE", source)
+        self.assertIn("repairMapGeometry", source)
+        self.assertIn("ResizeObserver", source)
+        self.assertIn("rasterLoadWatchdog", source)
+        self.assertIn("updateWhenIdle: false", source)
 
     def test_blank_canvas_css_overrides_are_removed(self):
         css = (WEB / "map-engine-v2.css").read_text(encoding="utf-8")

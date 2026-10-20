@@ -93,3 +93,11 @@
 - Counts: label “mapped parking locations”; source-reported live vacant bays only where evidence exists, otherwise “Vacancies unverified”.
 - State transitions: explicit Ireland/county actions control camera, ordinary asynchronous refresh updates markers/stats without recentering.
 
+## DEC-20261020-MAP04 — Single-owner geographic basemap with completion watchdog
+
+- Date: 2026-10-20.
+- Decision: retire legacy startup basemap creation from `map-fix.js`; `map-engine-v2.js` owns persistent basemap lifecycle.
+- Decision: raster fallback is considered healthy only after its visible tile grid completes, not merely because at least one tile rendered.
+- Decision: incomplete OSM Street fallback automatically tries alternate geographic Street tiles; never auto-open Parking Layout.
+- Rationale: mobile map integrity is more important than retaining a particular basemap provider.
+- Status: accepted/implemented.

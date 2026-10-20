@@ -118,3 +118,12 @@
 - R4 unexpected camera recenter while inspecting Ireland. Mitigation refresh counts and markers without recurring `fitBounds`; fit only on explicit Ireland/county action and pending initial county source.
 - R5 any source rows outside Irish bounds or duplicate IDs. Mitigation filter invalid coordinates and stable-ID duplicates; physical duplicate IDs still need evidence reconciliation.
 
+## RISK-20261020-MAP04 — Partial public-tile delivery on mobile
+
+- Date: 2026-10-20.
+- R1: raster provider returns only part of the visible tile grid. Likelihood medium; impact high. Mitigation bounded completion watchdog + alternate provider.
+- R2: simultaneous basemap renderers race during startup. Likelihood medium; impact high. Mitigation one persistent renderer owner.
+- R3: responsive container geometry changes after initialization. Likelihood high on mobile; impact medium/high. Mitigation ResizeObserver + Leaflet invalidateSize + GL resize.
+- R4: both public raster providers unavailable. Likelihood low/medium; impact high. Mitigation explicit source-incomplete status; future production provider/hosting requirement.
+- R5: repeated repair causes unnecessary requests. Mitigation debounced repair timer; watchdog cleared on successful full-layer load/provider change.
+- Status: mitigations implemented; live mobile validation pending.

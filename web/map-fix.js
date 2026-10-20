@@ -600,5 +600,10 @@
   refreshDestinationContext();
   normalizeIrelandCoverageLabel();
   loadGuidanceIntelligenceLayer();
-  void activateStreetVector();
+
+  // app.js already starts with a real Leaflet street basemap. Do not create a
+  // second MapLibre basemap here: the persistent map-engine-v3 takes ownership
+  // on DOMContentLoaded. Keeping one renderer owner avoids Android startup races
+  // where overlapping/removing basemap layers can leave a checkerboard of tiles.
+  mapEl.dataset.basemapOwner = "map-engine-v3";
 })();

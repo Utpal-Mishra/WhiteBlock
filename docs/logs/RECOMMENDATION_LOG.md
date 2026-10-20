@@ -71,3 +71,11 @@
 - Cluster tap zooms towards real parking locations, individual point tap gives evidence/name and details where supported.
 - Live vacant bays and total capacity must remain independent of mapped-location inventory totals; unreported live occupancy is unknown, never zero or inferred.
 
+## REC-20261020-MAP04 — Treat partial basemaps as failure, not degraded success
+
+- Date: 2026-10-20.
+- Recommendation: a map showing one or two isolated tiles must never be considered successfully loaded.
+- Implementation rule: success requires the visible raster grid to complete; otherwise fail over within a bounded window.
+- Renderer rule: maintain one basemap owner and keep analytical Parking Layout user-invoked.
+- Longer-term recommendation: before material traffic scale, replace best-effort public tile dependencies with a production map provider/hosting contract and explicit SLA/usage terms.
+- Status: adopted.

@@ -74,3 +74,11 @@
 - New county direct renderer `renderCountyParkingMarkers` reuses existing marker clustering and per-site tooltips.
 - Optional Parking Layout is dismissed on all national/county selection events so the geographic street map is visible.
 
+## SYS-20261020-MAP04 — Single basemap owner and bounded raster recovery
+
+- Date: 2026-10-20.
+- System owner: `map-engine-v2.js` (v3 runtime) is now the sole persistent basemap renderer after startup.
+- Startup: `app.js` provides an immediate real Leaflet street map; `map-fix.js` provides controls/context only; v3 replaces the initial layer with the persistent renderer.
+- Recovery: WebGL/vector failure -> OSM raster Street -> CARTO raster Street when the visible tile grid errors or stalls.
+- Geometry repair: Leaflet size invalidation and MapLibre resize are run together after responsive resize, orientation/visibility changes, browse transitions, data-ready events and parking focus.
+- Status: implemented; CI/deployed mobile confirmation pending.

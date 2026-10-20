@@ -86,3 +86,10 @@
 - County source event `whiteblock:region-inventory-ready` redraws active county without losing user camera; if a source-backed county is still pending after a supplemental pilot loads, fit again when canonical county arrives.
 - No write to parking source coordinates, capacity records, access restrictions or proof.
 
+## DATA-20261020-MAP04 — No parking-data semantics changed by basemap repair
+
+- Date: 2026-10-20.
+- Scope: renderer/network resilience only.
+- Unchanged: canonical parking IDs, coordinates, capacity, availability, access, regional snapshots, evidence provenance and recommendation eligibility.
+- Important distinction: blank/partial map tiles are presentation/provider failures and must not alter source-backed parking counts or generate fallback parking records.
+- Status: no data migration required.

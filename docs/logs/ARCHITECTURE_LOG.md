@@ -94,3 +94,11 @@
 - Wicklow includes Bray locality asset records without creating a fifth national region; late county source triggers pending all-county fit.
 - Preservation: zoom/pan by user is retained during asynchronous count/data refresh, except pending first full-county source fit when a prior pilot-only preview was shown.
 
+## ARCH-20261020-MAP04 — One renderer owns the basemap
+
+- Date: 2026-10-20.
+- Decision: only the persistent map engine may own the long-lived basemap. The legacy map adapter must not create a second MapLibre layer.
+- Rationale: two renderer lifecycles can race during Android startup/removal and leave stale/partial map surfaces.
+- Resilience chain: vector Street -> geographic raster Street provider A -> geographic raster Street provider B; Parking Layout remains explicit opt-in only.
+- Responsive contract: map-container geometry changes require Leaflet `invalidateSize` and MapLibre `resize` as one atomic repair action.
+- Status: accepted/implemented.

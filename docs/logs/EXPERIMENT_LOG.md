@@ -54,3 +54,12 @@
 - Cases: Ireland overview camera, per-county fit bounds, Cork/Dublin site detail, no repeated camera reset on ready events, initial Bray-only followed by full Wicklow inventory; no live availability invented.
 - Acceptance: CI green and manual Android map with actual source coverage and real Street basemap.
 
+## EXP-20261020-MAP04 — Mobile partial-tile recovery hypothesis
+
+- Date: 2026-10-20.
+- Observation: Ireland Street map rendered a checkerboard/partial raster grid on mobile.
+- Hypothesis: a raster request can stall without enough `tileerror` events to trigger the existing provider failover; duplicate renderer startup increases the probability of unstable map state.
+- Change under test: single renderer ownership + bounded incomplete-grid watchdog + responsive Leaflet geometry repair.
+- Automated acceptance: simulated MapLibre exception must keep a geographic map; a stalled raster fallback must switch to alternate Street tiles even without explicit tile errors; no schematic layout may auto-open.
+- Manual acceptance: Android/mobile Ireland view must fill the entire map card, then remain intact through county switches, orientation changes and returning from background.
+- Status: implementation ready for CI/device validation.

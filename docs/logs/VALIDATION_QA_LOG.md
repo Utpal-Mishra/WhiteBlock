@@ -153,3 +153,21 @@
 - PR #41 branch suite `39472300266`: PASS. Main suite `39472445119`: PASS.
 - Regression asserts source-dependent national badges, Cork and Dublin direct all-site map bounds, detailed marker expansion, full-county Wicklow fit after Bray-only loading, Ireland reset and non-invented live vacancy.
 - Pending: GitHub Pages `39472445106` completion; manual Android check of visible actual street tiles, touch interactions, mobile count labels and four connected county views.
+
+## QA-20261020-MAP04 — Checkerboard map regression gate
+
+- Date: 2026-10-20.
+- Automated assertions:
+  - MapLibre failure still leaves a real geographic raster map;
+  - raster fallback has a bounded incomplete-grid watchdog;
+  - a stalled OSM grid switches to CARTO even without `tileerror`;
+  - responsive engine contains `ResizeObserver` and Leaflet `invalidateSize`;
+  - legacy map adapter no longer calls `activateStreetVector()` at startup;
+  - Parking Layout is never activated automatically.
+- Manual device checks after Pages deploy:
+  - Ireland default fills the entire map card;
+  - Cork/Kildare/Dublin/Wicklow county switches keep a continuous basemap;
+  - rotate portrait/landscape and return to portrait;
+  - background/foreground browser tab;
+  - weak-network fallback does not leave checkerboard tiles.
+- Status: pending CI and live mobile confirmation.

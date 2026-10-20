@@ -41,6 +41,8 @@
   let styleGeneration = 0;
   let styleHealthTimer = null;
   let styleErrors = 0;
+  let rasterLoadWatchdog = null;
+  let mapRepairTimer = null;
   let parkingAreaLayer = null;
   let selectedFootprintLayer = null;
   let destinationContextLayer = null;
@@ -143,6 +145,22 @@
     try { gl.resize(); } catch (_) {}
   }
 
+  function repairMapGeometry(delay = 0) {
+    if (mapRepairTimer) window.clearTimeout(mapRepairTimer);
+    mapRepairTimer = window.setTimeout(() => {
+      mapRepairTimer = null;
+      window.requestAnimationFrame(() => {
+        try { map.invalidateSize({ pan: false, animate: false, debounceMoveend: true }); } catch (_) {}
+        resizeBasemap();
+      });
+    }, delay);
+  }
+
+  function clearRasterLoadWatchdog() {
+    if (rasterLoadWatchdog) window.clearTimeout(rasterLoadWatchdog);
+    rasterLoadWatchdog = null;
+  }
+
   // When WebGL or a vector style cannot load on a mobile browser, continue
   // showing a *geographical* Leaflet tile map. A schematic must never replace
   // the real map without an explicit user request.
@@ -173,6 +191,7 @@
     };
     function attachTiles(provider) {
       if (generation !== fallbackGeneration) return;
+      clearRasterLoadWatchdog();
       if (rasterFallbackLayer && map.hasLayer(rasterFallbackLayer)) map.removeLayer(rasterFallbackLayer);
       rasterFallbackLayer = null;
       if (basemapLayer && map.hasLayer(basemapLayer)) {
@@ -184,38 +203,75 @@
       const layer = L.tileLayer(config.url, {
         maxZoom: config.maxZoom,
         maxNativeZoom: config.maxNativeZoom,
-        updateWhenIdle: true,
-        keepBuffer: 2,
+        updateWhenIdle: false,
+        updateWhenZooming: false,
+        keepBuffer: 3,
         attribution: config.attribution
       });
       rasterFallbackLayer = layer; // assigned before layeradd fires
       rasterFallbackSource = provider;
       let tileErrors = 0;
+      let tileLoads = 0;
+      let complete = false;
+
+      layer.on("tileload", () => {
+        if (layer === rasterFallbackLayer && generation === fallbackGeneration) tileLoads += 1;
+      });
       layer.on("tileerror", () => {
         if (layer !== rasterFallbackLayer || generation !== fallbackGeneration) return;
         tileErrors += 1;
-        if (tileErrors >= 3 && provider === "street") {
-          // Stay on an actual road map, even if OSM tile requests are blocked.
+        if (tileErrors >= 2 && provider === "street") {
+          // Do not leave a checkerboard on screen: switch provider as soon as
+          // the primary street tile grid proves incomplete.
           attachTiles("backup");
-        } else if (tileErrors >= 3 && (provider === "terrain" || provider === "satellite")) {
+        } else if (tileErrors >= 2 && (provider === "terrain" || provider === "satellite")) {
           activateRasterFallback(LAYER_LABELS[selected] + " tiles unavailable · switched to Street", "street");
-        } else if (tileErrors >= 3 && provider === "backup" && typeof setMapStatus === "function") {
+        } else if (tileErrors >= 2 && provider === "backup" && typeof setMapStatus === "function") {
           setMapStatus("Street tiles unavailable", "Both street-map tile sources failed · check network connectivity");
         }
       });
       layer.on("load", () => {
-        if (layer === rasterFallbackLayer) mapEl.classList.remove("wb-map-repairing");
+        if (layer !== rasterFallbackLayer || generation !== fallbackGeneration) return;
+        complete = true;
+        clearRasterLoadWatchdog();
+        mapEl.classList.remove("wb-map-repairing");
+        repairMapGeometry(0);
       });
+
       layer.addTo(map);
       updateMapTheme(selected);
       mapEl.dataset.basemapEngine = "raster-fallback";
       mapEl.dataset.basemapSource = provider;
-      mapEl.classList.remove("wb-map-repairing");
+      mapEl.classList.add("wb-map-repairing");
       if (typeof setMapStatus === "function") {
         setMapStatus(selected === "street" ? "Street map · compatibility mode" : LAYER_LABELS[selected] + " map",
           reason || "Geographical basemap shown without WebGL");
       }
-      window.requestAnimationFrame(() => map.invalidateSize({ pan: false, animate: false }));
+      repairMapGeometry(0);
+
+      // Some Android/network failures leave requests hanging without emitting
+      // enough tileerror events. A provider can therefore display one or two
+      // tiles indefinitely. Require the visible tile grid to complete within a
+      // bounded time and fail over even when requests merely stall.
+      rasterLoadWatchdog = window.setTimeout(() => {
+        if (complete || layer !== rasterFallbackLayer || generation !== fallbackGeneration) return;
+        if (provider === "street") {
+          attachTiles("backup");
+          return;
+        }
+        if (provider === "terrain" || provider === "satellite") {
+          activateRasterFallback(LAYER_LABELS[selected] + " tile grid incomplete · switched to Street", "street");
+          return;
+        }
+        mapEl.classList.remove("wb-map-repairing");
+        repairMapGeometry(0);
+        if (typeof setMapStatus === "function") {
+          const detail = tileLoads
+            ? `Street map partially loaded (${tileLoads} tiles) · retry or check network connectivity`
+            : "Street map could not load tiles · check network connectivity";
+          setMapStatus("Street map source incomplete", detail);
+        }
+      }, 3200);
     }
     attachTiles(source);
   }
@@ -301,10 +357,7 @@
       const generation = ++styleGeneration;
       updateMapTheme("street");
       armStyleHealth("street", generation);
-      window.requestAnimationFrame(() => {
-        map.invalidateSize({ pan: false, animate: false });
-        resizeBasemap();
-      });
+      repairMapGeometry(0);
     };
     connect();
     return true;
@@ -613,7 +666,7 @@
     if (!item) return;
     try { map.setView([Number(item.lat), Number(item.lng)], 17, { animate: false }); } catch (_) {}
     renderParkingAreas();
-    window.setTimeout(resizeBasemap, 40);
+    repairMapGeometry(40);
   }
 
   function openStreetView() {
@@ -699,7 +752,7 @@
     wrapSelection();
     renderDestinationContext();
     renderParkingAreas();
-    window.setTimeout(resizeBasemap, 40);
+    repairMapGeometry(40);
   });
   document.addEventListener("whiteblock:coverage-browse", () => {
     // Ireland/region browsing owns the visible overlay while there is no
@@ -710,12 +763,12 @@
     parkingAreaLayer = null;
     selectedFootprintLayer = null;
     destinationContextLayer = null;
-    window.setTimeout(resizeBasemap, 30);
+    repairMapGeometry(30);
   });
   document.addEventListener("whiteblock:kildare-attributes-ready", renderParkingAreas);
   document.addEventListener("whiteblock:ranked-gl-overlay-ready", renderParkingAreas);
   map.on("zoomend", renderParkingAreas);
-  document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(resizeBasemap, 30));
+  document.addEventListener("whiteblock:inventory-map-ready", () => repairMapGeometry(30));
 
   document.addEventListener("click", event => {
     if (event.target.closest?.("#ireland-overview-button")) {
@@ -724,23 +777,28 @@
         if (typeof IRELAND_BOUNDS !== "undefined") {
           map.fitBounds(IRELAND_BOUNDS, { padding: [24, 24], maxZoom: 7, animate: false });
         }
-        resizeBasemap();
+        repairMapGeometry(0);
       }, 20);
     }
     if (event.target.closest?.("#search-button") || event.target.closest?.("#destination-suggestions") || event.target.closest?.(".chip")) {
       window.setTimeout(() => {
         renderDestinationContext();
         renderParkingAreas();
-        resizeBasemap();
+        repairMapGeometry(0);
       }, 520);
     }
   });
 
-  window.addEventListener("resize", () => window.setTimeout(resizeBasemap, 100), { passive: true });
-  window.addEventListener("orientationchange", () => window.setTimeout(resizeBasemap, 180), { passive: true });
+  window.addEventListener("resize", () => repairMapGeometry(100), { passive: true });
+  window.addEventListener("orientationchange", () => repairMapGeometry(180), { passive: true });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) window.setTimeout(resizeBasemap, 100);
+    if (!document.hidden) repairMapGeometry(100);
   });
+
+  if (typeof ResizeObserver !== "undefined") {
+    const resizeObserver = new ResizeObserver(() => repairMapGeometry(80));
+    resizeObserver.observe(mapEl);
+  }
 
   createPersistentBasemap();
   renderDestinationContext();

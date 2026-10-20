@@ -115,6 +115,10 @@ assert.equal(error.rasterPresent(), true, "MapLibre exception must immediately l
 assert.ok(error.sources[0].includes("tile.openstreetmap.org"), "Default fallback uses real street tiles");
 assert.equal(error.mapEl.dataset.basemapEngine, "raster-fallback");
 assert.equal(error.mapEl.classList.contains("layout-active"), false, "Layout must not activate automatically");
+const incompleteGridWatchdog = error.timeouts.find(task => task.ms === 3200);
+assert.ok(incompleteGridWatchdog, "Raster street fallback must have an incomplete-grid watchdog");
+incompleteGridWatchdog.fn();
+assert.ok(error.sources.some(url => url.includes("cartocdn.com")), "Stalled partial street tiles must fail over even without tileerror events");
 assert.ok(!error.document.querySelector(".wb-parking-layout-button"));
 error.flushLayerRemoval();
 assert.equal(error.rasterPresent(), true, "Legacy layer cleanup must not delete the fallback tiles");

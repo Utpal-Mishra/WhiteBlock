@@ -48,3 +48,14 @@
 - `.github/workflows/test.yml` includes Node integration test alongside previous all-region marker tests and full Python suite.
 - Initial status: PR #41; awaiting CI conclusion and mobile production verification.
 
+## AUTO-20261020-MAP04 — Automatic incomplete-tile-grid recovery
+
+- Date: 2026-10-20.
+- Trigger: raster fallback begins after MapLibre/WebGL failure or explicit raster mode.
+- Automation:
+  - count tile failures;
+  - detect a raster layer that never reaches Leaflet's full `load` event;
+  - after 3.2 s, automatically switch an incomplete OSM Street grid to the alternate Street provider;
+  - responsive container changes automatically schedule geometry repair.
+- Guardrails: no automatic switch to Parking Layout; no parking data or recommendation state is modified.
+- Status: implemented.

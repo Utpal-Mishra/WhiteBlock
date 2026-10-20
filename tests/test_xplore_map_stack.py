@@ -13,7 +13,7 @@ class XploreMapStackContractTests(unittest.TestCase):
         maplibre = html.index("maplibre-gl@5/dist/maplibre-gl.js")
         bridge = html.index("maplibre-gl-leaflet/leaflet-maplibre-gl.js")
         app = html.index("./app.js")
-        adapter = html.index("./map-fix.js?v=20261020-2")
+        adapter = html.index("./map-fix.js?v=20261020-3")
 
         self.assertLess(leaflet, maplibre)
         self.assertLess(maplibre, bridge)
