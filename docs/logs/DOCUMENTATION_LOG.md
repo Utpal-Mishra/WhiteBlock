@@ -46,3 +46,9 @@
 - Documented the explicit map-number vocabulary: `OPTIONS` for grouped ranked results, `LOCATIONS` for browse/inventory clusters, `#N` for ordinal recommendation rank, and separate live-space labels.
 - Updated QA expectations so future marker changes cannot reintroduce bare-number ambiguity.
 - Status: documented with implementation.
+
+## DOC-20261020-MAP07 — Default map-mode contract
+- Date: 2026-10-20.
+- Documented Hybrid composition, + menu hierarchy, recovery order, provider lifecycle risk and QA expectations.
+- Clarified that pure Satellite remains a separate secondary view.
+- Status: documented with implementation.
