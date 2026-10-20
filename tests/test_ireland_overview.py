@@ -45,7 +45,7 @@ class IrelandOverviewTests(unittest.TestCase):
     def test_runtime_loads_overview_assets(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
         self.assertIn('ireland-overview.css?v=20261018-1', runtime)
-        self.assertIn('ireland-overview.js?v=20261018-1', runtime)
+        self.assertIn('ireland-overview.js?v=20261020-1', runtime)
         self.assertIn('loadWhiteblockIrelandOverview()', runtime)
 
 
