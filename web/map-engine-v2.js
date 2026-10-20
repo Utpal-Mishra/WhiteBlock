@@ -643,6 +643,7 @@
     window.setTimeout(resizeBasemap, 30);
   });
   document.addEventListener("whiteblock:kildare-attributes-ready", renderParkingAreas);
+  document.addEventListener("whiteblock:ranked-gl-overlay-ready", renderParkingAreas);
   map.on("zoomend", renderParkingAreas);
   document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(resizeBasemap, 30));
 
