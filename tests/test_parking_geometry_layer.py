@@ -9,7 +9,7 @@ WEB = ROOT / "web"
 class ParkingGeometryLayerTests(unittest.TestCase):
     def test_runtime_loads_maplibre_geometry_overlay(self):
         runtime = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("parking-gl-overlay.js?v=20261020-3", runtime)
+        self.assertIn("parking-gl-overlay.js?v=20261020-4", runtime)
         self.assertIn("loadWhiteblockParkingGeometry", runtime)
         self.assertNotIn("parking-geometry-layer.js?v=20260921-1", runtime)
 
@@ -25,7 +25,10 @@ class ParkingGeometryLayerTests(unittest.TestCase):
         source = (WEB / "parking-gl-overlay.js").read_text(encoding="utf-8")
         self.assertIn("String(index + 1).padStart", source)
         self.assertIn('POINT_LABEL = "whiteblock-ranked-parking-label"', source)
-        self.assertIn('"text-field": ["get", "rank"]', source)
+        self.assertIn('"text-field": ["get", "display_rank"]', source)
+        self.assertIn('caption: "OPTIONS"', source)
+        self.assertIn('POINT_CLUSTER_CAPTION = "whiteblock-ranked-parking-cluster-caption"', source)
+        self.assertIn('POINT_AVAILABILITY = "whiteblock-ranked-parking-availability"', source)
 
     def test_overlay_renders_in_maplibre_not_leaflet_panes(self):
         source = (WEB / "parking-gl-overlay.js").read_text(encoding="utf-8")
