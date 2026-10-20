@@ -9,7 +9,8 @@ class InventoryMapLayerTests(unittest.TestCase):
         js = (ROOT / "web" / "inventory-map-layer.js").read_text(encoding="utf-8")
         self.assertIn("markerClusterGroup", js)
         self.assertIn("chunkedLoading: true", js)
-        self.assertIn("state.regionInventories", js)
+        self.assertIn("POLICY.connectedInventory(state, parkingData)", js)
+        self.assertIn("POLICY.groupNearby(items", js)
         self.assertIn("whiteblock:inventory-map-ready", js)
         self.assertIn("whiteblock:region-inventory-ready", js)
         self.assertIn("inventoryMarkersEnabled", js)
@@ -21,7 +22,7 @@ class InventoryMapLayerTests(unittest.TestCase):
 
     def test_runtime_loads_inventory_map_layer(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("inventory-map-layer.js?v=20261018-1", runtime)
+        self.assertIn("inventory-map-layer.js?v=20261020-2", runtime)
         self.assertIn("loadWhiteblockInventoryMapLayer", runtime)
 
     def test_map_layer_styles_exist(self):
