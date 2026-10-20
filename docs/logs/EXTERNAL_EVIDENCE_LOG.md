@@ -44,3 +44,9 @@
 - Evidence type: two Android mobile screenshots, 20 October 2026, showing Ireland connected coverage while numbered Cork ranks 01–07 overlap at city and national zoom levels.
 - Root cause: ranked MapLibre overlay mounted independently of Leaflet county overview cleanup; code inspection confirmed missing browse-mode guard.
 - Confidence: high match to reported symptoms; deployment screenshot confirmation outstanding.
+
+## EVID-20261020-MAP02 — Mobile overlapping markers
+- Evidence: two owner-supplied Android screenshots dated 20 October 2026 showing multiple overlapping numbered Cork markers at close/national zoom.
+- Root causes confirmed in source: ranked MapLibre layer remained on browse; locality drill-down drew unclustered circles. Both handled by shared policy work.
+- Status: mobile post-publication screenshot check remains pending.
+
