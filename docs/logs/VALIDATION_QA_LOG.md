@@ -171,3 +171,18 @@
   - background/foreground browser tab;
   - weak-network fallback does not leave checkerboard tiles.
 - Status: pending CI and live mobile confirmation.
+
+## QA-20261020-MAP05 — Selected county outline
+- Date: 2026-10-20.
+- Automated contracts:
+  - boundary config contains canonical Cork/Kildare/Dublin/Wicklow OSM relation IDs;
+  - builder stitches relation members into Polygon/MultiPolygon GeoJSON;
+  - overview loads the boundary sidecar, renders with `L.geoJSON`, uses `wbRegionBoundaryPane`, and cache-busted assets;
+  - county parking fit remains immediate and boundary fit refines focus when geometry is available.
+- Manual mobile checks:
+  - select each county and verify the correct outline;
+  - ensure the previous county outline disappears instantly when switching;
+  - Ireland reset removes all selected-region fill/border;
+  - parking clusters/labels remain above the boundary;
+  - boundary survives Street/Terrain/Satellite changes and map resize/orientation.
+- Status: pending CI/deployed visual check.
