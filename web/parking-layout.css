@@ -24,3 +24,25 @@
 #map.layout-active .leaflet-pane,#map.layout-active .leaflet-control-container,#map.layout-active .maplibregl-canvas-container{visibility:hidden}
 #map.layout-active .wb-map-state-legend{display:none}
 @media(max-width:720px){.parking-layout-node-label{min-width:88px;max-width:108px;padding:5px 6px}.parking-layout-node-label strong{font-size:10px}.parking-layout-node-label small{font-size:8px}.parking-layout-head{top:68px}.parking-layout-foot{bottom:78px}.parking-layout-ring.r1{width:30%}.parking-layout-ring.r2{width:57%}.parking-layout-ring.r3{width:84%}}
+
+/* Explicit exit from the optional schematic: map controls stay visible. */
+.parking-layout-return {
+  pointer-events: auto;
+  align-self: flex-start;
+  border: 1px solid rgba(120,230,170,.55);
+  background: rgba(15,40,29,.98);
+  color: #C8F56B;
+  padding: 11px 13px;
+  border-radius: 12px;
+  font: 700 11px/1.2 "Manrope", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.parking-layout-return:hover,
+.parking-layout-return:focus-visible {
+  background: #C8F56B; color: #07110D;
+}
+@media(max-width:520px) {
+  .parking-layout-head { flex-wrap: wrap; }
+  .parking-layout-return { padding: 9px 11px; font-size: 10px; }
+}
