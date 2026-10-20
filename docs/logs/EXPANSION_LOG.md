@@ -53,3 +53,8 @@
 - Global Leaflet geographic raster fallback requires no region-specific implementation; applies to Cork, Kildare, Dublin, Wicklow and any future source-backed county.
 - Maintain provider/source attribution and verify acceptable production tile usage as traffic grows.
 
+## EXP-20261020-COV04 — New counties inherit national overview/drilldown
+- Source-backed new county uses existing registration and map zoom policies; its total mapped parking locations appear as a national node and selecting it zooms to the full regional dataset automatically.
+- Existing baseline counties: Cork, Kildare, Dublin, Wicklow (Bray nested). Future test fixtures must not be confused with deployed coverage.
+- Before claiming capacity/free bays, require verified capacity or live telemetry as appropriate.
+

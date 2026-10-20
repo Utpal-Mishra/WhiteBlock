@@ -55,3 +55,8 @@
 - Code review confirmed a forced schematic takeover in `map-engine-v2.js` on vector renderer failure/style timeout.
 - Ambiguity: screenshot alone cannot tell whether the user manually selected Parking Layout; runtime code confirms forced takeover was possible. Device retest pending.
 
+## EVID-20261020-COV04 — User requested Ireland top map and region drilldown
+- Evidence: project-owner instruction 2026-10-20: “When the coverage is Ireland, make sure to view top view of Ireland with total available parking spots in each coverage region while when any coverage region is selected, map zoom into that region to view all the available parkings.”
+- Technical review: current `focusRegion` called `renderRegionSettlementNodes(key)` which required a second locality click before parking sites; current national node already computed evidence-backed location counts with guarded live vacant-bay aggregates.
+- Decision: preserve truth in labeling; total mapped parking locations per region on national overview, separately identify sourced real-time free bays.
+

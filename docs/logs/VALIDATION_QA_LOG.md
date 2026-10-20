@@ -142,3 +142,10 @@
 - PR #40 tests: PASS (GitHub Actions `39467188332`); real raster fallback and compatibility state passed mocked recovery checks.
 - Main branch and Pages rebuild triggered for commit `8cc276f4302a798042eb8b62610c3bc6fb48067d`.
 - Not yet validated in an Android graphical browser: new Street default, ability to select Parking Layout voluntarily, Back to map control, and recover under actual weak mobile network conditions.
+
+## QA-20261020-COV04 — Ireland coverage and full county map
+- Automated: simulated national geographic camera has 4 source-connected county badges, with matched mapped-location counts; Cork 7 and Dublin 10 sample assets fit direct bounds and split into per-asset markers at zoom 17; Wicklow 5+Bray 1 on delayed county load; no repeated Ireland camera fit on refresh.
+- Production test queue: select Ireland, verify all-island basemap and actual live county counts; tap/filter Cork, Kildare, Dublin and Wicklow, confirm full parking asset extent and count clusters, pinch zoom/click location, Bray within Wicklow.
+- Negative QA: no fake vacant-bay count where live data absent; no forced schematic overlay; no marker or source duplication; map not resetting while user pans.
+- Status: pending CI and live device check.
+

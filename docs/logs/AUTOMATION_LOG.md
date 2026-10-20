@@ -43,3 +43,8 @@
 - Existing marker/ranked/county regression suite retained; Python layout/map engine version and fallback expectations updated.
 - PR #40 CI / main Pages deployment to be recorded after conclusion.
 
+## AUTO-20261020-COV04 — Country/county regression gate
+- `tests/test_ireland_county_map.js`: simulated browser/map DOM, national 4 badges and counts, Cork & Dublin auto-fit to all assets, zoom 17 reveals individual sites, Ireland reset, no camera resets on inventory refresh, Wicklow pilot then county load.
+- `.github/workflows/test.yml` includes Node integration test alongside previous all-region marker tests and full Python suite.
+- Initial status: PR #41; awaiting CI conclusion and mobile production verification.
+

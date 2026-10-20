@@ -25,3 +25,7 @@
 - Changed map fallback architecture: actual Street vector -> actual raster Street -> alternate street tiles; Parking Layout stays an optional analytical diagram.
 - Relevant implementation: `web/map-engine-v2.js` and `web/parking-layout.js`; regression `tests/test_geographic_map_fallback.js`.
 
+## DOC-20261020-COV04 — Ireland geographic navigation
+- Updated Ireland navigation design and CI contract: island-wide county totals, direct all-location county map, evidence-based availability labels and no background camera changes.
+- References: `web/ireland-overview.js`, `tests/test_ireland_county_map.js`, existing `docs/UNIVERSAL_MARKER_POLICY.md`, and audit logs.
+

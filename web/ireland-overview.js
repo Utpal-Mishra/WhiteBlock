@@ -54,6 +54,7 @@
   state.irelandOverviewLayer = null;
   state.regionSubareaFocus = null;
   state.regionSubareaGroup = null;
+  state.regionPendingFit = null;
   const MARKER_POLICY = window.WHITEBLOCK_MARKER_POLICY;
 
   // New county adapters can register via their source-backed region snapshot;
@@ -252,13 +253,14 @@
   function regionNodeHtml(key, stats) {
     const region = CONNECTED_REGIONS[key];
     const count = stats.loaded ? formatInteger(stats.locations) : "…";
-    const capacity = stats.capacityAssets ? `${formatInteger(stats.capacity)} known spaces` : "capacity partly unknown";
-    const available = stats.availableAssets ? ` · ${formatInteger(stats.available)} free now` : "";
+    const available = stats.availableAssets
+      ? `${formatInteger(stats.available)} reported vacant bays`
+      : "Vacancies unverified";
     const scope = `County ${region.countyLabel}`;
     return `<div class="wb-ireland-region-node">
       <strong>${escapeHtml(scope)}</strong>
-      <span>${escapeHtml(count)} locations</span>
-      <small>${escapeHtml(capacity + available)}</small>
+      <span>${escapeHtml(count)} mapped locations</span>
+      <small>${escapeHtml(available)}</small>
     </div>`;
   }
 
@@ -435,6 +437,54 @@
     });
   }
 
+  // Selecting a county immediately displays its entire mapped/evidence-backed
+  // parking inventory, not just locality summaries. Count badges are visual
+  // clusters of real parking locations; they never claim live empty bays.
+  function countyParkingRows(key) {
+    const inventory = inventoryFor(key);
+    const source = inventory.length ? inventory : (snapshotFor(key)?.locations || []);
+    const seen = new Set();
+    return source.filter(item => {
+      const id = String(item?.id || item?.parking_id || "");
+      const lat = numeric(item?.lat), lng = numeric(item?.lng);
+      if (!id || seen.has(id) || lat == null || lng == null) return false;
+      if (lat < 51 || lat > 56 || lng < -12 || lng > -5) return false;
+      seen.add(id);
+      return true;
+    });
+  }
+
+  function fitCountyParking(key, rows) {
+    const region = CONNECTED_REGIONS[key];
+    if (!state.map || !region) return;
+    const points = rows.map(item => [Number(item.lat), Number(item.lng)]);
+    if (points.length > 1) {
+      state.map.fitBounds(L.latLngBounds(points), {
+        padding: [46, 46], maxZoom: Math.min(14, region.zoom + 1),
+        animate: true
+      });
+    } else if (points.length === 1) {
+      state.map.flyTo(points[0], Math.min(13, region.zoom + 1), { duration: 0.75 });
+    } else {
+      // The county is selectable while a source is still loading.
+      state.map.flyTo(region.center, region.zoom, { duration: 0.75 });
+    }
+  }
+
+  function renderCountyParkingMarkers(key, { fit = false } = {}) {
+    const region = CONNECTED_REGIONS[key];
+    if (!region || !state.map || typeof L === "undefined") return [];
+    const rows = countyParkingRows(key);
+    // Existing cluster renderer is county-agnostic, handles all source rows,
+    // and uses viewport filtering at detail zoom rather than truncating at 300.
+    renderSubareaParkingMarkers(key, {
+      label: "County " + region.countyLabel,
+      items: rows
+    });
+    if (fit) fitCountyParking(key, rows);
+    return rows;
+  }
+
   function focusSubarea(key, group) {
     const region = CONNECTED_REGIONS[key];
     if (!region || !state.map || typeof L === "undefined" || !group?.items?.length) return;
@@ -591,7 +641,7 @@
             <span class="discover-status">${item.loaded ? "Active" : "Loading"}</span>
           </div>
           <div class="wb-national-region-stats">
-            <span><small>Inventory</small><strong>${item.loaded ? formatInteger(item.locations) : "—"}</strong></span>
+            <span><small>Mapped locations</small><strong>${item.loaded ? formatInteger(item.locations) : "—"}</strong></span>
             <span><small>Capacity</small><strong>${item.capacityAssets ? formatInteger(item.capacity) : "—"}</strong></span>
             <span><small>Availability</small><strong>${escapeHtml(availability)}</strong></span>
           </div>
@@ -607,7 +657,7 @@
       <article class="surface wb-region-browse-message">
         <p class="eyebrow">${escapeHtml(region.label)} coverage</p>
         <h3>${stats.loaded ? `${formatInteger(stats.locations)} mapped/evidence-backed parking assets` : "Regional inventory is loading"}</h3>
-        <p>You are viewing the ${escapeHtml(region.detail)} network. Search a destination above to apply walking distance, stay, access and pricing rules before recommendations are ranked.</p>
+        <p>The map shows all currently mapped parking locations in ${escapeHtml(region.detail)}. Tap count clusters to zoom in and reveal individual sites. Search a destination to filter by walking distance, stay and access before ranking.</p>
         <div class="wb-region-browse-stats">
           <span><small>Published capacity</small><strong>${stats.capacityAssets ? formatInteger(stats.capacity) : "—"}</strong></span>
           <span><small>Reported available now</small><strong>${stats.availableAssets ? formatInteger(stats.available) : "—"}</strong></span>
@@ -639,7 +689,7 @@
     }
     if (state.regionFocus && !state.destination) {
       list.innerHTML = regionBrowseHtml(state.regionFocus);
-      if (count) count.textContent = "Choose destination";
+      if (count) count.textContent = `${formatInteger(regionStats(state.regionFocus).locations)} mapped`;
     }
   }
 
@@ -670,6 +720,7 @@
     state.regionFocus = null;
     state.regionSubareaFocus = null;
     state.regionSubareaGroup = null;
+    state.regionPendingFit = null;
     clearDestinationForBrowse();
     clearDetailedMarkers();
     updateStaticChrome();
@@ -704,6 +755,7 @@
     state.regionFocus = key;
     state.regionSubareaFocus = null;
     state.regionSubareaGroup = null;
+    state.regionPendingFit = key;
     state.activeRegion = key;
     clearDestinationForBrowse();
     clearDetailedMarkers();
@@ -727,15 +779,26 @@
     const input = document.getElementById("destination");
     if (input) input.placeholder = `Search a destination in ${region.label} or anywhere in Ireland`;
 
-    // Region-level focus deliberately does not manufacture a destination.
-    // Instead it drills the county/region into real city/town/settlement groups.
+    // County selection is geographic drill-down: zoom to *all* mapped sites
+    // and show their clustered real coordinates immediately. No invented
+    // destination and no intermediate locality-only map are required.
     document.dispatchEvent(new CustomEvent("whiteblock:coverage-browse", { detail: { scope: "region", region: key } }));
-    const groups = renderRegionSettlementNodes(key);
+    const rows = renderCountyParkingMarkers(key, { fit: true });
+    // A locality pilot may load before the larger county snapshot (e.g. Bray
+    // before County Wicklow). Fit again when the complete source-backed county
+    // snapshot arrives instead of incorrectly leaving the camera on the pilot.
+    if (rows.length && Array.isArray(state.regionInventories[key]) &&
+        state.regionInventories[key].length && Array.isArray(snapshotFor(key)?.locations)) {
+      state.regionPendingFit = null;
+    }
     if (typeof setMapStatus === "function") {
       const stats = regionStats(key);
+      const availability = stats.availableAssets
+        ? `${formatInteger(stats.available)} reported vacant bays across ${formatInteger(stats.availableAssets)} reporting assets`
+        : "live vacant spaces not reported";
       setMapStatus(
-        `${region.detail} coverage`,
-        `${stats.loaded ? formatInteger(stats.locations) : "Loading"} mapped/evidence-backed assets · ${formatInteger(groups.length)} locality groups · tap a locality to show individual parking`
+        `${region.detail} · ${formatInteger(rows.length)} mapped parking locations`,
+        `Tap a cluster to zoom into individual locations · ${availability}`
       );
     }
   }
@@ -747,7 +810,7 @@
     if (state.regionSubareaGroup) {
       renderSubareaParkingMarkers(state.regionFocus, state.regionSubareaGroup);
     } else {
-      renderRegionSettlementNodes(state.regionFocus, { fit: false });
+      renderCountyParkingMarkers(state.regionFocus, { fit: false });
     }
   });
 
@@ -761,6 +824,8 @@
     stats: nationalStats,
     groups: groupRegionalInventory,
     focusSubarea,
+    renderCountyParkingMarkers,
+    countyParkingRows,
     registerNewRegionalInventories
   };
 
@@ -785,8 +850,11 @@
       }
     });
 
-    if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
-    else if (state.regionFocus) {
+    if (state.overviewMode) {
+      updateNationalKpis();
+      renderBrowseResults();
+      renderNationalRegionNodes();
+    } else if (state.regionFocus) {
       updateRegionKpis(state.regionFocus);
       renderBrowseResults();
     }
@@ -804,14 +872,28 @@
   }, 500);
 
   document.addEventListener("whiteblock:data-ready", () => {
-    if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
+    if (state.overviewMode) {
+      updateNationalKpis();
+      renderBrowseResults();
+      renderNationalRegionNodes();
+    }
   });
   document.addEventListener("whiteblock:region-inventory-ready", () => {
     registerNewRegionalInventories();
     updateStaticChrome();
-    if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
-    else if (state.regionFocus && !state.regionSubareaGroup) {
-      renderRegionSettlementNodes(state.regionFocus, { fit: false });
+    if (state.overviewMode) {
+      updateNationalKpis();
+      renderBrowseResults();
+      renderNationalRegionNodes();
+    } else if (state.regionFocus && !state.regionSubareaGroup) {
+      const rows = renderCountyParkingMarkers(state.regionFocus, {
+        fit: state.regionPendingFit === state.regionFocus
+      });
+      if (rows.length && Array.isArray(state.regionInventories[state.regionFocus]) &&
+          state.regionInventories[state.regionFocus].length &&
+          Array.isArray(snapshotFor(state.regionFocus)?.locations)) {
+        state.regionPendingFit = null;
+      }
     }
   });
 

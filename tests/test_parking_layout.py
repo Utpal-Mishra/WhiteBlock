@@ -9,7 +9,7 @@ class ParkingLayoutContractTests(unittest.TestCase):
     def test_layout_assets_are_loaded(self):
         html = (WEB / "index.html").read_text(encoding="utf-8")
         self.assertIn("parking-layout.css?v=20261020-2", html)
-        self.assertIn("parking-layout.js?v=20261020-2", html)
+        self.assertIn("parking-layout.js?v=20261020-4", html)
         self.assertLess(html.index("map-fix.js"), html.index("parking-layout.js"))
 
     def test_layout_is_destination_centred_and_data_driven(self):
@@ -31,6 +31,7 @@ class ParkingLayoutContractTests(unittest.TestCase):
         self.assertIn("setLayoutMode(false)", js)
         self.assertIn('document.addEventListener("click", event => {', js)
         self.assertNotIn("activateLayoutFallback", js)
+        self.assertIn('"whiteblock:coverage-browse"', js)
 
 
 

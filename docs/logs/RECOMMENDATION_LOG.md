@@ -66,3 +66,8 @@
 - User chooses Parking Layout explicitly from More map views; exit/Street control returns to geographical map.
 - Avoid silent ambiguity: mark compatibility raster street map and report outage if both tile sources fail.
 
+## REC-20261020-COV04 — Show every region's supply at region selection
+- Recommendation: default Ireland shows all connected counties, each with its mapped parking-location count; default county shows all county parking assets directly as clusters without a prerequisite locality view.
+- Cluster tap zooms towards real parking locations, individual point tap gives evidence/name and details where supported.
+- Live vacant bays and total capacity must remain independent of mapped-location inventory totals; unreported live occupancy is unknown, never zero or inferred.
+

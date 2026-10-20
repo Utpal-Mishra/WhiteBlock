@@ -48,3 +48,8 @@
 - Relative-distance Parking Layout is useful for analytical comparison, but cannot replace road-level geographic context.
 - Basemap must have a non-WebGL fallback across all future regions before broad roll-out and partner integrations.
 
+## BUS-20261020-COV04 — Geographic hierarchy must match county selection
+- User requirement: Ireland selection shows an actual all-Ireland geographical map with total mapped parking locations at each currently connected county; selecting a region zooms directly to all its mapped parking assets.
+- Learning: a county filter should not require a second town/locality tap before parking evidence becomes visible. Cluster where markers collide, reveal actual locations with zoom.
+- Commercial trust: mapped locations are not live vacant bays. Label any live vacancies separately and only where provider-backed records are available.
+

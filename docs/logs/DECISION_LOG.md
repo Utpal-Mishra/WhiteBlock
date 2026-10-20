@@ -87,3 +87,9 @@
 - Reason: driving/parking decisions require true road topology; schematic is supplementary only.
 - Status: implemented on PR #40, pending CI/deployment/device acceptance.
 
+## DEC-20261020-COV04 — County selection means full mapped parking coverage
+- Decision: Ireland always displays island-wide geographic bounds and current connected county totals. County selection auto-fits the whole mapped regional inventory and renders clustered individual assets, without mandatory town intermediary.
+- Alternative rejected: only show locality labels when a county is selected. This hides actual parking inventory behind an extra tap, contrary to the user intent.
+- Counts: label “mapped parking locations”; source-reported live vacant bays only where evidence exists, otherwise “Vacancies unverified”.
+- State transitions: explicit Ireland/county actions control camera, ordinary asynchronous refresh updates markers/stats without recentering.
+

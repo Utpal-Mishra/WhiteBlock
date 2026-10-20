@@ -88,3 +88,10 @@
 - Added in-panel Back to map button and close-on-basemap click; Street state no longer appears simultaneously active with schematic.
 - Scope: all current/future geographical regions, not Cork-specific.
 
+## FEAT-20261020-COV04 — Ireland-wide coverage and direct county parking map
+- Ireland selected: geographical island-scale overview with one linked county badge and mapped parking-location total per connected county, distinct from sourced vacant-bay figures.
+- County selected: zoom to all valid parking sites across that region and display adaptive count clusters immediately; pinch/tap zoom expands actual individual parking locations.
+- Wicklow directly includes Bray as locality source; future source-backed counties inherit existing global marker policy.
+- Optional Parking Layout closes on coverage action so the map remains geographical.
+- Status: PR #41, pending CI and live mobile acceptance.
+
