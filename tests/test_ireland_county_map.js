@@ -112,7 +112,7 @@ assert.equal(state.destination,null,"County browse must not invent a destination
 assert.equal(fits.at(-1).bounds.points.length,7,"County auto-fits to all 7 real site coordinates");
 assert.ok(activeMarkers().length>=1,"County map must show clustered parking immediately");
 const markerLabels=activeMarkers().map(m=>m.html).join(" ");
-assert.ok(markerLabels.includes("parking locations") || activeMarkers().some(m=>m.type==="circle"));
+assert.ok(markerLabels.includes("LOCATIONS") || activeMarkers().some(m=>m.type==="circle"), "County browse clusters must explicitly say LOCATIONS");
 zoom=17;
 map.events.get("zoomend")();
 assert.equal(activeMarkers().filter(x=>x.type==="circle").length,7,"Detailed county zoom shows all individual sites");
