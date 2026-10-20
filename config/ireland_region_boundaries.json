@@ -1,0 +1,11 @@
+{
+  "source": "OpenStreetMap",
+  "license": "ODbL",
+  "admin_level": 6,
+  "regions": [
+    {"key": "cork", "label": "County Cork", "relation_id": 332631},
+    {"key": "kildare", "label": "County Kildare", "relation_id": 285833},
+    {"key": "dublin", "label": "County Dublin", "relation_id": 282800},
+    {"key": "wicklow", "label": "County Wicklow", "relation_id": 282760}
+  ]
+}
