@@ -38,3 +38,8 @@
 - Geography: County Wicklow outside existing 5 km Bray pilot, sourced from exact OSM County Wicklow administrative relation.
 - Priority audit areas: Wicklow Town, Greystones, Arklow, Glendalough/Laragh, Brittas Bay, Blessington, Baltinglass and inland/rural towns.
 - Exit: successful network snapshot, source reconciliation, missing-location audit and location-specific access/rule checks; no assertion of exhaustive coverage.
+
+## EXPAND-20261020-WW01 — Wicklow county rollout hierarchy corrected
+- Date: 2026-10-20; status: branch.
+- Correction: Wicklow county is the expansion geography, Bray is a subordinate locality/pilot source, not an extra connected county.
+- Metrics: count Bray in Wicklow aggregate exactly once, preserve distinct source evidence and the OSM Bray-exclusion radius.

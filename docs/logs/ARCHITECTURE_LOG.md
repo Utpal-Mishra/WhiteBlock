@@ -64,3 +64,8 @@
 - Flow: OSM exact County Wicklow admin-level-6 relation 282760 -> source-labelled snapshot -> browser regional adapter -> Ireland Overview / Find / Discover / Inventory Coverage.
 - Boundary rule: exclude Bray pilot's 5 km coverage from new county snapshot to avoid duplicate totals.
 - Separation: mapped supply != current driver eligibility != live occupancy != commercial partnership.
+
+## ARCH-20261020-WW01 — Separate ingestion from presentation hierarchy
+- Date: 2026-10-20; status: branch.
+- Pattern: internal state.regionInventories.bray and .wicklow remain separate ingestion pools; presentation aggregates them as County Wicklow, de-duplicates stable IDs and derives locality from Bray metadata.
+- Guardrail: county totals count source assets once; no inferred live occupancy or cross-pilot duplicate representation.

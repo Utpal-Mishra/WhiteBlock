@@ -17,7 +17,20 @@ Inventory Coverage is the operational view of parking records currently known to
 - capacity/access/EV/fee/opening-hour attributes where published;
 - no county-wide live occupancy claim.
 
-The Kildare inventory is searched alongside Cork by name, town/area, asset ID, source and parking type. The UI renders at most 100 matching cards at once for mobile performance while filtering the complete regional inventory in memory.
+Regional inventory is searched by name, town/area, asset ID, source and parking type. County selection is consistent across Cork, Kildare, Dublin and Wicklow. The UI renders at most 100 matching cards at once for mobile performance while filtering the complete regional inventory in memory.
+
+### County Dublin
+
+- County Dublin mapped parking assets and source-backed local-authority evidence;
+- no inferred availability when no feed reports occupancy.
+
+### County Wicklow (including Bray)
+
+- OpenStreetMap County Wicklow mapped parking inventory outside the Bray pilot area;
+- separately curated Bray seafront pilot data displayed **within the Wicklow county total**;
+- Bray appears as a locality/town for drill-down, not a fifth region filter;
+- original Bray evidence and source identifiers remain intact, with no invented live occupancy;
+- national/county totals deduplicate stable asset IDs and preserve the existing Bray exclusion radius in county sourcing.
 
 ## Region and status filtering
 
@@ -26,6 +39,8 @@ Inventory Coverage supports:
 - All connected regions;
 - Cork;
 - Kildare;
+- Dublin;
+- Wicklow (including Bray);
 - Canonical inventory only;
 - Unverified candidate queue only;
 - Inventory + candidates.

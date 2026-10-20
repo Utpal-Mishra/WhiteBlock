@@ -45,3 +45,8 @@
 - Change: independent browser adapter hydrates Wicklow JSON inventory on demand and renders destination markers/KPIs without invented occupancy.
 - Isolation: preserves Bray's existing curated 5 km pilot; keeps Cork/Kildare/Dublin regions unchanged.
 - Recovery: source outage surfaces a missing-inventory state rather than substitute records.
+
+## SYS-20261020-WW01 — County-level UI reconciliation
+- Date: 2026-10-20; status: branch.
+- Changed: Ireland region switcher/county markers, Discover filters and Inventory Coverage. Kept existing Bray destination adapter/parking listings.
+- User correction: do not expose a seafront evidence pilot as a top-level administrative region.

@@ -59,3 +59,8 @@
 - Preserved fields: OSM ID/URL/type, coordinates, optionally valid polygon, settlement/provenance, source timestamp, explicit access/fee/capacity/opening hours.
 - Null policy: available_spaces, occupancy and untagged capacity/rules remain null; OSM fee tags are textual, not verified monetary prices.
 - Deduplication: OSM ID and exclusion of Bray pilot circle.
+
+## DATA-20261020-WW01 — County-normalized Bray identity
+- Date: 2026-10-20; status: branch.
+- In-memory classification: Bray asset county='Wicklow', area='Bray'; underlying Bray source key/IDs/snapshot retained.
+- Collection: Wicklow county summary combines Wicklow OSM records and independently curated Bray records; site-specific record values and null availability are unchanged.

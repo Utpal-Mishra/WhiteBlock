@@ -56,3 +56,10 @@
 - Alternatives rejected: approximate rectangular OSM county query; invented capacity/occupancy; wholesale application of town-wide by-law rates; partnership-dependent initial inventory.
 - Risk accepted: current OSM coverage is incomplete, and some records have unresolved access/restriction evidence.
 - Status: implemented on branch, subject to live-source and CI validation.
+
+## DEC-20261020-WW01 — County-level navigation with Bray as a Wicklow locality
+- Date: 2026-10-20; decision: remove Bray as a standalone national coverage region/filter and fold its locations under County Wicklow.
+- Rationale: consistent administrative hierarchy with Cork, Kildare and Dublin. A locality-level evidence pilot must not look like a fifth county.
+- Keep: independent Bray curated source data, IDs, 5 km overlap guard and individual tariff/restriction evidence.
+- Scope: overview, Discover, Inventory Coverage, local city drill-down and national county counts.
+- Status: feature branch, CI/deployment review pending.

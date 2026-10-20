@@ -74,7 +74,7 @@ function loadWhiteblockInventoryMapLayer() {
 function loadWhiteblockInventoryCoverage() {
   if (!document.querySelector('script[data-whiteblock-inventory-coverage]')) {
     const script = document.createElement('script');
-    script.src = './inventory-coverage.js?v=20260930-1';
+    script.src = './inventory-coverage.js?v=20261020-1';
     script.defer = true;
     script.dataset.whiteblockInventoryCoverage = 'true';
     document.body.appendChild(script);
@@ -120,7 +120,7 @@ function loadWhiteblockReattachBray() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './bray-adapter.js?v=20261018-1';
+  script.src = './bray-adapter.js?v=20261020-1';
   script.defer = true;
   script.dataset.whiteblockBrayRebind = 'true';
   script.addEventListener('load', loadWhiteblockWicklowNetwork, { once: true });
@@ -249,7 +249,7 @@ function loadWhiteblockIrelandOverview() {
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20261018-1';
+  script.src = './ireland-overview.js?v=20261020-1';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);

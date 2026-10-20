@@ -10,7 +10,7 @@ class DiscoverInventoryTests(unittest.TestCase):
     def test_discover_assets_are_loaded(self):
         html = (WEB / "index.html").read_text(encoding="utf-8")
         self.assertIn('href="./discover.css?v=20261004-1"', html)
-        self.assertIn('<script src="./discover.js"></script>', html)
+        self.assertIn('<script src="./discover.js?v=20261020-1"></script>', html)
         self.assertIn('id="discover-region-list"', html)
         self.assertIn('id="discover-location-list"', html)
         self.assertIn('id="discover-regions-value"', html)

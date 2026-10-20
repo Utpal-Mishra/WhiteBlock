@@ -53,3 +53,8 @@
 - UI: Wicklow connected-region summary, selectable focus, town grouping, destination parking markers, Discover filtering and search inventory.
 - Labels: mapped/evidence-backed inventory, not live parking availability or county completeness.
 - Regression controls: existing Bray pilot and other regional views retained.
+
+## FEAT-20261020-WW01 — Remove duplicate Bray county filter
+- Date: 2026-10-20; status: branch.
+- UX contract: national and inventory-region filters list exactly Cork, Kildare, Dublin and Wicklow. Bray appears inside Wicklow as a locality; clicking Wicklow shows its parking plus Bray locations.
+- Provenance: individual Bray source remains labelled as the seafront pilot.

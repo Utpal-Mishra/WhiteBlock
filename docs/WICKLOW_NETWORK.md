@@ -2,7 +2,7 @@
 
 ## Expansion status and scope
 
-WHITEBLOCK's Wicklow County overlay complements the existing independently curated **Bray seafront** pilot. An automated OpenStreetMap (OSM) exact-county inventory provides mapped parking locations in the rest of the county; the Bray pilot continues to cover its 5 km radius. Both contribute separately to the national Ireland overview and Discover inventory, without duplicating mapped OSM records inside Bray's pilot circle.
+WHITEBLOCK's Wicklow County overlay complements the existing independently curated **Bray seafront** pilot. An automated OpenStreetMap (OSM) exact-county inventory provides mapped parking locations in the rest of the county; the Bray pilot continues to cover its 5 km radius. Both contribute to **one County Wicklow** national overview, county-level Discover filter and Inventory Coverage filter. Bray appears as a **locality within Wicklow**, not a standalone fifth region. Source inventories remain separate internally to preserve the curated pilot's evidence and avoid duplicated mapped OSM records inside its circle.
 
 **Important:** county-wide query coverage is **not** a claim that every physically existing or legally usable parking space is recorded. This is a mapped inventory layer. No live occupancy, actual vacant bay counts, unrestricted-public-access claims or official partner relationships are inferred.
 
@@ -22,7 +22,7 @@ Town coordinates in the browser are **navigation hubs only**. They are not parki
 - The County Wicklow ingestion script queries OSM relation [282760](https://www.openstreetmap.org/relation/282760), County Wicklow, administrative level 6. Only matching parking nodes, ways and relations are included.
 - The JSON browser snapshot is generated during GitHub Pages deployment. The job refuses an empty or malformed snapshot. An Overpass outage removes the optional county snapshot, and the browser reports source unavailable.
 - The Wicklow browser adapter consumes and validates the snapshot, connects Find, mapped markers and regional inventories. The existing Bray adapter remains in charge of its local pilot.
-- Ireland Overview, Discover and Inventory Coverage expose the region in connected-region and search/browse views.
+- Ireland Overview, Discover and Inventory Coverage expose **four geographic county-level regions**: Cork, Kildare, Dublin and Wicklow. Bray is grouped beneath Wicklow as a drill-down locality, while its own source provenance and evidence remain intact.
 - OSM credit and terms: OpenStreetMap contributors, [ODbL](https://www.openstreetmap.org/copyright). County by-law documents are source references only; there is no automated blanket assignment of their rates to every mapped parking record.
 
 Known unknowns remain null: current available spaces, occupancy, untagged capacity, untagged access class, pricing, opening hours and maximum stay. Mapped public/private/customer/permit access is populated only from source fields.
@@ -48,7 +48,8 @@ Known unknowns remain null: current available spaces, occupancy, untagged capaci
 
 ## Next improvements
 
-- Inspect the first successful deployment for actual location count, polygons and access classifications. **No asset count is claimed before a successful run.**
+- County Wicklow summary totals must aggregate the independently ingested county snapshot and the curated Bray evidence inventory once each. **Do not treat Bray as a fifth county or a separate region filter.**
+- Inspect successful deployments for actual counts, polygons and access classifications. **No unsupported asset count is claimed.**
 - Add official Wicklow car-park coordinates, Park & Ride, accessible bays and verified entrances as additional evidence.
 - Normalize place-specific tariffs, maximum-stay, payment instructions and source timestamps.
 - Extend permitted imagery review to missing rural, coastal and retail parking candidates.
