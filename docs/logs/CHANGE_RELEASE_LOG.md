@@ -74,3 +74,8 @@
 - Date: 2026-10-19; status: feature branch pending review/deployment.
 - Change scope: exact-county builder, browser adapter, national map, Discover, Inventory Coverage, Pages generation and validation, unit tests, public source notes.
 - Rollback: disable Wicklow script include / snapshot build if QA identifies wrongly promoted access, duplicates or broken regional navigation.
+
+## RELEASE-20261020-WW01 — Wicklow/Bray coverage UI correction
+- Date: 2026-10-20; status: branch, pending merge and Pages verification.
+- Change: combine county coverage presentation while retaining two separate sourcing/adapters; remove duplicate filter across overview and Discover surfaces.
+- Rollback: revert this commit if county aggregation omits Bray or doubles inventory values.
