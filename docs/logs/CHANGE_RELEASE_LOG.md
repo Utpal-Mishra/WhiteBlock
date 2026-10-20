@@ -139,3 +139,11 @@
 - Behaviour: eliminates duplicate startup basemap creation; repairs map geometry on responsive/state changes; fails over stalled/partial raster grids automatically.
 - Data: no inventory/evidence changes.
 - Status: fix branch implemented; PR/CI/Pages/device validation pending.
+
+## RELEASE-20261020-MAP05 — Selected-region border focus
+- Date: 2026-10-20.
+- Branch: `feat/region-boundary-focus`.
+- Added: county-boundary config, deployment boundary builder, generated GeoJSON deployment step and validation.
+- Changed: Ireland overview rendering and asset cache versions; selected county now receives an exact outline/fill layer.
+- Data semantics: no parking records, counts, access rules, availability or capacity changed.
+- Status: feature branch implementation complete; CI/Pages/mobile validation pending.
