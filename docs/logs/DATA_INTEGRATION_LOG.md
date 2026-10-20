@@ -70,3 +70,8 @@
 - Derivation: ephemeral screen-pixel groups of up to ten currently ranked destination records; group count is parking assets, never sum of capacity or open bays.
 - Read/write: render-only browser transformation; zero mutations to canonical parking sources.
 
+## DATA-20261020-MAP02 — New source-backed county integration
+- Adapter contract: `state.regionInventories[regionKey]` contains normalized source asset rows, `state.regionSnapshots[regionKey]` contains validated nonempty source snapshot, followed by `whiteblock:region-inventory-ready`.
+- Browser automatically builds county navigation where a new source-backed key is available; nested pilot aliases `bray` and `corkCounty` map to Wicklow and Cork.
+- Stable IDs, original latitude/longitude, source access restrictions, unknown availability and provenance preserved; presentation clusters are transient.
+
