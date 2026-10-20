@@ -81,3 +81,9 @@
 - Guardrails: counts mean mapped parking locations (not vacant bays), original coordinates and source evidence unchanged.
 - Rationale: prevent recurrence of Cork 01–07 overlap as WHITEBLOCK scales geographically.
 
+## DEC-20261020-MAP03 — No forced Parking Layout fallback
+- Accepted: MapLibre first; actual Leaflet geographic raster map on failure; optional user-selected schematic only.
+- Rejected: programmatically click Parking Layout when style times out and obscure road geography; false Street active indicator while schematic is displayed.
+- Reason: driving/parking decisions require true road topology; schematic is supplementary only.
+- Status: implemented on PR #40, pending CI/deployment/device acceptance.
+
