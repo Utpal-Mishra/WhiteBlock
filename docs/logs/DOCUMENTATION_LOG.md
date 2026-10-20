@@ -21,3 +21,7 @@
 - Source: `docs/UNIVERSAL_MARKER_POLICY.md` specifies nationwide hierarchy, fallback, default zoom, future source-backed county registration and QA.
 - Authoritative runtime: `web/parking-marker-policy.js`, associated regression tests and per-region evidence files.
 
+## DOC-20261020-MAP03 — Geographic map and optional schematic semantics
+- Changed map fallback architecture: actual Street vector -> actual raster Street -> alternate street tiles; Parking Layout stays an optional analytical diagram.
+- Relevant implementation: `web/map-engine-v2.js` and `web/parking-layout.js`; regression `tests/test_geographic_map_fallback.js`.
+
