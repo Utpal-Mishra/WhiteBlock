@@ -7,6 +7,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const source = fs.readFileSync(path.join(__dirname, "../web/parking-gl-overlay.js"), "utf8");
+const policySource = fs.readFileSync(path.join(__dirname, "../web/parking-marker-policy.js"), "utf8");
 const documentHandlers = new Map();
 const mapHandlers = new Map();
 const glHandlers = new Map();
@@ -67,6 +68,7 @@ const context = {
   console
 };
 
+vm.runInNewContext(policySource, context, { filename: "parking-marker-policy.js" });
 vm.runInNewContext(source, context, { filename: "parking-gl-overlay.js" });
 assert.ok(sourceData, "MapLibre overlay should attach its source");
 assert.equal(sourceData.features.length, 0, "National view must not show old ranked Cork markers");

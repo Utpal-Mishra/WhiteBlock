@@ -43,3 +43,9 @@
 - Date: 2026-10-20; status: branch.
 - Correction: Wicklow county is the expansion geography, Bray is a subordinate locality/pilot source, not an extra connected county.
 - Metrics: count Bray in Wicklow aggregate exactly once, preserve distinct source evidence and the OSM Bray-exclusion radius.
+
+## EXP-20261020-MAP02 — Marker policy for any later county
+- Onboarding: write validated county snapshot, normalized parking rows, and dispatch region-inventory-ready; future counties join the shared map logic automatically.
+- Galway/Donegal used as test fixtures only; do not imply networks are live in those counties.
+- Existing county set remains Cork, Kildare, Dublin and Wicklow (Bray as locality).
+

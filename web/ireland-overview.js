@@ -52,6 +52,49 @@
   state.overviewMode = true;
   state.regionFocus = null;
   state.irelandOverviewLayer = null;
+  state.regionSubareaFocus = null;
+  state.regionSubareaGroup = null;
+  const MARKER_POLICY = window.WHITEBLOCK_MARKER_POLICY;
+
+  // New county adapters can register via their source-backed region snapshot;
+  // all map marker policies and locality drill-down then work without custom
+  // clustering code. Local pilots (e.g. Bray) remain nested in their county.
+  function registerNewRegionalInventories() {
+    let changed = false;
+    Object.entries(state.regionInventories || {}).forEach(([key, items]) => {
+      if (CONNECTED_REGIONS[key] || MARKER_POLICY.canonicalRegion(key) !== key.toLowerCase()) return;
+      if (!/^[a-z][a-z0-9_-]*$/i.test(key) || !Array.isArray(items) || !items.length) return;
+      const snapshot = state.regionSnapshots?.[key];
+      // Do not label an unsourced internal array as a newly connected county.
+      if (!snapshot || !Array.isArray(snapshot.locations) || !snapshot.locations.length) return;
+      const geo = items.filter(item => numeric(item?.lat) != null && numeric(item?.lng) != null);
+      if (!geo.length) return;
+      const label = String(snapshot.coverage?.region || key)
+        .replace(/^county\s+/i, "").replace(/[_-]/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+      const lat = geo.reduce((sum, item) => sum + Number(item.lat), 0) / geo.length;
+      const lng = geo.reduce((sum, item) => sum + Number(item.lng), 0) / geo.length;
+      CONNECTED_REGIONS[key] = {
+        label, countyLabel: label, detail: "County " + label,
+        center: [lat, lng], zoom: 10, nationalAnchor: [66, 36],
+        mode: "Mapped county evidence · availability only where reported"
+      };
+      changed = true;
+    });
+    if (changed) {
+      const switcher = document.getElementById("ireland-region-switcher");
+      if (switcher) Object.entries(CONNECTED_REGIONS).forEach(([key, region]) => {
+        if (switcher.querySelector('[data-ireland-scope="' + key + '"]')) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ireland-region-button";
+        button.dataset.irelandScope = key;
+        button.textContent = region.label;
+        switcher.appendChild(button);
+      });
+    }
+    return changed;
+  }
 
   const baseRenderParkingList = typeof renderParkingList === "function" ? renderParkingList : null;
   const baseSelectAddressSuggestion = typeof selectAddressSuggestion === "function" ? selectAddressSuggestion : null;
@@ -165,7 +208,9 @@
       : "no live occupancy feeds loaded yet";
 
     const regionCount = Object.keys(CONNECTED_REGIONS).length;
-    setKpiCard("coverage", "Connected inventory", formatInteger(stats.locations), "Cork + Kildare + Dublin + Wicklow mapped/evidence-backed assets (Bray included in Wicklow)");
+    const regionNames = Object.values(CONNECTED_REGIONS).map(region => region.label).join(" + ");
+    setKpiCard("coverage", "Connected inventory", formatInteger(stats.locations),
+      regionNames + " mapped/evidence-backed assets (local pilots included in their county)");
     setKpiCard("availability", "Reported available now", stats.availableAssets ? formatInteger(stats.available) : "—", reportingLabel);
     setKpiCard("confidence", "Published capacity", stats.capacityAssets ? formatInteger(stats.capacity) : "—", "known capacity only · missing capacity is not estimated");
     setKpiCard("pressure", "Connected regions", formatInteger(regionCount), `${stats.loadedRegions}/${regionCount} regional inventories loaded`);
@@ -331,55 +376,86 @@
     return `${item.name || item.id || "Parking"}${facts.length ? ` · ${facts.join(" · ")}` : " · capacity/availability not published"}`;
   }
 
+  function clusterGroups(rows, radiusPx, detailZoom) {
+    const zoom = state.map.getZoom();
+    return MARKER_POLICY.groupNearby(rows, zoom,
+      item => state.map.project(L.latLng(Number(item.lat), Number(item.lng)), zoom),
+      { radiusPx, detailZoom });
+  }
+
+  function zoomIntoGroup(lat, lng, detailZoom) {
+    state.map.flyTo([lat, lng], Math.min(detailZoom, state.map.getZoom() + 2), { duration: 0.75 });
+  }
+
+  function renderSubareaParkingMarkers(key, group) {
+    if (!group || !state.map || typeof L === "undefined") return;
+    ensureOverviewPane();
+    clearOverviewLayer();
+    state.irelandOverviewLayer = L.layerGroup().addTo(state.map);
+    const valid = group.items.filter(item => numeric(item?.lat) != null && numeric(item?.lng) != null);
+    const visible = state.map.getZoom() >= MARKER_POLICY.detailZoom && state.map.getBounds
+      ? valid.filter(item => {
+          const bounds = state.map.getBounds();
+          return !bounds || typeof bounds.pad !== "function" ||
+            bounds.pad(0.2).contains([Number(item.lat), Number(item.lng)]);
+        })
+      : valid;
+    clusterGroups(visible, MARKER_POLICY.inventoryRadiusPx, MARKER_POLICY.detailZoom).forEach(indices => {
+      if (indices.length > 1) {
+        const members = indices.map(index => visible[index]);
+        const lat = members.reduce((sum, item) => sum + Number(item.lat), 0) / members.length;
+        const lng = members.reduce((sum, item) => sum + Number(item.lng), 0) / members.length;
+        const icon = L.divIcon({
+          className: "wb-region-settlement-wrapper",
+          html: `<div class="wb-region-settlement-node"><strong>${formatInteger(indices.length)} parking locations</strong><span>Zoom to separate</span><small>${escapeHtml(group.label)}</small></div>`,
+          iconSize: [126, 66], iconAnchor: [63, 33]
+        });
+        L.marker([lat, lng], { icon, keyboard: true, pane: "wbOverviewPane" })
+          .addTo(state.irelandOverviewLayer)
+          .bindTooltip(`${formatInteger(indices.length)} distinct mapped parking locations · tap to zoom`,
+            { direction: "top", className: "wb-tooltip" })
+          .on("click", () => zoomIntoGroup(lat, lng, MARKER_POLICY.detailZoom));
+        return;
+      }
+      const item = visible[indices[0]];
+      const lat = Number(item.lat), lng = Number(item.lng);
+      const available = numeric(item.available);
+      L.circleMarker([lat, lng], {
+        pane: "wbOverviewPane", radius: 6, color: "#07110D",
+        weight: 2, fillColor: available != null ? "#52D98D" : "#78E6AA",
+        fillOpacity: 1
+      }).addTo(state.irelandOverviewLayer)
+        .bindTooltip(escapeHtml(assetTooltip(item)), {
+          direction: "top", offset: [0, -8], className: "wb-tooltip"
+        })
+        .on("click", () => {
+          state.map.setView([lat, lng], MARKER_POLICY.detailZoom, { animate: true });
+          if (typeof setMapStatus === "function") setMapStatus(item.name || "Parking location", assetTooltip(item));
+        });
+    });
+  }
+
   function focusSubarea(key, group) {
     const region = CONNECTED_REGIONS[key];
     if (!region || !state.map || typeof L === "undefined" || !group?.items?.length) return;
 
     state.regionSubareaFocus = group.label;
-    clearOverviewLayer();
-    state.irelandOverviewLayer = L.layerGroup().addTo(state.map);
-
-    const points = [];
-    group.items.slice(0, 300).forEach(item => {
-      const lat = numeric(item.lat);
-      const lng = numeric(item.lng);
-      if (lat == null || lng == null) return;
-      points.push([lat, lng]);
-      const available = numeric(item.available);
-      const marker = L.circleMarker([lat, lng], {
-        pane: "wbOverviewPane",
-        radius: 6,
-        color: "#07110D",
-        weight: 2,
-        fillColor: available != null ? "#52D98D" : "#78E6AA",
-        fillOpacity: 1
-      }).addTo(state.irelandOverviewLayer);
-      marker.bindTooltip(escapeHtml(assetTooltip(item)), {
-        direction: "top",
-        offset: [0, -8],
-        className: "wb-tooltip"
-      });
-      marker.on("click", () => {
-        state.map.setView([lat, lng], 17, { animate: true });
-        if (typeof setMapStatus === "function") {
-          setMapStatus(item.name || "Parking location", assetTooltip(item));
-        }
-      });
-    });
+    state.regionSubareaGroup = group;
+    renderSubareaParkingMarkers(key, group);
 
     const mapTitle = document.getElementById("map-title");
     if (mapTitle) mapTitle.textContent = `${group.label} parking · ${region.label}`;
     if (typeof setMapStatus === "function") {
       const capacity = group.capacityAssets ? `${formatInteger(group.capacity)} known spaces` : "capacity partly unknown";
-      setMapStatus(
-        `${group.label} parking`,
-        `${formatInteger(group.items.length)} mapped/evidence-backed locations · ${capacity} · tap a point for details`
-      );
+      setMapStatus(`${group.label} parking`,
+        `${formatInteger(group.items.length)} mapped/evidence-backed locations · ${capacity} · tap a marker for details`);
     }
-
     const count = document.querySelector(".result-count");
     if (count) count.textContent = `${formatInteger(group.items.length)} mapped`;
 
+    const points = group.items
+      .filter(item => numeric(item.lat) != null && numeric(item.lng) != null)
+      .map(item => [Number(item.lat), Number(item.lng)]);
     if (points.length > 1) {
       state.map.fitBounds(L.latLngBounds(points), { padding: [44, 44], maxZoom: 16, animate: true });
     } else if (points.length === 1) {
@@ -387,37 +463,55 @@
     }
   }
 
-  function renderRegionSettlementNodes(key) {
+  function renderRegionSettlementNodes(key, { fit = true } = {}) {
     const region = CONNECTED_REGIONS[key];
     if (!region || !state.map || typeof L === "undefined") return [];
-
     ensureOverviewPane();
     const groups = groupRegionalInventory(key);
     clearOverviewLayer();
     state.irelandOverviewLayer = L.layerGroup().addTo(state.map);
 
-    groups.slice(0, 60).forEach(group => {
-      const icon = L.divIcon({
-        className: "wb-region-settlement-wrapper",
-        html: settlementNodeHtml(group),
-        iconSize: [126, 66],
-        iconAnchor: [63, 33]
+    clusterGroups(groups, MARKER_POLICY.localityRadiusPx, MARKER_POLICY.localityDetailZoom)
+      .forEach(indices => {
+        if (indices.length > 1) {
+          const members = indices.map(index => groups[index]);
+          const lat = members.reduce((sum, item) => sum + item.lat, 0) / members.length;
+          const lng = members.reduce((sum, item) => sum + item.lng, 0) / members.length;
+          const locations = members.reduce((sum, item) => sum + item.items.length, 0);
+          const icon = L.divIcon({
+            className: "wb-region-settlement-wrapper",
+            html: `<div class="wb-region-settlement-node"><strong>${formatInteger(indices.length)} localities</strong><span>${formatInteger(locations)} parking locations</span><small>Zoom to explore</small></div>`,
+            iconSize: [126, 66], iconAnchor: [63, 33]
+          });
+          L.marker([lat, lng], { icon, keyboard: true, pane: "wbOverviewPane" })
+            .addTo(state.irelandOverviewLayer)
+            .bindTooltip(`${formatInteger(indices.length)} nearby localities · ${formatInteger(locations)} mapped parking locations`,
+              { direction: "top", className: "wb-tooltip" })
+            .on("click", () => zoomIntoGroup(lat, lng, MARKER_POLICY.localityDetailZoom));
+          return;
+        }
+        const group = groups[indices[0]];
+        const icon = L.divIcon({
+          className: "wb-region-settlement-wrapper",
+          html: settlementNodeHtml(group),
+          iconSize: [126, 66], iconAnchor: [63, 33]
+        });
+        L.marker([group.lat, group.lng], { icon, keyboard: true, pane: "wbOverviewPane" })
+          .addTo(state.irelandOverviewLayer)
+          .bindTooltip(`${group.label} · ${formatInteger(group.items.length)} parking locations · tap to show individual parking`,
+            { direction: "top", className: "wb-tooltip" })
+          .on("click", () => focusSubarea(key, group));
       });
-      const marker = L.marker([group.lat, group.lng], { icon, keyboard: true, pane: "wbOverviewPane" }).addTo(state.irelandOverviewLayer);
-      marker.bindTooltip(
-        `${group.label} · ${formatInteger(group.items.length)} parking locations · click to show individual parking`,
-        { direction: "top", offset: [0, -22], className: "wb-tooltip" }
-      );
-      marker.on("click", () => focusSubarea(key, group));
-    });
 
-    const groupPoints = groups.map(group => [group.lat, group.lng]);
-    if (groupPoints.length > 1) {
-      state.map.fitBounds(L.latLngBounds(groupPoints), { padding: [48, 48], maxZoom: region.zoom, animate: true });
-    } else if (groupPoints.length === 1) {
-      state.map.flyTo(groupPoints[0], region.zoom, { duration: .8 });
-    } else {
-      state.map.flyTo(region.center, region.zoom, { duration: .8 });
+    if (fit) {
+      const groupPoints = groups.map(group => [group.lat, group.lng]);
+      if (groupPoints.length > 1) {
+        state.map.fitBounds(L.latLngBounds(groupPoints), { padding: [48, 48], maxZoom: region.zoom, animate: true });
+      } else if (groupPoints.length === 1) {
+        state.map.flyTo(groupPoints[0], region.zoom, { duration: .8 });
+      } else {
+        state.map.flyTo(region.center, region.zoom, { duration: .8 });
+      }
     }
     return groups;
   }
@@ -467,7 +561,7 @@
       const strong = pilotCard.querySelector("strong");
       const small = pilotCard.querySelector("small");
       if (strong) strong.textContent = "Ireland Network";
-      if (small) small.textContent = "Cork · Kildare · Dublin · Wicklow connected";
+      if (small) small.textContent = Object.values(CONNECTED_REGIONS).map(region => region.label).join(" · ") + " connected";
     }
 
     const legend = document.querySelector(".map-head .legend");
@@ -563,6 +657,8 @@
     selectAddressSuggestion = function selectAddressSuggestionIrelandAware(item, options = {}) {
       state.overviewMode = false;
       state.regionFocus = null;
+      state.regionSubareaFocus = null;
+      state.regionSubareaGroup = null;
       clearOverviewLayer();
       updateSwitcher();
       return baseSelectAddressSuggestion(item, options);
@@ -572,6 +668,8 @@
   function showIrelandNetworkOverview({ animate = true } = {}) {
     state.overviewMode = true;
     state.regionFocus = null;
+    state.regionSubareaFocus = null;
+    state.regionSubareaGroup = null;
     clearDestinationForBrowse();
     clearDetailedMarkers();
     updateStaticChrome();
@@ -587,7 +685,7 @@
       const stats = nationalStats();
       setMapStatus(
         "Ireland connected coverage",
-        `${formatInteger(stats.locations)} mapped/evidence-backed assets across Cork, Kildare, Dublin and Wicklow (including Bray) · availability shown only where reported`
+        `${formatInteger(stats.locations)} mapped/evidence-backed assets across ${Object.values(CONNECTED_REGIONS).map(region => region.label).join(", ")} (local pilots included in counties) · availability shown only where reported`
       );
     }
     const title = document.getElementById("view-title");
@@ -604,6 +702,8 @@
     if (!region || !state.map) return;
     state.overviewMode = false;
     state.regionFocus = key;
+    state.regionSubareaFocus = null;
+    state.regionSubareaGroup = null;
     state.activeRegion = key;
     clearDestinationForBrowse();
     clearDetailedMarkers();
@@ -640,6 +740,17 @@
     }
   }
 
+  // Shared clustering responds to every zoom, independent of county identity.
+  // Do not refit bounds on zoomend: preserve the user's chosen map scale.
+  state.map?.on?.("zoomend", () => {
+    if (!state.regionFocus || state.overviewMode) return;
+    if (state.regionSubareaGroup) {
+      renderSubareaParkingMarkers(state.regionFocus, state.regionSubareaGroup);
+    } else {
+      renderRegionSettlementNodes(state.regionFocus, { fit: false });
+    }
+  });
+
   // Replace the legacy Cork-era Ireland overview action with the connected
   // national network view.  Existing button bindings resolve this global at click
   // time, so changing it here updates both desktop and future callers.
@@ -649,9 +760,11 @@
     focusRegion,
     stats: nationalStats,
     groups: groupRegionalInventory,
-    focusSubarea
+    focusSubarea,
+    registerNewRegionalInventories
   };
 
+  registerNewRegionalInventories();
   ensureRegionSwitcher();
   updateStaticChrome();
 
@@ -694,7 +807,12 @@
     if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
   });
   document.addEventListener("whiteblock:region-inventory-ready", () => {
+    registerNewRegionalInventories();
+    updateStaticChrome();
     if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
+    else if (state.regionFocus && !state.regionSubareaGroup) {
+      renderRegionSettlementNodes(state.regionFocus, { fit: false });
+    }
   });
 
   // The base app boots with the historical Cork default.  Replace that state once

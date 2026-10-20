@@ -115,3 +115,13 @@
 - Also test: switch Street/Terrain/Satellite, return to Ireland while fetch pending, verify no stale 01–07 and no change to inventory/live occupancy numbers.
 - CI follow-up: older asset-version assertion updated in `tests/test_parking_geometry_layer.py`.
 - Status: awaiting CI and device-level visual confirmation.
+
+## QA-20261020-MAP02 — Shared marker all-county release
+- Automated: 7→1→7 tests for Cork, Kildare, Dublin, Wicklow, Galway and Donegal synthetic site fixtures; nested Bray and duplicate Cork source handling; ranked browse isolation.
+- Manual: Android zoom tests national→county→locality→individual in all four connected regions plus Bray, plugin failure, fast pan, basemap switching and label/capacity distinctions.
+- Caveat: future Galway/Donegal tests are synthetic. They do not prove physical source coverage or live vacancy there.
+- Status: CI/publishing and device verification outstanding.
+
+### Renderer duplication gate — 2026-10-20
+- `map-engine-v2.js` stops drawing duplicate ranked Leaflet circles/polygons when the native GL overlay is live; GL readiness releases any provisional fallback.
+- Universal regression test enforces the ownership event and fallback clustering. Manual verify Android switch from provisional to GL never leaves two icons per location.

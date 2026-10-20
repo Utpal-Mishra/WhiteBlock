@@ -223,6 +223,9 @@
 
   function refreshParkingContext() {
     if (parkingContextLayer) map.removeLayer(parkingContextLayer);
+    parkingContextLayer = null;
+    // Never leave Cork-era parking haloes beneath nationwide county markers.
+    if (window.WHITEBLOCK_MARKER_POLICY?.browseActive(state) || !state.destination) return;
     parkingContextLayer = L.layerGroup().addTo(map);
 
     if (typeof parkingData === "undefined") return;
@@ -554,6 +557,11 @@
         scheduleMapRepair();
       }, 50);
     }
+  });
+
+  document.addEventListener("whiteblock:coverage-browse", () => {
+    if (parkingContextLayer) map.removeLayer(parkingContextLayer);
+    parkingContextLayer = null;
   });
 
   document.addEventListener("whiteblock:data-ready", () => {

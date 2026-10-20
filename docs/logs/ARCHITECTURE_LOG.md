@@ -76,3 +76,9 @@
 - Geometry: only show matched/estimated footprint polygons at zoom 14+ and only for non-clustered point groups. County/national browsing renders no destination-rank overlay.
 - Existing Leaflet all-inventory markerCluster layer remains separate; no additional source of parking location counts.
 
+## ARCH-20261020-MAP02 — Shared cluster policy and dynamic county onboarding
+- `web/parking-marker-policy.js` centralises pixel clustering, detailed zoom thresholds, browsable-state gating, source pool identity deduplication and canonical parent county for local pilots.
+- `web/ireland-overview.js` groups locality cards and on-demand individual places, registers new source-backed county snapshots into navigation automatically.
+- `web/inventory-map-layer.js` uses Leaflet.markercluster or an internal no-CDN clustering fallback; ranked MapLibre layer applies identical source-independent policy.
+- Constraint: never update true spatial source coordinates or interpret group counts as confirmed vacant bays.
+

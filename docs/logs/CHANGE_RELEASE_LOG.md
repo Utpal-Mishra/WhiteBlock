@@ -92,3 +92,11 @@
 - Rollback: revert PR #38 if cluster click or source-overlay reset breaks destination selection.
 - Status: awaiting PR checks and Pages deployment.
 
+## RELEASE-20261020-MAP02 — All-region marker framework
+- Change scope: shared marker policy, MapLibre ranked and Leaflet inventory overlays, county/locality browse, runtime imports, Node/CI tests and future-county onboarding documentation.
+- QA gates: Cork/Kildare/Dublin/Wicklow incl. Bray and synthetic future counties share collapse/expand contract; fallback clustering works if plugin unavailable.
+- Rollback: revert PR #39 if county navigation, source layer ownership or site zoom regress.
+- Status: PR #39 pending merge and deployment.
+
+### Scope extension — renderer ownership — 2026-10-20
+- Changed Leaflet `map-engine-v2.js` ranked marker fallback and GL readiness handshake to prevent duplicate physical parking markers during loading and zoom changes. This is included in PR #39.

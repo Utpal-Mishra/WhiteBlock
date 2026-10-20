@@ -16,3 +16,8 @@
 ## DOC-20261020-WW01 — Administrative hierarchy contract
 - Date: 2026-10-20; status: branch.
 - Updated: docs/WICKLOW_NETWORK.md clarifies one Wicklow county filter containing Bray, with separate ingestion/evidence provenance retained internally.
+
+## DOC-20261020-MAP02 — Marker/onboarding reference
+- Source: `docs/UNIVERSAL_MARKER_POLICY.md` specifies nationwide hierarchy, fallback, default zoom, future source-backed county registration and QA.
+- Authoritative runtime: `web/parking-marker-policy.js`, associated regression tests and per-region evidence files.
+

@@ -39,3 +39,8 @@
 - Observation: showing multiple overlapping parking labels at Ireland scale undermines clarity even where site data are valid.
 - Learning: match UI granularity to scale: counties at Ireland view, towns at county view, individual parking locations near a destination.
 - Constraint: count mapped parking locations only; no claim of live vacant spaces without provider-backed data.
+
+## BUS-20261020-MAP02 — Consistent map readability at expansion scale
+- Learning: clear geospatial hierarchy must hold independently of how many counties, towns or parking locations join the network.
+- Use source data and legal rules to expand supply; use a reusable clustering component for presentation; never infer vacant bays from a count of locations.
+

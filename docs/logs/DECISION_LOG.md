@@ -76,3 +76,8 @@
 - Thresholds: 56px connected-distance at zoom <17; polygons at >=14; higher zoom keeps per-location rank.
 - Status: implementation on PR #38, subject to CI/mobile acceptance.
 
+## DEC-20261020-MAP02 — Universal rather than regional marker implementation
+- Decision: centralise clustering at shared renderer level; automatically register future validated county snapshots. No new county-specific marker algorithms.
+- Guardrails: counts mean mapped parking locations (not vacant bays), original coordinates and source evidence unchanged.
+- Rationale: prevent recurrence of Cork 01–07 overlap as WHITEBLOCK scales geographically.
+
