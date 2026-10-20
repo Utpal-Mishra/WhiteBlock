@@ -29,3 +29,9 @@
 - Updated Ireland navigation design and CI contract: island-wide county totals, direct all-location county map, evidence-based availability labels and no background camera changes.
 - References: `web/ireland-overview.js`, `tests/test_ireland_county_map.js`, existing `docs/UNIVERSAL_MARKER_POLICY.md`, and audit logs.
 
+## DOC-20261020-MAP04 — Basemap ownership/recovery documentation
+
+- Date: 2026-10-20.
+- Updated project audit trail to record the mobile checkerboard incident, single-renderer architecture, incomplete-grid watchdog, responsive geometry repair and device QA gate.
+- No user-data, source-data or commercial-integration documentation changed.
+- Status: documented with implementation.
