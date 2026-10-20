@@ -90,7 +90,7 @@ assert.ok(legacyMap.includes('document.addEventListener("whiteblock:ranked-gl-ov
 assert.ok(ranked.includes("whiteblock:ranked-gl-overlay-ready"), "native overlay must announce renderer ownership");
 assert.ok(olderMapFix.includes("window.WHITEBLOCK_MARKER_POLICY?.browseActive(state)"), "older map context haloes must not leak into national/county browse");
 assert.ok(olderMapFix.includes('document.addEventListener("whiteblock:coverage-browse"'), "browse event must clear old map context haloes");
-assert.ok(index.includes("map-fix.js?v=20261020-3"), "mobile clients should load the new map context cleanup");
+assert.ok(index.includes("map-fix.js?v=20261020-hybrid1"), "mobile clients should load the new map context cleanup");
 
 
 assert.ok(overview.includes("MARKER_POLICY.groupNearby(rows"), "county locality and parking drill-down must cluster");
