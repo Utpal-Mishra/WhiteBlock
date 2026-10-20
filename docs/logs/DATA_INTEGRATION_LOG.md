@@ -101,3 +101,10 @@
 - Provenance fields: OSM relation ID, admin level, source, license and fetch timestamp.
 - Scope: presentation geometry only; not merged into canonical `WB-PARK-*` records.
 - Status: implemented.
+
+## DATA-20261020-MAP06 — Marker semantic fields do not alter parking data
+- Date: 2026-10-20.
+- Added presentation-only GeoJSON properties for ranked-map rendering: `display_rank`, `caption`, `availability_label`, `stroke_colour`, `label_colour`.
+- Source parking IDs, coordinates, access, capacity, live availability and recommendation scoring remain unchanged.
+- Cluster counts are derived from distinct ranked result rows; availability is never summed into the cluster number.
+- Status: no data migration required.
