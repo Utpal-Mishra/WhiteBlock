@@ -243,13 +243,13 @@ function loadWhiteblockIrelandOverview() {
   if (!document.querySelector('link[data-whiteblock-ireland-overview]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = './ireland-overview.css?v=20261018-1';
+    style.href = './ireland-overview.css?v=20261020-2';
     style.dataset.whiteblockIrelandOverview = 'true';
     document.head.appendChild(style);
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20261020-4';
+  script.src = './ireland-overview.js?v=20261020-6';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);

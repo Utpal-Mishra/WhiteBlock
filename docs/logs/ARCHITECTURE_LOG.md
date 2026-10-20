@@ -102,3 +102,12 @@
 - Resilience chain: vector Street -> geographic raster Street provider A -> geographic raster Street provider B; Parking Layout remains explicit opt-in only.
 - Responsive contract: map-container geometry changes require Leaflet `invalidateSize` and MapLibre `resize` as one atomic repair action.
 - Status: accepted/implemented.
+
+## ARCH-20261020-MAP05 — Administrative boundary is a separate presentation layer
+- Date: 2026-10-20.
+- Decision: do not infer county borders from parking points, bounding boxes or convex hulls.
+- Boundary source: published OpenStreetMap admin-level-6 county relations, materialized to browser-safe GeoJSON during Pages deployment.
+- Rendering: dedicated `wbRegionBoundaryPane` at z-index 438; parking footprints/points remain above it.
+- Styling: strong lime outline, very light green fill, no pointer interaction.
+- Separation: boundary geometry has no effect on parking identity, capacity, access, availability or recommendation eligibility.
+- Status: accepted/implemented.

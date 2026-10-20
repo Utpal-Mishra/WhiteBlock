@@ -60,3 +60,9 @@
 - Product implication: basemap completeness and recovery must be treated as a core availability requirement, independent of parking-data quality.
 - Architecture implication: graceful degradation must stay geographic; analytical layouts are supplementary rather than substitutes for a failed road map.
 - Status: incorporated into renderer design.
+
+## BUS-20261020-MAP05 — County focus needs visible geographic scope
+- Date: 2026-10-20.
+- Learning: zooming into a county is not always enough to communicate the exact operating area; a visible administrative outline materially improves interpretation of the parking inventory.
+- Product implication: geographic scope should be explicit without implying complete parking coverage.
+- Status: incorporated into map UX.

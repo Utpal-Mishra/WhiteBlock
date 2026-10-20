@@ -19,3 +19,10 @@
 - Failure mode addressed: provider requests can partially render or stall without enough explicit errors.
 - Operational note: public/best-effort tile services are suitable for prototype resilience, not a long-term production SLA. Provider terms, quotas, attribution and production hosting must be reviewed before scale.
 - Status: current fallback hardened; production provider decision remains open.
+
+## DEP-20261020-MAP05 — County boundary source dependency
+- Date: 2026-10-20.
+- Primary: OpenStreetMap administrative relation geometry via Overpass, ODbL attribution.
+- Deployment resilience: last published validated boundary; pinned OSM-derived GeoJSON fallback for first-deploy/source outage.
+- Runtime: browser reads only the locally deployed GeoJSON sidecar, so county selection does not call Overpass.
+- Status: configured.

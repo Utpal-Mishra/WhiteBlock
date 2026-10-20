@@ -127,3 +127,13 @@
 - R4: both public raster providers unavailable. Likelihood low/medium; impact high. Mitigation explicit source-incomplete status; future production provider/hosting requirement.
 - R5: repeated repair causes unnecessary requests. Mitigation debounced repair timer; watchdog cleared on successful full-layer load/provider change.
 - Status: mitigations implemented; live mobile validation pending.
+
+## RISK-20261020-MAP05 — Region border can be mistaken for parking coverage completeness
+- Date: 2026-10-20.
+- Risk: a precise county outline may visually imply WHITEBLOCK knows every physical parking asset inside that county.
+- Mitigation: boundary is a navigation/focus layer only; mapped-location counts keep evidence wording; no completeness claim is introduced.
+- Risk: stale administrative geometry if upstream boundary changes.
+- Mitigation: refresh on Pages deploy; reuse last known validated boundary only when refresh fails; validate relation IDs and geometry types.
+- Risk: boundary layer obscures map content.
+- Mitigation: fill opacity 0.045, non-interactive pane below parking footprint/point layers.
+- Status: controlled.

@@ -8,6 +8,7 @@
   if (typeof state === "undefined") return;
 
   const IRELAND_VIEW_BOUNDS = [[51.25, -10.85], [55.45, -5.55]];
+  const REGION_BOUNDARY_URL = "./data/ireland_region_boundaries.geojson?v=20261020-1";
   const CONNECTED_REGIONS = {
     cork: {
       label: "Cork",
@@ -55,7 +56,10 @@
   state.regionSubareaFocus = null;
   state.regionSubareaGroup = null;
   state.regionPendingFit = null;
+  state.regionBoundaryLayer = null;
   const MARKER_POLICY = window.WHITEBLOCK_MARKER_POLICY;
+  let regionBoundaryPromise = null;
+  let regionBoundaryRequest = 0;
 
   // New county adapters can register via their source-backed region snapshot;
   // all map marker policies and locality drill-down then work without custom
@@ -248,6 +252,85 @@
     pane.style.zIndex = "640";
     pane.style.pointerEvents = "auto";
     return pane;
+  }
+
+  function ensureRegionBoundaryPane() {
+    if (!state.map || typeof L === "undefined") return null;
+    let pane = state.map.getPane("wbRegionBoundaryPane");
+    if (!pane) pane = state.map.createPane("wbRegionBoundaryPane");
+    pane.style.zIndex = "438";
+    pane.style.pointerEvents = "none";
+    return pane;
+  }
+
+  function clearRegionBoundary() {
+    regionBoundaryRequest += 1;
+    if (state.map && state.regionBoundaryLayer) {
+      try { state.map.removeLayer(state.regionBoundaryLayer); } catch (_) { /* no-op */ }
+    }
+    state.regionBoundaryLayer = null;
+  }
+
+  function loadRegionBoundaries() {
+    if (regionBoundaryPromise) return regionBoundaryPromise;
+    if (typeof window.fetch !== "function") return Promise.resolve(null);
+    regionBoundaryPromise = window.fetch(REGION_BOUNDARY_URL, { cache: "force-cache" })
+      .then(response => {
+        if (!response.ok) throw new Error(`boundary HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        if (data?.type !== "FeatureCollection" || !Array.isArray(data.features)) {
+          throw new Error("invalid region boundary GeoJSON");
+        }
+        return data;
+      })
+      .catch(error => {
+        // Allow a later region selection to retry after a transient local-file
+        // or network failure instead of caching a failed boundary request forever.
+        regionBoundaryPromise = null;
+        console.warn("WHITEBLOCK selected-region boundary unavailable", error);
+        return null;
+      });
+    return regionBoundaryPromise;
+  }
+
+  async function renderRegionBoundary(key, { fit = false } = {}) {
+    const region = CONNECTED_REGIONS[key];
+    if (!region || !state.map || typeof L === "undefined" || typeof L.geoJSON !== "function") return false;
+    const request = ++regionBoundaryRequest;
+    const data = await loadRegionBoundaries();
+    if (!data || request !== regionBoundaryRequest || state.regionFocus !== key || state.overviewMode) return false;
+    const feature = data.features.find(item => String(item?.properties?.region_key || "").toLowerCase() === key);
+    if (!feature?.geometry) return false;
+
+    if (state.regionBoundaryLayer) {
+      try { state.map.removeLayer(state.regionBoundaryLayer); } catch (_) { /* no-op */ }
+    }
+    ensureRegionBoundaryPane();
+    state.regionBoundaryLayer = L.geoJSON(feature, {
+      pane: "wbRegionBoundaryPane",
+      interactive: false,
+      style: {
+        color: "#C8F56B",
+        weight: 3.4,
+        opacity: 0.96,
+        fillColor: "#78E6AA",
+        fillOpacity: 0.045,
+        lineJoin: "round",
+        className: "wb-selected-region-boundary"
+      }
+    }).addTo(state.map);
+
+    if (fit && request === regionBoundaryRequest && state.regionFocus === key) {
+      try {
+        const bounds = state.regionBoundaryLayer.getBounds?.();
+        if (bounds?.isValid?.()) {
+          state.map.fitBounds(bounds, { padding: [34, 34], maxZoom: region.zoom + 1, animate: true });
+        }
+      } catch (_) { /* parking-point fit remains the fallback */ }
+    }
+    return true;
   }
 
   function regionNodeHtml(key, stats) {
@@ -710,6 +793,7 @@
       state.regionSubareaFocus = null;
       state.regionSubareaGroup = null;
       clearOverviewLayer();
+      clearRegionBoundary();
       updateSwitcher();
       return baseSelectAddressSuggestion(item, options);
     };
@@ -723,6 +807,7 @@
     state.regionPendingFit = null;
     clearDestinationForBrowse();
     clearDetailedMarkers();
+    clearRegionBoundary();
     updateStaticChrome();
     updateSwitcher();
     updateNationalKpis();
@@ -760,6 +845,7 @@
     clearDestinationForBrowse();
     clearDetailedMarkers();
     clearOverviewLayer();
+    clearRegionBoundary();
     updateSwitcher();
     updateRegionKpis(key);
     renderBrowseResults();
@@ -784,9 +870,10 @@
     // destination and no intermediate locality-only map are required.
     document.dispatchEvent(new CustomEvent("whiteblock:coverage-browse", { detail: { scope: "region", region: key } }));
     const rows = renderCountyParkingMarkers(key, { fit: true });
+    void renderRegionBoundary(key, { fit: true });
     // A locality pilot may load before the larger county snapshot (e.g. Bray
-    // before County Wicklow). Fit again when the complete source-backed county
-    // snapshot arrives instead of incorrectly leaving the camera on the pilot.
+    // before County Wicklow). The administrative border remains the camera
+    // frame, while late parking data only refreshes the markers inside it.
     if (rows.length && Array.isArray(state.regionInventories[key]) &&
         state.regionInventories[key].length && Array.isArray(snapshotFor(key)?.locations)) {
       state.regionPendingFit = null;
@@ -826,10 +913,12 @@
     focusSubarea,
     renderCountyParkingMarkers,
     countyParkingRows,
+    renderRegionBoundary,
     registerNewRegionalInventories
   };
 
   registerNewRegionalInventories();
+  void loadRegionBoundaries();
   ensureRegionSwitcher();
   updateStaticChrome();
 
@@ -886,12 +975,13 @@
       renderBrowseResults();
       renderNationalRegionNodes();
     } else if (state.regionFocus && !state.regionSubareaGroup) {
-      const rows = renderCountyParkingMarkers(state.regionFocus, {
-        fit: state.regionPendingFit === state.regionFocus
-      });
-      if (rows.length && Array.isArray(state.regionInventories[state.regionFocus]) &&
-          state.regionInventories[state.regionFocus].length &&
-          Array.isArray(snapshotFor(state.regionFocus)?.locations)) {
+      const key = state.regionFocus;
+      const shouldFit = state.regionPendingFit === key;
+      const rows = renderCountyParkingMarkers(key, { fit: shouldFit });
+      if (shouldFit) void renderRegionBoundary(key, { fit: true });
+      if (rows.length && Array.isArray(state.regionInventories[key]) &&
+          state.regionInventories[key].length &&
+          Array.isArray(snapshotFor(key)?.locations)) {
         state.regionPendingFit = null;
       }
     }

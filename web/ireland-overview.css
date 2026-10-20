@@ -123,3 +123,11 @@
   }
 }
 
+/* Selected county focus: keep the administrative outline visibly distinct
+   from parking footprints and markers without obscuring the Street basemap. */
+#map .wb-selected-region-boundary {
+  filter: drop-shadow(0 0 3px rgba(200, 245, 107, .52));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+

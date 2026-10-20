@@ -68,3 +68,14 @@
 - Interpretation: parking data/count UI was present; the failure was basemap rendering/transport rather than missing parking inventory.
 - Constraint: screenshot alone cannot identify whether individual requests errored or hung, so the corrective design covers both explicit tile errors and silent incomplete-grid stalls.
 - Status: incorporated into MAP04 regression design.
+
+## EVID-20261020-MAP05 — Irish county boundary provenance
+- Date: 2026-10-20.
+- Boundary model: OpenStreetMap traditional Irish counties use administrative level 6.
+- Current selected-region relations:
+  - Cork: OSM relation 332631.
+  - Kildare: OSM relation 285833.
+  - Dublin: OSM relation 282800.
+  - Wicklow: OSM relation 282760.
+- Pinned fallback dataset: OSM-derived GeoJSON from `hyperknot/country-levels-export` at commit `536b86946e69d407d544405d6b1a18c6e20eb651`.
+- Use: map-focus presentation only; no parking inventory or access inference.

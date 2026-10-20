@@ -101,3 +101,10 @@
 - Decision: incomplete OSM Street fallback automatically tries alternate geographic Street tiles; never auto-open Parking Layout.
 - Rationale: mobile map integrity is more important than retaining a particular basemap provider.
 - Status: accepted/implemented.
+
+## DEC-20261020-MAP05 — Selected county gets an exact border
+- Date: 2026-10-20.
+- Decision: county selection must communicate focus using an exact published administrative outline in addition to camera zoom.
+- Rejected: rectangular coverage boxes, marker convex hulls and approximate hand-drawn borders.
+- Ireland default remains uncluttered; the strong outline appears only for the selected county.
+- Status: accepted/implemented.

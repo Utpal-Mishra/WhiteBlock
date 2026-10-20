@@ -93,3 +93,11 @@
 - Unchanged: canonical parking IDs, coordinates, capacity, availability, access, regional snapshots, evidence provenance and recommendation eligibility.
 - Important distinction: blank/partial map tiles are presentation/provider failures and must not alter source-backed parking counts or generate fallback parking records.
 - Status: no data migration required.
+
+## DATA-20261020-MAP05 — Administrative-boundary GeoJSON sidecar
+- Date: 2026-10-20.
+- New deployment artifact: `web/data/ireland_region_boundaries.geojson`.
+- Feature key: `properties.region_key` matching `cork`, `kildare`, `dublin`, `wicklow`.
+- Provenance fields: OSM relation ID, admin level, source, license and fetch timestamp.
+- Scope: presentation geometry only; not merged into canonical `WB-PARK-*` records.
+- Status: implemented.
