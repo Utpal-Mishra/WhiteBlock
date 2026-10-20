@@ -15,9 +15,9 @@
   const POINT_CIRCLE = "whiteblock-ranked-parking-point";
   const POINT_LABEL = "whiteblock-ranked-parking-label";
   const MAX_RESULTS = 10;
-  const CLUSTER_RADIUS_PX = 56;
-  const INDIVIDUAL_MARKER_ZOOM = 17;
-  const FOOTPRINT_MIN_ZOOM = 14;
+  const POLICY = window.WHITEBLOCK_MARKER_POLICY;
+  const INDIVIDUAL_MARKER_ZOOM = POLICY.detailZoom;
+  const FOOTPRINT_MIN_ZOOM = POLICY.minimumFootprintZoom;
   const EMPTY_FEATURES = () => ({ type: "FeatureCollection", features: [] });
   const OVERPASS = [
     "https://overpass-api.de/api/interpreter",
@@ -33,7 +33,7 @@
   function currentResults() {
     // County and Ireland browsing show county/locality aggregates, never the
     // previously ranked Cork destination markers or their footprint polygons.
-    if (!state.destination || state.overviewMode === true || state.regionFocus) return [];
+    if (!state.destination || POLICY.browseActive(state)) return [];
     let rows = [];
     try {
       if (typeof currentData === "function") rows = currentData() || [];
@@ -186,33 +186,9 @@
   }
 
   function rankedGroupsAtZoom(rows) {
-    const zoom = leafMap.getZoom();
-    const groups = [];
-    const visited = new Set();
-    const points = rows.map(item => leafMap.project(L.latLng(Number(item.lat), Number(item.lng)), zoom));
-
-    rows.forEach((item, index) => {
-      if (visited.has(index)) return;
-      visited.add(index);
-      const members = [index];
-      // For few ranked results, pixel-distance connected components avoid
-      // visually overlapping numbers while keeping distinct mapped positions.
-      if (zoom < INDIVIDUAL_MARKER_ZOOM) {
-        for (let cursor = 0; cursor < members.length; cursor += 1) {
-          const a = points[members[cursor]];
-          for (let other = 0; other < rows.length; other += 1) {
-            if (visited.has(other)) continue;
-            const b = points[other];
-            if (Math.hypot(a.x - b.x, a.y - b.y) <= CLUSTER_RADIUS_PX) {
-              visited.add(other);
-              members.push(other);
-            }
-          }
-        }
-      }
-      groups.push(members);
-    });
-    return groups;
+    return POLICY.groupNearby(rows, leafMap.getZoom(),
+      item => leafMap.project(L.latLng(Number(item.lat), Number(item.lng)), leafMap.getZoom()),
+      { radiusPx: POLICY.rankedRadiusPx, detailZoom: INDIVIDUAL_MARKER_ZOOM });
   }
 
   function featureCollection(rows, mapped = new Map()) {
@@ -452,7 +428,7 @@
     glMap.on?.("idle", onStyleReady);
     glMap.on?.("click", POINT_CIRCLE, event => {
       const feature = event?.features?.[0];
-      if (feature?.properties?.kind !== "cluster" || !state.destination || state.overviewMode || state.regionFocus) return;
+      if (feature?.properties?.kind !== "cluster" || !state.destination || POLICY.browseActive(state)) return;
       const coords = feature.geometry?.coordinates;
       if (!Array.isArray(coords) || coords.length < 2) return;
       // Zoom towards the real locations in this cluster; the zoomend handler
