@@ -80,3 +80,9 @@
 - Source-backed parking inventory, availability unknowns, location coordinates, legal access and records stay unchanged.
 - Rendered compatibility map does not imply real-time vacancies or complete county supply.
 
+## DATA-20261020-COV04 — Coverage marker counts and county evidence
+- Derive per-county mapped parking asset count from normalized `state.regionInventories` or snapshot fallback, with null/no-coordinate records excluded from geographic point layer and stable-ID dedupe.
+- National counts remain based on `regionStats`; explicit reported vacant bays use only numeric source availability values, otherwise unverified.
+- County source event `whiteblock:region-inventory-ready` redraws active county without losing user camera; if a source-backed county is still pending after a supplemental pilot loads, fit again when canonical county arrives.
+- No write to parking source coordinates, capacity records, access restrictions or proof.
+
