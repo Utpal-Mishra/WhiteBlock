@@ -64,3 +64,9 @@
 - Date: 2026-10-20; status: branch.
 - In-memory classification: Bray asset county='Wicklow', area='Bray'; underlying Bray source key/IDs/snapshot retained.
 - Collection: Wicklow county summary combines Wicklow OSM records and independently curated Bray records; site-specific record values and null availability are unchanged.
+
+## DATA-20261020-CL01 — Pure presentation clustering
+- Data contracts unchanged: county snapshots, curated Bray records, published capacities, OSM sources, availability unknowns and provenance remain authoritative.
+- Derivation: ephemeral screen-pixel groups of up to ten currently ranked destination records; group count is parking assets, never sum of capacity or open bays.
+- Read/write: render-only browser transformation; zero mutations to canonical parking sources.
+
