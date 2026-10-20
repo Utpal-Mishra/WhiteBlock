@@ -101,7 +101,7 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("invalidateSize", js)
         self.assertIn("focusSelectedParking", js)
         self.assertIn("renderCoverageTint", js)
-        self.assertNotIn("void activateStreetVector();", js)
+        self.assertNotIn("loadGuidanceIntelligenceLayer();\n  void activateStreetVector();", js)
         self.assertIn('mapEl.dataset.basemapOwner = "map-engine-v3"', js)
         self.assertIn("whiteblock:data-ready", js)
         self.assertNotIn("activeTileLayer.redraw", js)
