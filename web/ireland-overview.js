@@ -784,7 +784,13 @@
     // destination and no intermediate locality-only map are required.
     document.dispatchEvent(new CustomEvent("whiteblock:coverage-browse", { detail: { scope: "region", region: key } }));
     const rows = renderCountyParkingMarkers(key, { fit: true });
-    if (rows.length) state.regionPendingFit = null;
+    // A locality pilot may load before the larger county snapshot (e.g. Bray
+    // before County Wicklow). Fit again when the complete source-backed county
+    // snapshot arrives instead of incorrectly leaving the camera on the pilot.
+    if (rows.length && Array.isArray(state.regionInventories[key]) &&
+        state.regionInventories[key].length && Array.isArray(snapshotFor(key)?.locations)) {
+      state.regionPendingFit = null;
+    }
     if (typeof setMapStatus === "function") {
       const stats = regionStats(key);
       const availability = stats.availableAssets
@@ -883,7 +889,11 @@
       const rows = renderCountyParkingMarkers(state.regionFocus, {
         fit: state.regionPendingFit === state.regionFocus
       });
-      if (rows.length) state.regionPendingFit = null;
+      if (rows.length && Array.isArray(state.regionInventories[state.regionFocus]) &&
+          state.regionInventories[state.regionFocus].length &&
+          Array.isArray(snapshotFor(state.regionFocus)?.locations)) {
+        state.regionPendingFit = null;
+      }
     }
   });
 
