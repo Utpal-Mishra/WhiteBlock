@@ -33,3 +33,8 @@
 - Source/data: deterministic local fixture only, no live occupancy feed or external Overpass needed in CI.
 - Status: CI pending at entry creation.
 
+## AUTO-20261020-MAP02 — Universal clustering CI release gate
+- PR #39 adds a pure Node policy test, existing ranked GL regression and syntax checks to `.github/workflows/test.yml`.
+- Deterministic 7-site fixtures for Cork, Kildare, Dublin, Wicklow, Galway and Donegal, plus Bray nested/duplicate-Cork guard and script integration.
+- Region adapters still refresh source-backed JSON independently; new county onboarding requires valid snapshot before county activation.
+
