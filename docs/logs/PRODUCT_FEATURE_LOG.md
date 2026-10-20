@@ -102,3 +102,11 @@
 - Recovery behaviour: vector Street when healthy; otherwise geographic raster Street with automatic alternate-provider failover on errors or incomplete loading.
 - Interaction preservation: Ireland/county drilldown, parking markers, + menu and optional Parking Layout remain unchanged.
 - Status: implemented on fix branch.
+
+## FEAT-20261020-MAP05 — Highlight selected county boundary
+- Date: 2026-10-20.
+- User-visible behavior: selecting Cork, Kildare, Dublin or Wicklow draws the county outline on the map so the active region is immediately obvious.
+- The border remains visible while viewing county parking clusters and individual sites.
+- Switching region replaces the outline; returning to Ireland or selecting a destination removes it.
+- Styling: high-contrast lime outline, subtle translucent green interior.
+- Status: implemented on feature branch.
