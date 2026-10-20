@@ -71,3 +71,9 @@
 - Existing large-inventory MarkerCluster remains available and sourced independently.
 - Status: PR #38 pending CI and publication smoke check.
 
+## FEAT-20261020-MAP02 — Universal cluster and locality drill-down
+- UX: national county totals -> clustered county locality cards -> grouped parking markers -> individual true-coordinate site points, with tap-to-zoom.
+- Cork, Kildare, Dublin, Wicklow/Bray currently supported. Subsequent source-backed county networks inherit the grouping policy without special case scripts.
+- Removed former locality detail rendering limit of 300 items: broader view aggregates full evidence inventory, high zoom filters to map viewport.
+- Status: feature PR #39, CI/mobile QA pending.
+
