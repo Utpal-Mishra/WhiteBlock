@@ -98,3 +98,5 @@
 - Rollback: revert PR #39 if county navigation, source layer ownership or site zoom regress.
 - Status: PR #39 pending merge and deployment.
 
+### Scope extension — renderer ownership — 2026-10-20
+- Changed Leaflet `map-engine-v2.js` ranked marker fallback and GL readiness handshake to prevent duplicate physical parking markers during loading and zoom changes. This is included in PR #39.
