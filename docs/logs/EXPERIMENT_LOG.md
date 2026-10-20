@@ -63,3 +63,11 @@
 - Automated acceptance: simulated MapLibre exception must keep a geographic map; a stalled raster fallback must switch to alternate Street tiles even without explicit tile errors; no schematic layout may auto-open.
 - Manual acceptance: Android/mobile Ireland view must fill the entire map card, then remain intact through county switches, orientation changes and returning from background.
 - Status: implementation ready for CI/device validation.
+
+## EXP-20261020-MAP05 — County-border focus experiment
+- Date: 2026-10-20.
+- Hypothesis: a persistent exact county outline makes Cork/Kildare/Dublin/Wicklow focus materially clearer than zoom alone.
+- Treatment: lime administrative outline + low-opacity fill while county filter is selected.
+- Control: existing county auto-fit with no boundary.
+- Acceptance: user can identify the focused county at a glance; parking clusters remain legible; Ireland reset removes the outline; switching county never leaves the previous border.
+- Status: implementation ready for CI/mobile validation.
