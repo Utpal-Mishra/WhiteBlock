@@ -9,7 +9,7 @@
   const PAGE_SIZE = 100;
   const GENERIC_NAMES = new Set(["parking", "car park", "surface parking", "street side parking", "lane parking"]);
   const REGION_LABELS = { cork: "Cork", kildare: "Kildare", dublin: "Dublin" };
-  REGION_LABELS.bray = "Bray";
+  REGION_LABELS.bray = "Wicklow"; // Bray is a Wicklow locality, not a county filter.
   REGION_LABELS.wicklow = "Wicklow";
 
   state.discoveryInventory = [];
@@ -107,9 +107,10 @@
     const region = REGION_LABELS[regionKey] || regionKey;
     return {
       ...item,
-      discoverRegionKey: regionKey,
+      discoverRegionKey: regionKey === "bray" ? "wicklow" : regionKey,
+      discoverSourceRegionKey: regionKey,
       discoverRegion: region,
-      discoverSubregion: regionSubarea(item, region),
+      discoverSubregion: regionKey === "bray" ? "Bray" : regionSubarea(item, region),
       discoverSupplyState: supplyState(item),
       discoverPricingState: pricingState(item),
       discoverAccessState: accessState(item)
@@ -210,7 +211,7 @@
     if (region === "Cork") return "City live + county mapped";
     if (region === "Dublin") return "Exact-boundary mapped network";
     if (region === "Kildare") return "Exact-county mapped network";
-    if (region === "Bray") return "Seafront evidence pilot + imagery review";
+    if (region === "Wicklow") return "County mapped network + Bray seafront evidence pilot";
     return "Evidence-backed inventory";
   }
 
