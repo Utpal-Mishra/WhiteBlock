@@ -131,3 +131,10 @@
 - Assertions include regional coverage and code integrations: Cork/Kildare/Dublin/Wicklow + synthetic Galway/Donegal; Bray nested within Wicklow; ranked/inventory/legacy renderer isolation.
 - Source-backed future registration follows `docs/UNIVERSAL_MARKER_POLICY.md`; synthetic fixture success is not live-site validation.
 - Outstanding: main deployment run `39459997110` and in-browser Android map zoom, cluster tap and visual checks. Do not mark visual QA passed until observed.
+
+## QA-20261020-MAP03 — Real map vs Parking Layout
+- Evidence: Android screenshot, Cork City, Street selected but Parking Layout covering streets.
+- New `tests/test_geographic_map_fallback.js`: MapLibre throws, style watchdog expires, preserve Leaflet fallback on layeradd cleanup, OSM tile failures switch to CARTO street tiles, no automatic schematic.
+- Retained national marker aggregation tests, updated loader/cache-contract assertions.
+- Manual: open Cork destination, Street should show streets; explicitly choose Parking Layout from +; Back to map restores; change Satellite/Terrain; test mobile weak network. Not yet confirmed by visual screenshot.
+
