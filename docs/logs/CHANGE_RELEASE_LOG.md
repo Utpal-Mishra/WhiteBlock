@@ -106,3 +106,10 @@
 - Branch CI `39459853465`: success, including Python suite, Node all-region/future-region policy test, ranked GL tests and JavaScript syntax.
 - Main Pages deployment: `39459997110` started; production publication/device visual verification still pending at reconciliation time.
 - Older releases #37/#38 were merged and their respective CI passed. This entry supersedes historical in-progress status notes without erasing them.
+
+## RELEASE-20261020-MAP03 — Geographic map on WebGL/MapLibre failure
+- Scope: global WHITEBLOCK map; `web/map-engine-v2.js` falls back to geographic Leaflet raster Street tiles (OSM then CARTO) rather than schematic, preserving markers.
+- `web/parking-layout.js` requires explicit toggle, has Back to map and closes on Street/Terrain/Satellite selection.
+- Asset version bumps, new mock Node failure and timeout test, updated map/layout Python contracts.
+- PR #40: pending CI/Pages; manual Android confirmation still needed.
+
