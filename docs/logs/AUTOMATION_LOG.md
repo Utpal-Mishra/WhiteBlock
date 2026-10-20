@@ -59,3 +59,11 @@
   - responsive container changes automatically schedule geometry repair.
 - Guardrails: no automatic switch to Parking Layout; no parking data or recommendation state is modified.
 - Status: implemented.
+
+## AUTO-20261020-MAP05 — Boundary build and deployment gate
+- Date: 2026-10-20.
+- Pages now builds `web/data/ireland_region_boundaries.geojson` before publishing.
+- Primary refresh: exact OSM relation geometry through Overpass.
+- Recovery: if the live refresh fails, reuse the last published boundary layer; first-deploy fallback uses pinned OSM-derived county GeoJSON with relation-ID validation.
+- Validation: deployment requires exactly Cork 332631, Kildare 285833, Dublin 282800 and Wicklow 282760 with Polygon/MultiPolygon geometry.
+- Status: implemented.
