@@ -43,3 +43,8 @@
 - Expected: zoom 7 -> one count-7 group per sample area; zoom 17 -> seven individual site markers; Bray remains included in Wicklow with stable ID; duplicate Cork county pool does not inflate count.
 - Automation: `tests/test_universal_marker_policy.js` plus ranked GL unit; Android visual test remains outstanding.
 
+## EXP-20261020-MAP03 — Mobile vector failure recovery
+- Hypothesis: true Leaflet raster fallback solves blank/delayed vector-map cases while preserving real parking point geography.
+- Simulations: synchronous MapLibre init exception; 4500ms style health timeout; three OSM tile failures; assert CARTO fallback; assert no layout overlay programmatically activated.
+- Manual acceptance: Android Cork parking search should show actual road map or geographic raster despite WebGL failure; explicit Parking Layout toggle/Back to map must work.
+
