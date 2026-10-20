@@ -57,3 +57,8 @@
 - Change: empty ranked source on county/national browse, cancel stale geometry-response writes and recompute ranked marker groups on zoom.
 - Status: PR #38 awaiting integration; no change to source inventory or reported parking availability.
 
+## SYS-20261020-MAP02 — Region-independent marker update
+- Status: PR #39 pending release; implemented universal grouping module and hooked inventory, ranked GL and county locality layers into it.
+- Affected: all currently connected counties (Cork, Kildare, Dublin, Wicklow) and future validated county datasets; Bray remains nested in Wicklow.
+- Behaviour: grouped map markers collapse at low zoom and separate when geographically distinguishable; no stale ranked results on national/county browsing.
+
