@@ -48,3 +48,9 @@
 - Simulations: synchronous MapLibre init exception; 4500ms style health timeout; three OSM tile failures; assert CARTO fallback; assert no layout overlay programmatically activated.
 - Manual acceptance: Android Cork parking search should show actual road map or geographic raster despite WebGL failure; explicit Parking Layout toggle/Back to map must work.
 
+## EXP-20261020-COV04 — Count and camera transition verification
+- Hypothesis: county auto-fitting full parking location bounds plus zoom-clustering is clearer than a mandatory town-group stage.
+- Fixtures: Ireland 4 active county badges; Cork 7, Dublin 10, Kildare 4, Wicklow 5 + Bray 1 (synthetic test data; not live counts).
+- Cases: Ireland overview camera, per-county fit bounds, Cork/Dublin site detail, no repeated camera reset on ready events, initial Bray-only followed by full Wicklow inventory; no live availability invented.
+- Acceptance: CI green and manual Android map with actual source coverage and real Street basemap.
+
