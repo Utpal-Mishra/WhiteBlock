@@ -55,7 +55,7 @@ function loadWhiteblockMapEngineV2() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './map-engine-v2.js?v=20261020-3';
+  script.src = './map-engine-v2.js?v=20261020-5';
   script.async = false;
   script.dataset.whiteblockMapEngineV2 = 'true';
   script.addEventListener('load', loadWhiteblockParkingGeometry, { once: true });
