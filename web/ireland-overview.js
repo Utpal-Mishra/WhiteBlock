@@ -56,6 +56,46 @@
   state.regionSubareaGroup = null;
   const MARKER_POLICY = window.WHITEBLOCK_MARKER_POLICY;
 
+  // New county adapters can register via their source-backed region snapshot;
+  // all map marker policies and locality drill-down then work without custom
+  // clustering code. Local pilots (e.g. Bray) remain nested in their county.
+  function registerNewRegionalInventories() {
+    let changed = false;
+    Object.entries(state.regionInventories || {}).forEach(([key, items]) => {
+      if (CONNECTED_REGIONS[key] || MARKER_POLICY.canonicalRegion(key) !== key.toLowerCase()) return;
+      if (!/^[a-z][a-z0-9_-]*$/i.test(key) || !Array.isArray(items) || !items.length) return;
+      const snapshot = state.regionSnapshots?.[key];
+      // Do not label an unsourced internal array as a newly connected county.
+      if (!snapshot || !Array.isArray(snapshot.locations) || !snapshot.locations.length) return;
+      const geo = items.filter(item => numeric(item?.lat) != null && numeric(item?.lng) != null);
+      if (!geo.length) return;
+      const label = String(snapshot.coverage?.region || key)
+        .replace(/^county\s+/i, "").replace(/[_-]/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+      const lat = geo.reduce((sum, item) => sum + Number(item.lat), 0) / geo.length;
+      const lng = geo.reduce((sum, item) => sum + Number(item.lng), 0) / geo.length;
+      CONNECTED_REGIONS[key] = {
+        label, countyLabel: label, detail: "County " + label,
+        center: [lat, lng], zoom: 10, nationalAnchor: [66, 36],
+        mode: "Mapped county evidence · availability only where reported"
+      };
+      changed = true;
+    });
+    if (changed) {
+      const switcher = document.getElementById("ireland-region-switcher");
+      if (switcher) Object.entries(CONNECTED_REGIONS).forEach(([key, region]) => {
+        if (switcher.querySelector('[data-ireland-scope="' + key + '"]')) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ireland-region-button";
+        button.dataset.irelandScope = key;
+        button.textContent = region.label;
+        switcher.appendChild(button);
+      });
+    }
+    return changed;
+  }
+
   const baseRenderParkingList = typeof renderParkingList === "function" ? renderParkingList : null;
   const baseSelectAddressSuggestion = typeof selectAddressSuggestion === "function" ? selectAddressSuggestion : null;
 
@@ -168,7 +208,9 @@
       : "no live occupancy feeds loaded yet";
 
     const regionCount = Object.keys(CONNECTED_REGIONS).length;
-    setKpiCard("coverage", "Connected inventory", formatInteger(stats.locations), "Cork + Kildare + Dublin + Wicklow mapped/evidence-backed assets (Bray included in Wicklow)");
+    const regionNames = Object.values(CONNECTED_REGIONS).map(region => region.label).join(" + ");
+    setKpiCard("coverage", "Connected inventory", formatInteger(stats.locations),
+      regionNames + " mapped/evidence-backed assets (local pilots included in their county)");
     setKpiCard("availability", "Reported available now", stats.availableAssets ? formatInteger(stats.available) : "—", reportingLabel);
     setKpiCard("confidence", "Published capacity", stats.capacityAssets ? formatInteger(stats.capacity) : "—", "known capacity only · missing capacity is not estimated");
     setKpiCard("pressure", "Connected regions", formatInteger(regionCount), `${stats.loadedRegions}/${regionCount} regional inventories loaded`);
@@ -519,7 +561,7 @@
       const strong = pilotCard.querySelector("strong");
       const small = pilotCard.querySelector("small");
       if (strong) strong.textContent = "Ireland Network";
-      if (small) small.textContent = "Cork · Kildare · Dublin · Wicklow connected";
+      if (small) small.textContent = Object.values(CONNECTED_REGIONS).map(region => region.label).join(" · ") + " connected";
     }
 
     const legend = document.querySelector(".map-head .legend");
@@ -643,7 +685,7 @@
       const stats = nationalStats();
       setMapStatus(
         "Ireland connected coverage",
-        `${formatInteger(stats.locations)} mapped/evidence-backed assets across Cork, Kildare, Dublin and Wicklow (including Bray) · availability shown only where reported`
+        `${formatInteger(stats.locations)} mapped/evidence-backed assets across ${Object.values(CONNECTED_REGIONS).map(region => region.label).join(", ")} (local pilots included in counties) · availability shown only where reported`
       );
     }
     const title = document.getElementById("view-title");
@@ -718,9 +760,11 @@
     focusRegion,
     stats: nationalStats,
     groups: groupRegionalInventory,
-    focusSubarea
+    focusSubarea,
+    registerNewRegionalInventories
   };
 
+  registerNewRegionalInventories();
   ensureRegionSwitcher();
   updateStaticChrome();
 
@@ -763,6 +807,8 @@
     if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
   });
   document.addEventListener("whiteblock:region-inventory-ready", () => {
+    registerNewRegionalInventories();
+    updateStaticChrome();
     if (state.overviewMode) showIrelandNetworkOverview({ animate: false });
     else if (state.regionFocus && !state.regionSubareaGroup) {
       renderRegionSettlementNodes(state.regionFocus, { fit: false });
