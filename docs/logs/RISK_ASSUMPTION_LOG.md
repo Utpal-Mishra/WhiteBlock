@@ -104,3 +104,10 @@
 - R4: venues with identical exact coordinates may not separate by zoom 17; preserve IDs and add spiderfy/list disambiguation if required, never arbitrarily relocate sites.
 - R5: heavy locality source: use approximate linear screen grid grouping; viewport-filter detailed markers.
 
+## RISK-20261020-MAP03 — Raster fallback reliability and safe UI control
+- R1 WebGL blocked/slow: map could fall into Parking Layout and hide geographic context. Mitigation: use raster street basemap, never programmatic schematic activation. Evidence: user mobile screenshot/code path.
+- R2 OSM raster tile availability/rate limits: use alternative CARTO street tiles after repeated tile failures; report failure if both unavailable. Never imply a basemap is loaded without tile evidence.
+- R3 Legacy handler removes fallback raster: layeradd cleanup explicitly exempts tracked `rasterFallbackLayer`; regression test confirms retained layer.
+- R4 Street selected while Parking Layout visible: clear basemap pressed state during schematic; provide visible Back to map, document capture listener to restore even with MapLibre intercepted clicks.
+- R5 External tile-provider terms/attribution/network reliability: preserve attribution; evaluate hosting strategy and tile policy before scale-up.
+
