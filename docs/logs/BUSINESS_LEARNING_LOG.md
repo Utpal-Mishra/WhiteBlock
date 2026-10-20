@@ -44,3 +44,7 @@
 - Learning: clear geospatial hierarchy must hold independently of how many counties, towns or parking locations join the network.
 - Use source data and legal rules to expand supply; use a reusable clustering component for presentation; never infer vacant bays from a count of locations.
 
+## BUS-20261020-MAP03 — Map reliability affects trust
+- Relative-distance Parking Layout is useful for analytical comparison, but cannot replace road-level geographic context.
+- Basemap must have a non-WebGL fallback across all future regions before broad roll-out and partner integrations.
+
