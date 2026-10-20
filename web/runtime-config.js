@@ -249,7 +249,7 @@ function loadWhiteblockIrelandOverview() {
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20261020-2';
+  script.src = './ireland-overview.js?v=20261020-4';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);
