@@ -138,3 +138,7 @@
 - Retained national marker aggregation tests, updated loader/cache-contract assertions.
 - Manual: open Cork destination, Street should show streets; explicitly choose Parking Layout from +; Back to map restores; change Satellite/Terrain; test mobile weak network. Not yet confirmed by visual screenshot.
 
+## QA-20261020-MAP03 merge evidence
+- PR #40 tests: PASS (GitHub Actions `39467188332`); real raster fallback and compatibility state passed mocked recovery checks.
+- Main branch and Pages rebuild triggered for commit `8cc276f4302a798042eb8b62610c3bc6fb48067d`.
+- Not yet validated in an Android graphical browser: new Street default, ability to select Parking Layout voluntarily, Back to map control, and recover under actual weak mobile network conditions.
