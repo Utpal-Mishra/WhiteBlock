@@ -32,3 +32,6 @@ Shared defaults in `web/parking-marker-policy.js`: 56px parking-radius grouping,
 - Before closing full QA: Android browser test across each current region and Bray locality. Check pinch-out collapse, pinch-in expansion, cluster tap, switching national→county→locality→destination, Street/Terrain/Satellite, delayed-source loads, and network-failed MarkerCluster fallback.
 - Onboarding test for a future county with an actual source-backed snapshot; automated Donegal/Galway fixtures prove code paths, **not** actual new parking coverage or source completeness.
 - Source of truth: `web/parking-marker-policy.js`, the region adapter contract, and individual project logs.
+
+## Renderer ownership
+The native MapLibre ranked overlay owns destination result circles/labels and footprints when available. Leaflet map engine draws an emergency ranked fallback only until MapLibre announces readiness; both must not draw the same numbered site markers simultaneously. Map engine clears its prior Leaflet layer on `whiteblock:ranked-gl-overlay-ready`, and guards against rendering fallback while native GL owns them.
