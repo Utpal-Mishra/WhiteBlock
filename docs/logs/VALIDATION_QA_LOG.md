@@ -225,3 +225,9 @@
   - county outlines, parking clusters and #rank markers remain legible;
   - orientation/background/foreground recovery retains selected basemap.
 - Status: pending CI and live review.
+
+### MAP07 automated result — 2026-10-20
+- Feature-branch regression suite: PASS (run #348).
+- Main regression suite after merge: PASS (run #349).
+- Verified contracts include Hybrid first-paint/default state, + menu secondary modes, Hybrid-to-Street degradation, existing clustering/count semantics and county-map regressions.
+- Remaining gate: Pages run #277 completion plus visual mobile confirmation.
