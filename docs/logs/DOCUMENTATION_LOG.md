@@ -12,3 +12,7 @@
 - Date: 2026-10-19; status: feature branch.
 - Added docs/WICKLOW_NETWORK.md with scope, provenance, no-live policy, priority town/seasonal locations, official rule references and acceptance tests.
 - Follow-up: record exact deployment asset counts, source freshness, missing localities and human verification evidence once produced.
+
+## DOC-20261020-WW01 — Administrative hierarchy contract
+- Date: 2026-10-20; status: branch.
+- Updated: docs/WICKLOW_NETWORK.md clarifies one Wicklow county filter containing Bray, with separate ingestion/evidence provenance retained internally.
