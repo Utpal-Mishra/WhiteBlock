@@ -69,6 +69,7 @@ const ranked = fs.readFileSync(path.join(root, "web/parking-gl-overlay.js"), "ut
 const legacyMap = fs.readFileSync(path.join(root, "web/map-engine-v2.js"), "utf8");
 const olderMapFix = fs.readFileSync(path.join(root, "web/map-fix.js"), "utf8");
 const overview = fs.readFileSync(path.join(root, "web/ireland-overview.js"), "utf8");
+const app = fs.readFileSync(path.join(root, "web/app.js"), "utf8");
 assert.ok(index.indexOf("parking-marker-policy.js") < index.indexOf("runtime-config.js"), "policy initializes before map adapters");
 assert.ok(runtime.includes("inventory-map-layer.js?v=20261020-3"));
 assert.ok(runtime.includes("parking-gl-overlay.js?v=20261020-4"));
@@ -97,6 +98,7 @@ assert.ok(overview.includes("LOCATIONS"), "browse clusters must say LOCATIONS ra
 assert.ok(inventoryJs.includes("<small>locations</small>"), "inventory clusters must label their number as locations");
 assert.ok(legacyMap.includes("<small>options</small>"), "destination-result fallback clusters must label their number as options");
 assert.ok(legacyMap.includes("rankedOptionIcon"), "fallback individual options must show ordinal ranks");
+assert.ok(app.includes('<span class="rank">#${index + 1}</span>'), "result cards must use the same explicit # ordinal rank");
 assert.ok(overview.includes("registerNewRegionalInventories()"), "future source-backed counties join the national map automatically");
 assert.ok(overview.includes("state.regionSubareaGroup"), "zoomend preserves locality drill-down selection");
 assert.ok(!overview.includes("group.items.slice(0, 300)"), "locality visual aggregation must not silently drop assets");
