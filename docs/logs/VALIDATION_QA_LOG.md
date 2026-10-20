@@ -186,3 +186,9 @@
   - parking clusters/labels remain above the boundary;
   - boundary survives Street/Terrain/Satellite changes and map resize/orientation.
 - Status: pending CI/deployed visual check.
+
+### MAP05 automated result — 2026-10-20
+- PR #43 branch tests: PASS (run #330).
+- Main tests after merge: PASS (run #331).
+- Pages boundary-generation/validation step in run #274: PASS.
+- Remaining gate: completion of the full Pages deployment and on-device visual confirmation of Cork/Kildare/Dublin/Wicklow outlines.
