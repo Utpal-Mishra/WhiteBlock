@@ -118,3 +118,10 @@
 - Branch CI `39467188332`: SUCCESS with simulated MapLibre initialization failure, style timeout and street tile backup regression, plus existing Python/unit tests.
 - Main branch test run: `39467328613`; Pages publishing run: `39467328592`, both triggered at merge. Production/mobile smoke verification not yet completed.
 - Previous “pending CI” notes reflect their original timestamps; this entry is the updated audit record.
+
+## RELEASE-20261020-COV04 — Ireland-first all-parking regional drilldown
+- PR #41: `web/ireland-overview.js` national county badges and count labels, county auto-fit/all parking clusters, late regional source handling, no repeated Ireland camera resets.
+- `web/parking-layout.js`: optional schematic closes on coverage switch; asset version bumps for both modules.
+- Tests: browser-free Ireland/county integration regression plus updated Python contracts and CI.
+- Status: feature branch awaiting test/merge/publication and Android visual QA.
+
