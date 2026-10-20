@@ -125,3 +125,8 @@
 - Tests: browser-free Ireland/county integration regression plus updated Python contracts and CI.
 - Status: feature branch awaiting test/merge/publication and Android visual QA.
 
+## RELEASE-20261020-COV04 — Merge and CI result
+- PR #41 merged to `main` at `bf4e53b223e5435bcb16b49bd3cdfa68f05c4032` on 2026-10-20.
+- Feature branch test run `39472300266`: SUCCESS. Main branch test run `39472445119`: SUCCESS.
+- Pages deployment run `39472445106` launched at merge; actual live phone visual QA must be checked when publishing completes.
+- All 15+ granular project logs were updated with architecture, data, UX, evidence, risks, test coverage and expansion rules.
