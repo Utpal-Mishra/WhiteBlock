@@ -95,3 +95,10 @@
 - Optional Parking Layout closes on coverage action so the map remains geographical.
 - Status: PR #41, pending CI and live mobile acceptance.
 
+## FEAT-20261020-MAP04 — Full-card geographic Street recovery
+
+- Date: 2026-10-20.
+- User-visible requirement: Street mode must fill the complete map card on mobile; isolated checkerboard tiles are not an acceptable degraded state.
+- Recovery behaviour: vector Street when healthy; otherwise geographic raster Street with automatic alternate-provider failover on errors or incomplete loading.
+- Interaction preservation: Ireland/county drilldown, parking markers, + menu and optional Parking Layout remain unchanged.
+- Status: implemented on fix branch.
