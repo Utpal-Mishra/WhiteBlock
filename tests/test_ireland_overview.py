@@ -20,6 +20,23 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('publishedLocationCount', js)
         self.assertIn('wbOverviewPane', js)
 
+    def test_bray_is_only_a_wicklow_locality_not_a_county_coverage_marker(self):
+        base = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        overview = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
+        discover = (ROOT / "web" / "discover.js").read_text(encoding="utf-8")
+        index = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        bray = (ROOT / "web" / "bray-adapter.js").read_text(encoding="utf-8")
+        self.assertNotIn('{ name: "Bray", lat:', base)
+        self.assertIn('Cork · Kildare · Dublin · Wicklow connected (including Bray)', base)
+        self.assertIn('Bray Seafront', base)  # Destination search remains usable.
+        self.assertNotIn('data-ireland-scope="bray"', overview)
+        self.assertNotIn('data-discover-filter="bray"', index)
+        self.assertIn('data-discover-filter="wicklow"', index)
+        self.assertIn('regionKey === "bray" ? "wicklow"', discover)
+        self.assertIn('const bray = state.regionInventories?.bray || [];', overview)
+        self.assertIn('region: "Wicklow"', bray)
+        self.assertIn('app.js?v=20261020-2', index)
+
     def test_live_availability_is_not_inferred(self):
         js = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
         self.assertIn('Reported available now', js)
