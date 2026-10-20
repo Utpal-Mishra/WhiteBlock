@@ -74,3 +74,13 @@
 - Reverse behaviour: zooming out recombines nearby recommendations into the explicit option-count cluster.
 - No live availability is generated during clustering; availability labels are copied only from source-backed result records.
 - Status: implemented.
+
+## AUTO-20261020-MAP07 — Default Hybrid degradation chain
+- Date: 2026-10-20.
+- Automatic recovery:
+  1. MapLibre Hybrid;
+  2. Leaflet Hybrid using imagery + reference overlay;
+  3. Street raster when Hybrid imagery stalls/errors;
+  4. alternate Street raster when the first Street source also stalls/errors.
+- Existing 3.2 s incomplete-grid watchdog and responsive geometry repair remain active.
+- Status: implemented.
