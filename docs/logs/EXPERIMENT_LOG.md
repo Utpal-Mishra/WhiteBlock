@@ -38,3 +38,8 @@
 - Success: zero stale ranked features in browse; one count-7 feature at low zoom; seven ranked points at detailed zoom; prior IDs and 01–07 ranking retained.
 - Caveat: additional hands-on Android pinch-zoom/pan and basemap-mode smoke tests required.
 
+## EXP-20261020-MAP02 — Existing and future region clustering
+- Test sample: 7 synthetic clustered parking locations in each of Cork, Kildare, Dublin, Wicklow, Galway, Donegal.
+- Expected: zoom 7 -> one count-7 group per sample area; zoom 17 -> seven individual site markers; Bray remains included in Wicklow with stable ID; duplicate Cork county pool does not inflate count.
+- Automation: `tests/test_universal_marker_policy.js` plus ranked GL unit; Android visual test remains outstanding.
+
