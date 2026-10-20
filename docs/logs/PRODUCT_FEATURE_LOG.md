@@ -77,3 +77,7 @@
 - Removed former locality detail rendering limit of 300 items: broader view aggregates full evidence inventory, high zoom filters to map viewport.
 - Status: feature PR #39, CI/mobile QA pending.
 
+## FEAT-20261020-MAP02 integration status
+- PR #39 integrated into `main`; branch CI passed on 2026-10-20.
+- All connected region and future county map marker renderers consume the shared zoom policy, with legacy renderer handoff and no-CDN fallback.
+- Release to GitHub Pages and mobile acceptance remain open at time of log entry.
