@@ -842,6 +842,7 @@
     clearDestinationForBrowse();
     clearDetailedMarkers();
     clearOverviewLayer();
+    clearRegionBoundary();
     updateSwitcher();
     updateRegionKpis(key);
     renderBrowseResults();
