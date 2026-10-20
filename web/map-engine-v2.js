@@ -375,8 +375,16 @@
       // MapLibre can report isolated glyph/tile errors while the map remains usable.
       // Only act after a sustained burst from the currently selected non-Hybrid style.
       styleErrors += 1;
-      if (styleErrors >= 16 && activeBasemap !== "hybrid") {
-        switchBasemap("hybrid", { quiet: true });
+      if (styleErrors >= 16) {
+        styleErrors = 0;
+        if (activeBasemap !== "hybrid") {
+          switchBasemap("hybrid", { quiet: true });
+        } else {
+          // If Hybrid itself is the failing MapLibre source, preserve the user's
+          // default visual first through Leaflet raster Hybrid, then let the
+          // bounded tile watchdog fall back to Street only if imagery also fails.
+          activateRasterFallback("Hybrid source degraded · retrying aerial imagery with labels", "hybrid");
+        }
       }
       if (event?.error) console.debug("WHITEBLOCK map source warning", event.error.message || event.error);
     });
