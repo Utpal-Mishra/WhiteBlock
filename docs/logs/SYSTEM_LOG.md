@@ -50,3 +50,10 @@
 - Date: 2026-10-20; status: branch.
 - Changed: Ireland region switcher/county markers, Discover filters and Inventory Coverage. Kept existing Bray destination adapter/parking listings.
 - User correction: do not expose a seafront evidence pilot as a top-level administrative region.
+
+## SYS-20261020-CL01 — Ranked map display and browse-mode isolation
+- Trigger: mobile map screenshots showed seven 01–07 Cork recommendation markers overlapping in Ireland overview after zoom changes.
+- Cause: MapLibre ranked-results layer ignored national/region browse state; the separate all-inventory Leaflet layer already clusters its supply.
+- Change: empty ranked source on county/national browse, cancel stale geometry-response writes and recompute ranked marker groups on zoom.
+- Status: PR #38 awaiting integration; no change to source inventory or reported parking availability.
+
