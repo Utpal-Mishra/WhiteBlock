@@ -26,3 +26,11 @@
 - Deployment resilience: last published validated boundary; pinned OSM-derived GeoJSON fallback for first-deploy/source outage.
 - Runtime: browser reads only the locally deployed GeoJSON sidecar, so county selection does not call Overpass.
 - Status: configured.
+
+## DEP-20261020-MAP07 — Hybrid imagery/reference services
+- Date: 2026-10-20.
+- Base imagery: Esri World Imagery.
+- Reference overlay: Esri World Hybrid Overlay.
+- Independent fallbacks: OpenStreetMap Street, then CARTO Street.
+- Lifecycle note: Esri has announced retirement plans for legacy raster/reference basemaps; migrate this reference layer to a supported modern Hybrid/Imagery Hybrid service before retirement.
+- Status: current prototype dependency configured; migration tracked.
