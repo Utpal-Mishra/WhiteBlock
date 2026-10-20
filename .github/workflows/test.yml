@@ -80,6 +80,9 @@ jobs:
           node --check web/dublin-venue-knowledge.js
           python -m compileall -q api scripts
 
+      - name: Test geographical map fallback on WebGL or style failure
+        run: node tests/test_geographic_map_fallback.js
+
       - name: Test ranked map marker clustering
         run: node tests/test_ranked_gl_clustering.js
 
