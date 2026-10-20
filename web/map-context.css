@@ -19,6 +19,7 @@
   backface-visibility: hidden;
 }
 
+#map.wb-map-hybrid .leaflet-tile,
 #map.wb-map-street .leaflet-tile,
 #map.wb-map-terrain .leaflet-tile,
 #map.wb-map-satellite .leaflet-tile {
@@ -178,9 +179,9 @@
   }
 }
 
-/* 2026-10-04 compact map-view control.
-   Street stays visible/default; secondary basemaps and contextual tools are
-   intentionally tucked behind the + menu so the map itself keeps priority. */
+/* Compact map-view control.
+   Hybrid stays visible/default; Street, Terrain, pure Satellite and contextual
+   tools are tucked behind the + menu so the map itself keeps priority. */
 .wb-map-toolbar {
   left: auto;
   right: 12px;
