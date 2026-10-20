@@ -10,3 +10,12 @@
 - GitHub Actions/Pages: review artifact generation and application deployment.
 - Mitigation: explicit source provenance, no live-state inference, bounded Kildare refresh and partial fallback.
 - Status: monitored.
+
+## DEP-20261020-MAP04 — Geographic basemap provider resilience
+
+- Date: 2026-10-20.
+- Primary vector dependency: MapLibre GL + OpenFreeMap style.
+- Raster compatibility dependencies: OpenStreetMap Street tiles, then CARTO Street tiles as alternate provider.
+- Failure mode addressed: provider requests can partially render or stall without enough explicit errors.
+- Operational note: public/best-effort tile services are suitable for prototype resilience, not a long-term production SLA. Provider terms, quotas, attribution and production hosting must be reviewed before scale.
+- Status: current fallback hardened; production provider decision remains open.
