@@ -85,3 +85,10 @@
 - Change: remove standalone Bray coverage marker in the base map, adjust Ireland status copy to 4 county networks, version-bump `app.js` to help invalidate prior client cache.
 - Invariant: the Bray dataset stays independently ingested; Wicklow includes it for national summaries; country/region filters contain no fifth Bray option.
 - Rollback: revert this targeted patch if regional navigation or Bray destination lookup is affected.
+
+## RELEASE-20261020-CL01 — Zoomable recommendation clusters
+- Change files: `web/parking-gl-overlay.js`, `web/runtime-config.js`, `tests/test_ranked_gl_clustering.js`, `.github/workflows/test.yml` plus logs.
+- User-visible: national/region map no longer polluted by stale 01–07 labels; ranked parking locations aggregate and split according to zoom.
+- Rollback: revert PR #38 if cluster click or source-overlay reset breaks destination selection.
+- Status: awaiting PR checks and Pages deployment.
+

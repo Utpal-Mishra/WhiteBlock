@@ -50,3 +50,9 @@
 - Guidance: prioritize Wicklow Town, Greystones, Arklow, Glendalough/Laragh, Brittas Bay and inland towns for access/stay/entrance verification.
 - Guardrail: do not promote OSM unknown/customer/private/permit-only parking to unrestricted public parking; on-site signage overrides general rules.
 - Action: enrich individual sites with maximum stay and tariff only after matching official evidence to location.
+
+## REC-20261020-CL01 — Use zoom-adaptive location aggregation
+- Recommendation: preserve county and locality aggregation at overview zoom levels; display one count for nearby parking *locations*, not available bays.
+- Detailed mode: reveal distinct ranked parking IDs and actual coordinates as zoom permits; keep source evidence and live availability indicators separate.
+- Interaction: tapping a cluster progressively zooms; do not scatter markers to artificial coordinates or leave previous destination ranks on national map.
+

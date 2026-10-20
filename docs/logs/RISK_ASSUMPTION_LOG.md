@@ -90,3 +90,10 @@
 - R3 temporary/seasonal coastal closures: medium/high; method check current on-site rules and event notices; mitigation timestamp rule evidence, no blanket year-round access promises.
 - R4 Overpass timeout: medium/medium; method inspect hourly build logs; mitigation remove optional snapshot and show source-unavailable state, no fake fallbacks.
 - R5 double counting Bray: high/medium if unmitigated; mitigation remove the existing 5 km Bray circle from Wicklow data and unit-test.
+
+## RISK-20261020-CL01 — Stale overlays and icon collisions
+- Risk: ranked MapLibre circles may remain after overview transition despite Leaflet layer cleanup. Impact: phantom Cork parking dots and implied extra availability. Mitigation: source reset + generation cancellation + browse gating; test with source-nonavailable overlays.
+- Risk: clusters misinterpreted as available parking *spaces*. Mitigation: document as counted mapped parking locations, not vacant bays.
+- Risk: visual collisions within dense areas near zoom 17. Mitigation: pixel-connected clusters below zoom 17, preserve mapped locations at detailed zoom; verify on narrow mobile screens.
+- Risk: differing asynchronous overlay and basemap events. Mitigation: cache-busted GL loader, CI regressions and pending manual mobile smoke validation.
+

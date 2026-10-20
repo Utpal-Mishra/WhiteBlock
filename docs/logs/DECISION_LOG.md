@@ -69,3 +69,10 @@
 - Identified root cause: the older `web/app.js` coverage-area list still contained Bray even though the newer Ireland switcher, Discover and Inventory Coverage were already county-normalized.
 - Action: remove only that legacy coverage marker and stale status copy; retain destination search and OSM Bray overlap exclusion. No changes to capacity, pricing, evidence, availability or geolocation.
 - Status: proposed fix on `fix/remove-legacy-bray-region-marker-20261020`; QA and production verification required.
+
+## DEC-20261020-CL01 — Two-layer clustering without inventing locations
+- Decision: keep existing all-inventory Leaflet clustering and add zoom-aware grouping to the separate MapLibre ranked-results overlay; suppress ranked overlay in Ireland/county browsing.
+- Alternative rejected: shift map coordinates to avoid visual overlap or expose multiple numbered circles at small map scales; these misstate actual site positions.
+- Thresholds: 56px connected-distance at zoom <17; polygons at >=14; higher zoom keeps per-location rank.
+- Status: implementation on PR #38, subject to CI/mobile acceptance.
+

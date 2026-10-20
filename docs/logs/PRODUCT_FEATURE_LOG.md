@@ -64,3 +64,10 @@
 - Bray remains a named Wicklow locality and searchable destination; curated parking evidence and Wicklow county aggregation are unchanged.
 - Implementation: `web/app.js` legacy marker/status cleanup; cache version bump for initial HTML entry.
 - Status: awaiting PR validation; no standalone Bray region/filter expected.
+
+## FEAT-20261020-CL01 — Map aggregation and expanding ranked markers
+- User report: mobile Cork numbered 01–07 map symbols overlap when zooming out, including Ireland coverage mode.
+- Behaviour: no destination ranks over national/region county cards; low-zoom clustered badge shows aggregate parking-location count, tap zooms; higher zoom reveals 01–07 at true positions.
+- Existing large-inventory MarkerCluster remains available and sourced independently.
+- Status: PR #38 pending CI and publication smoke check.
+

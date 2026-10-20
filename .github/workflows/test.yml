@@ -63,6 +63,7 @@ jobs:
           node --check web/kildare-asset-enrichment.js
           node --check web/destination-parking-focus.js
           node --check web/result-card-polish.js
+          node --check web/parking-gl-overlay.js
           node --check web/inventory-map-layer.js
           node --check web/map-fix.js
           node --check web/map-engine-v2.js
@@ -77,6 +78,9 @@ jobs:
           node --check web/dublin-restriction-integration.js
           node --check web/dublin-venue-knowledge.js
           python -m compileall -q api scripts
+
+      - name: Test ranked map marker clustering
+        run: node tests/test_ranked_gl_clustering.js
 
       - name: Run tests
         run: python -m unittest discover -s tests -p 'test_*.py'

@@ -34,3 +34,8 @@
 - Learning: public/open mapped parking can seed a practical geographic registry independently of live operators. Council rules are location-specific; catalogue of physical parking is not a claim of driver eligibility.
 - Evidence: County Wicklow parking by-laws and OSM County Wicklow relation 282760 (see docs/WICKLOW_NETWORK.md).
 - Next validation: identify what proportion of real visitor/retail/rural parking remains unrecorded, before prioritising partnerships.
+
+## BUS-20261020-CL01 — Map zoom clarity is part of data trust
+- Observation: showing multiple overlapping parking labels at Ireland scale undermines clarity even where site data are valid.
+- Learning: match UI granularity to scale: counties at Ireland view, towns at county view, individual parking locations near a destination.
+- Constraint: count mapped parking locations only; no claim of live vacant spaces without provider-backed data.

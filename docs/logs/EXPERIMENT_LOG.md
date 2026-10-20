@@ -31,3 +31,10 @@
 - Hypothesis: an OSM county snapshot plus Bray deduplication will expose useful parking records in major and rural localities without false occupancy.
 - Method: unit-test boundary selectors, null policy, open-way geometry and Bray radius; after deployment compare five sample destination queries and counts to real source records.
 - Pass gate: no fabricated live figures; no Bray duplication; exact county attribution; usable town drill-down.
+
+## EXP-20261020-CL01 — Seven-marker zoom regression
+- Hypothesis: a 56px projected-distance cluster threshold and zoom-17 release eliminate mobile overlap without moving physical locations.
+- Procedure: mock Leaflet+MapLibre in Node; test Cork seven-location fixture at national view, zoom 7, cluster tap, zoom 17, return to Ireland and county browse.
+- Success: zero stale ranked features in browse; one count-7 feature at low zoom; seven ranked points at detailed zoom; prior IDs and 01–07 ranking retained.
+- Caveat: additional hands-on Android pinch-zoom/pan and basemap-mode smoke tests required.
+

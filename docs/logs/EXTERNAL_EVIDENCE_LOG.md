@@ -39,3 +39,8 @@
 - Wicklow Town: https://wicklowtown.ie/find-us
 - Glendalough: https://glendalough.ie/transport/parking-in-glendalough/
 - Important: links support candidate/rule research, not blanket current pricing or live vacancy claims.
+
+## EVID-20261020-CL01 — Mobile visual defect supplied by project owner
+- Evidence type: two Android mobile screenshots, 20 October 2026, showing Ireland connected coverage while numbered Cork ranks 01–07 overlap at city and national zoom levels.
+- Root cause: ranked MapLibre overlay mounted independently of Leaflet county overview cleanup; code inspection confirmed missing browse-mode guard.
+- Confidence: high match to reported symptoms; deployment screenshot confirmation outstanding.

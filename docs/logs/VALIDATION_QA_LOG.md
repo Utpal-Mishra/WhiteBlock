@@ -108,3 +108,10 @@
 - Asserts: no Bray root-level map coverage marker, no Bray top-level Discover or Ireland switcher option, Wicklow filter present, Bray-to-Wicklow Discover normalization preserved, pilot source remains associated with Wicklow, and Bray Seafront remains searchable.
 - Requires: GitHub Actions green + post-deployment manual review of Ireland -> Wicklow -> Bray -> parking locations and fresh cache on mobile.
 - Status: awaiting CI and UI smoke test.
+
+## QA-20261020-CL01 — Overlapping ranked markers
+- Automated: Node MapLibre/Leaflet test covers overview empty, 7→1 at low zoom, tap zoom, 1→7 at zoom 17, and county/browse clearing with preserved rank strings.
+- Manual queue: mobile Ireland → Cork → select a destination with nearby parking → pinch outward until a count badge replaces overlapping ranks → zoom in until all numbered real sites return.
+- Also test: switch Street/Terrain/Satellite, return to Ireland while fetch pending, verify no stale 01–07 and no change to inventory/live occupancy numbers.
+- CI follow-up: older asset-version assertion updated in `tests/test_parking_geometry_layer.py`.
+- Status: awaiting CI and device-level visual confirmation.

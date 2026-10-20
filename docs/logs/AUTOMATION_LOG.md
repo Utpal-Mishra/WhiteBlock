@@ -26,3 +26,10 @@
 - Source refresh: existing Pages deployment workflow invokes County Wicklow OSM builder; validates relation ID, source integrity, non-live semantics and Bray exclusion.
 - Failure path: no snapshot released if the external feed fails. No invented fallback counts.
 - Evidence: GitHub Actions log and per-snapshot generated_at/source metadata.
+
+## AUTO-20261020-CL01 — Regression gating for ranking/map clusters
+- Trigger: PR #38 adds `node tests/test_ranked_gl_clustering.js` to CI and a JavaScript syntax check for `web/parking-gl-overlay.js`.
+- Checks: browse-mode empty overlay; seven sample locations merge into one at low zoom, expand into seven at zoom 17, and cluster tap zooms rather than fabricates a location.
+- Source/data: deterministic local fixture only, no live occupancy feed or external Overpass needed in CI.
+- Status: CI pending at entry creation.
+
