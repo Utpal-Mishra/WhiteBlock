@@ -15,7 +15,7 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('state.overviewMode = true', js)
         self.assertIn('Ireland · Connected parking intelligence', js)
         self.assertIn('Connected parking across Ireland', js)
-        self.assertIn('Cork · Kildare · Dublin · Wicklow connected', js)
+        self.assertIn('Object.values(CONNECTED_REGIONS).map(region => region.label)', js)
         self.assertIn('snapshotRows', js)
         self.assertIn('publishedLocationCount', js)
         self.assertIn('wbOverviewPane', js)
@@ -62,7 +62,7 @@ class IrelandOverviewTests(unittest.TestCase):
     def test_runtime_loads_overview_assets(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
         self.assertIn('ireland-overview.css?v=20261018-1', runtime)
-        self.assertIn('ireland-overview.js?v=20261020-1', runtime)
+        self.assertIn('ireland-overview.js?v=20261020-2', runtime)
         self.assertIn('loadWhiteblockIrelandOverview()', runtime)
 
 
