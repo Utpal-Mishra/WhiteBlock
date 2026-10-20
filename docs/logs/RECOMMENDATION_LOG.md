@@ -92,3 +92,10 @@
 - Recommendation: all quantity markers require a noun; all recommendation positions require an ordinal prefix; all availability numbers require a live/free-space qualifier.
 - Preferred vocabulary: `OPTIONS`, `LOCATIONS`, `#N`, `N FREE`, and `LIVE —` when no live feed exists.
 - Status: adopted.
+
+## REC-20261020-MAP07 — Keep Hybrid visible; hide secondary map modes under +
+- Date: 2026-10-20.
+- Recommendation: the toolbar should communicate one clear product default rather than show several equally weighted basemap choices.
+- Adopted UX: `Hybrid` + `+`; the menu contains Street, Terrain, Satellite, Street View and Parking Layout.
+- Reason: preserves maximum map area on mobile and aligns the visible control with the actual startup state.
+- Status: adopted.
