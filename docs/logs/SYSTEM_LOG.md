@@ -82,3 +82,12 @@
 - Recovery: WebGL/vector failure -> OSM raster Street -> CARTO raster Street when the visible tile grid errors or stalls.
 - Geometry repair: Leaflet size invalidation and MapLibre resize are run together after responsive resize, orientation/visibility changes, browse transitions, data-ready events and parking focus.
 - Status: implemented; CI/deployed mobile confirmation pending.
+
+## SYS-20261020-MAP05 — Selected-region administrative boundary overlay
+- Date: 2026-10-20.
+- System change: county focus now loads a dedicated GeoJSON administrative-boundary layer and renders it beneath parking markers but above the basemap.
+- State: `state.regionBoundaryLayer` is independent from parking, coverage and recommendation layers.
+- Transition rules: Ireland overview clears the selected boundary; selecting Cork/Kildare/Dublin/Wicklow clears the previous outline and draws the newly selected county; destination selection clears the county outline.
+- Camera: county parking points still fit immediately, then the exact county boundary may refine the frame when available.
+- Failure mode: if boundary GeoJSON is unavailable, parking inventory remains usable and the existing county parking fit is retained.
+- Status: implemented on feature branch.
