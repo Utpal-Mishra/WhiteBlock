@@ -10,3 +10,9 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Next step: separately validate local parking operators, retail-customer restrictions, permissions, public/permit access and booking eligibility.
 - Risk mitigation: keep commercial status and public access as separate fields; require documentary evidence before asserting any operator relationship.
 - Status: evidence inventory only.
+
+## MERCH-20261020-COV04 — No partner telemetry inferred by map coverage
+- County overview badges display mapped supply, not confirmed partner inventory or bookable/vacant bays.
+- Merchant/operator integration remains separate: publish live availability only after partner/data-source agreement and trustworthy timestamps; county map rendering does not create partner commitments.
+- No merchant fulfilment workflow or booking capability changed.
+
