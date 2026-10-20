@@ -337,8 +337,38 @@
   function renderParkingAreas() {
     ensurePanes();
     clearLayer(parkingAreaLayer);
-    parkingAreaLayer = L.layerGroup().addTo(map);
+    parkingAreaLayer = null;
+    const policy = window.WHITEBLOCK_MARKER_POLICY;
+    // The MapLibre ranked overlay owns all numbers, circles and polygons when
+    // available. Never draw a second set of Leaflet markers beneath it.
+    if (policy.browseActive(state) || !state.destination ||
+        window.__WHITEBLOCK_PARKING_GL_OVERLAY__) return;
     const rows = resultItems();
+    const zoom = map.getZoom();
+    const groups = policy.groupNearby(rows, zoom,
+      item => map.project(L.latLng(Number(item.lat), Number(item.lng)), zoom),
+      { radiusPx: policy.rankedRadiusPx, detailZoom: policy.detailZoom });
+    parkingAreaLayer = L.layerGroup().addTo(map);
+    if (zoom < policy.detailZoom) {
+      // Fallback renderer if the GL overlay has not loaded: one zoomable
+      // aggregate per nearby group, never seven overlapping raw points.
+      groups.forEach(indices => {
+        const members = indices.map(index => rows[index]);
+        const lat = members.reduce((sum, item) => sum + Number(item.lat), 0) / members.length;
+        const lng = members.reduce((sum, item) => sum + Number(item.lng), 0) / members.length;
+        const count = members.length;
+        L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: "wb-parking-cluster-wrapper",
+            html: `<div class="wb-parking-cluster"><span>${count}</span><small>parking</small></div>`,
+            iconSize: [54, 54], iconAnchor: [27, 27]
+          })
+        }).addTo(parkingAreaLayer)
+          .bindTooltip(count + " mapped parking locations · tap to zoom", { className: "wb-tooltip" })
+          .on("click", () => map.flyTo([lat, lng], Math.min(policy.detailZoom, zoom + 2), { duration: .7 }));
+      });
+      return;
+    }
 
     rows.forEach((item, index) => {
       const selected = item.id === state.selectedId;
@@ -613,6 +643,7 @@
     window.setTimeout(resizeBasemap, 30);
   });
   document.addEventListener("whiteblock:kildare-attributes-ready", renderParkingAreas);
+  map.on("zoomend", renderParkingAreas);
   document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(resizeBasemap, 30));
 
   document.addEventListener("click", event => {
