@@ -8,7 +8,7 @@
   const CLUSTER_JS = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js";
   const CLUSTER_CSS = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css";
   const CLUSTER_DEFAULT_CSS = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css";
-  const STYLE_URL = "./inventory-map-layer.css?v=20260921-1";
+  const STYLE_URL = "./inventory-map-layer.css?v=20261020-2";
 
   state.inventoryMarkerLayer = null;
   state.inventoryMarkerLookup = new Map();
@@ -152,7 +152,7 @@
     const size = count >= 1000 ? "xl" : count >= 100 ? "lg" : count >= 20 ? "md" : "sm";
     return L.divIcon({
       className: "wb-parking-cluster-wrapper",
-      html: `<div class="wb-parking-cluster ${size}"><span>${count.toLocaleString()}</span><small>parking</small></div>`,
+      html: `<div class="wb-parking-cluster locations ${size}"><span>${count.toLocaleString()}</span><small>locations</small></div>`,
       iconSize: [54, 54],
       iconAnchor: [27, 27]
     });
