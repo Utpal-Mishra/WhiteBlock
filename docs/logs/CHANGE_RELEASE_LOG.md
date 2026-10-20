@@ -100,3 +100,9 @@
 
 ### Scope extension — renderer ownership — 2026-10-20
 - Changed Leaflet `map-engine-v2.js` ranked marker fallback and GL readiness handshake to prevent duplicate physical parking markers during loading and zoom changes. This is included in PR #39.
+
+## RELEASE-20261020-MAP02 reconciliation — merged
+- PR #39 merged to `main` on 2026-10-20, merge SHA `1f42ba2db19bb7ccddeaf9b78e78a1cd5af13562`.
+- Branch CI `39459853465`: success, including Python suite, Node all-region/future-region policy test, ranked GL tests and JavaScript syntax.
+- Main Pages deployment: `39459997110` started; production publication/device visual verification still pending at reconciliation time.
+- Older releases #37/#38 were merged and their respective CI passed. This entry supersedes historical in-progress status notes without erasing them.
