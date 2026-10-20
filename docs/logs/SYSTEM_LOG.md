@@ -68,3 +68,9 @@
 - Change: replace forced schematic with Leaflet raster street basemap, keep map overlays, preserve toolbar operation, and offer alternate raster street provider after repeated tile errors.
 - Status: PR #40 / release verification pending.
 
+## SYS-20261020-COV04 — Ireland-to-county all-parking map
+- System transition: national overview -> selected county full inventory -> zoom-adaptive parking site clusters/individual points.
+- Parent: `web/ireland-overview.js` owns national/county map presentation; region adapters provide source-backed inventories. County mode never manufactures a destination.
+- New county direct renderer `renderCountyParkingMarkers` reuses existing marker clustering and per-site tooltips.
+- Optional Parking Layout is dismissed on all national/county selection events so the geographic street map is visible.
+
