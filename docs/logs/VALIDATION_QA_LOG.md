@@ -149,3 +149,7 @@
 - Negative QA: no fake vacant-bay count where live data absent; no forced schematic overlay; no marker or source duplication; map not resetting while user pans.
 - Status: pending CI and live device check.
 
+## QA-20261020-COV04 — Automated checks passed; mobile gate open
+- PR #41 branch suite `39472300266`: PASS. Main suite `39472445119`: PASS.
+- Regression asserts source-dependent national badges, Cork and Dublin direct all-site map bounds, detailed marker expansion, full-county Wicklow fit after Bray-only loading, Ireland reset and non-invented live vacancy.
+- Pending: GitHub Pages `39472445106` completion; manual Android check of visible actual street tiles, touch interactions, mobile count labels and four connected county views.
