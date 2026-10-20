@@ -28,6 +28,7 @@
 .wb-inventory-marker.restricted { border-color: rgba(143,163,154,.34); color: #8FA39A; opacity: .78; }
 
 .wb-parking-cluster {
+  position: relative;
   width: 54px;
   height: 54px;
   border-radius: 50%;
@@ -40,8 +41,30 @@
   color: #EDF7F1;
   backdrop-filter: blur(8px);
 }
+.wb-parking-cluster::before,
+.wb-parking-cluster::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,245,107,.22);
+  background: rgba(11,23,18,.42);
+  z-index: -1;
+  pointer-events: none;
+}
+.wb-parking-cluster::before { transform: translate(-6px, -5px); }
+.wb-parking-cluster::after { transform: translate(6px, 5px); }
+.wb-parking-cluster span,
+.wb-parking-cluster small { position: relative; z-index: 2; }
 .wb-parking-cluster span { font: 800 13px/1 "Manrope", system-ui, sans-serif; }
-.wb-parking-cluster small { margin-top: 3px; color: #78E6AA; font: 600 7px/1 "DM Sans", system-ui, sans-serif; text-transform: uppercase; letter-spacing: .06em; }
+.wb-parking-cluster small { margin-top: 3px; color: #78E6AA; font: 700 7px/1 "DM Sans", system-ui, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+.wb-parking-cluster.options {
+  background: rgba(7,17,13,.97);
+  border-color: rgba(200,245,107,.78);
+  box-shadow: 0 10px 24px rgba(0,0,0,.42), inset 0 0 0 4px rgba(200,245,107,.05);
+}
+.wb-parking-cluster.options small { color: #C8F56B; }
+.wb-parking-cluster.locations small { color: #78E6AA; }
 .wb-parking-cluster.md { border-color: rgba(200,245,107,.62); }
 .wb-parking-cluster.lg,
 .wb-parking-cluster.xl { width: 58px; height: 58px; border-color: rgba(241,196,107,.68); }
@@ -93,4 +116,52 @@
   .wb-parking-cluster { width: 48px; height: 48px; }
   .wb-parking-cluster.lg,
   .wb-parking-cluster.xl { width: 52px; height: 52px; }
+}
+
+
+.wb-ranked-option-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+  overflow: visible !important;
+}
+
+.wb-ranked-option-marker {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50% 50% 50% 16%;
+  transform: rotate(-45deg);
+  display: grid;
+  place-items: center;
+  background: var(--wb-option-colour, #78E6AA);
+  border: 3px solid #07110D;
+  box-shadow: 0 8px 22px rgba(0,0,0,.38);
+}
+
+.wb-ranked-option-marker.selected {
+  border-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(200,245,107,.22), 0 8px 24px rgba(0,0,0,.42);
+}
+
+.wb-ranked-option-marker strong {
+  transform: rotate(45deg);
+  color: #07110D;
+  font: 800 11px/1 "Manrope", system-ui, sans-serif;
+}
+
+.wb-ranked-option-marker small {
+  position: absolute;
+  left: 50%;
+  top: 44px;
+  transform: translateX(-50%) rotate(45deg);
+  min-width: max-content;
+  padding: 3px 6px;
+  border: 1px solid rgba(237,247,241,.18);
+  border-radius: 999px;
+  background: rgba(7,17,13,.92);
+  color: #EDF7F1;
+  font: 700 7px/1 "DM Sans", system-ui, sans-serif;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  box-shadow: 0 5px 16px rgba(0,0,0,.25);
 }
