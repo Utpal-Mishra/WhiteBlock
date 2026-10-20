@@ -41,7 +41,7 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
 function loadWhiteblockParkingGeometry() {
   if (document.querySelector('script[data-whiteblock-parking-gl-overlay]')) return;
   const script = document.createElement('script');
-  script.src = './parking-gl-overlay.js?v=20261020-2';
+  script.src = './parking-gl-overlay.js?v=20261020-3';
   script.defer = true;
   script.dataset.whiteblockParkingGlOverlay = 'true';
   document.body.appendChild(script);
@@ -65,7 +65,7 @@ function loadWhiteblockMapEngineV2() {
 function loadWhiteblockInventoryMapLayer() {
   if (document.querySelector('script[data-whiteblock-inventory-map]')) return;
   const script = document.createElement('script');
-  script.src = './inventory-map-layer.js?v=20261018-1';
+  script.src = './inventory-map-layer.js?v=20261020-2';
   script.defer = true;
   script.dataset.whiteblockInventoryMap = 'true';
   document.body.appendChild(script);
@@ -249,7 +249,7 @@ function loadWhiteblockIrelandOverview() {
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20261020-1';
+  script.src = './ireland-overview.js?v=20261020-2';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);
