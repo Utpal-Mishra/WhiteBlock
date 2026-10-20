@@ -67,6 +67,7 @@ const runtime = fs.readFileSync(path.join(root, "web/runtime-config.js"), "utf8"
 const inventoryJs = fs.readFileSync(path.join(root, "web/inventory-map-layer.js"), "utf8");
 const ranked = fs.readFileSync(path.join(root, "web/parking-gl-overlay.js"), "utf8");
 const legacyMap = fs.readFileSync(path.join(root, "web/map-engine-v2.js"), "utf8");
+const olderMapFix = fs.readFileSync(path.join(root, "web/map-fix.js"), "utf8");
 const overview = fs.readFileSync(path.join(root, "web/ireland-overview.js"), "utf8");
 assert.ok(index.indexOf("parking-marker-policy.js") < index.indexOf("runtime-config.js"), "policy initializes before map adapters");
 assert.ok(runtime.includes("inventory-map-layer.js?v=20261020-2"));
@@ -81,6 +82,10 @@ assert.ok(legacyMap.includes("window.__WHITEBLOCK_PARKING_GL_OVERLAY__"), "fallb
 assert.ok(legacyMap.includes("policy.groupNearby(rows"), "fallback Leaflet ranked points must still cluster");
 assert.ok(legacyMap.includes('document.addEventListener("whiteblock:ranked-gl-overlay-ready", renderParkingAreas)'), "old fallback clears after GL readiness");
 assert.ok(ranked.includes("whiteblock:ranked-gl-overlay-ready"), "native overlay must announce renderer ownership");
+assert.ok(olderMapFix.includes("window.WHITEBLOCK_MARKER_POLICY?.browseActive(state)"), "older map context haloes must not leak into national/county browse");
+assert.ok(olderMapFix.includes('document.addEventListener("whiteblock:coverage-browse"'), "browse event must clear old map context haloes");
+assert.ok(index.includes("map-fix.js?v=20261020-2"), "mobile clients should load the new map context cleanup");
+
 
 assert.ok(overview.includes("MARKER_POLICY.groupNearby(rows"), "county locality and parking drill-down must cluster");
 assert.ok(overview.includes("registerNewRegionalInventories()"), "future source-backed counties join the national map automatically");
