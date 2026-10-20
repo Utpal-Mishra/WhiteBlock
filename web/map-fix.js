@@ -1,7 +1,7 @@
 // WHITEBLOCK map adapter.
-// Default Street view now mirrors XPLORE's stable architecture:
-// Leaflet owns the map/overlays while MapLibre + OpenFreeMap render the basemap.
-// Raster tiles remain only for explicit Terrain/Satellite modes and emergency fallback.
+// Default Hybrid view uses aerial imagery plus a transparent road/place reference
+// overlay. Leaflet owns the map/overlays while the persistent v3 engine takes
+// long-lived basemap ownership. Street, Terrain and pure Satellite stay optional.
 
 (() => {
   if (typeof L === "undefined" || typeof state === "undefined" || !state.map) return;
@@ -18,8 +18,18 @@
   const OSM = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const OPENTOPO = "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png";
   const ESRI_IMAGERY = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+  const ESRI_HYBRID_OVERLAY = "https://who.maptiles.arcgis.com/arcgis/rest/services/World_Hybrid_Overlay/MapServer/tile/{z}/{y}/{x}";
 
   const layerDefinitions = {
+    hybrid: {
+      label: "Hybrid",
+      className: "wb-map-hybrid",
+      kind: "raster",
+      url: ESRI_IMAGERY,
+      overlayUrls: [ESRI_HYBRID_OVERLAY],
+      maxZoom: 19,
+      attribution: "Tiles &copy; Esri, Maxar, Earthstar Geographics, and GIS User Community"
+    },
     street: { label: "Street", className: "wb-map-street", kind: "vector" },
     terrain: {
       label: "Terrain",
@@ -39,7 +49,7 @@
     }
   };
 
-  let activeLayerKey = "street";
+  let activeLayerKey = "hybrid";
   let activeBasemapLayer = null;
   let vectorEnginePromise = null;
   let vectorAttributionAdded = false;
@@ -199,6 +209,9 @@
     removeBasemap();
     activeBasemapLayer = buildRasterLayer(definition).addTo(map);
     if (typeof activeBasemapLayer.bringToBack === "function") activeBasemapLayer.bringToBack();
+    (definition.overlayUrls || []).forEach(url => {
+      buildRasterLayer({ ...definition, url }).addTo(map);
+    });
     updateLayerButtons(key);
     applyMapTheme(key);
     mapEl.dataset.basemapEngine = "raster";
@@ -321,19 +334,19 @@
     toolbar.className = "wb-map-toolbar";
     toolbar.setAttribute("aria-label", "Map views and street context");
 
-    const streetLayer = layerDefinitions.street;
-    const street = document.createElement("button");
-    street.type = "button";
-    street.className = "wb-map-layer-button wb-map-primary-layer";
-    street.dataset.layer = "street";
-    street.textContent = streetLayer.label;
-    street.setAttribute("aria-pressed", "true");
-    street.addEventListener("click", event => {
+    const primaryLayer = layerDefinitions.hybrid;
+    const primary = document.createElement("button");
+    primary.type = "button";
+    primary.className = "wb-map-layer-button wb-map-primary-layer";
+    primary.dataset.layer = "hybrid";
+    primary.textContent = primaryLayer.label;
+    primary.setAttribute("aria-pressed", "true");
+    primary.addEventListener("click", event => {
       event.preventDefault();
       event.stopPropagation();
-      activateLayer("street");
+      activateLayer("hybrid");
     });
-    toolbar.appendChild(street);
+    toolbar.appendChild(primary);
 
     const moreButton = document.createElement("button");
     moreButton.type = "button";
@@ -350,7 +363,7 @@
     menu.setAttribute("role", "menu");
     menu.setAttribute("aria-label", "Additional map views");
 
-    ["terrain", "satellite"].forEach(key => {
+    ["street", "terrain", "satellite"].forEach(key => {
       const definition = layerDefinitions[key];
       const button = document.createElement("button");
       button.type = "button";
@@ -601,8 +614,8 @@
   normalizeIrelandCoverageLabel();
   loadGuidanceIntelligenceLayer();
 
-  // app.js already starts with a real Leaflet street basemap. Do not create a
-  // second MapLibre basemap here: the persistent map-engine-v3 takes ownership
+  // app.js already starts with a real Leaflet Hybrid basemap. Do not create a
+  // second basemap here: the persistent map-engine-v3 takes ownership
   // on DOMContentLoaded. Keeping one renderer owner avoids Android startup races
   // where overlapping/removing basemap layers can leave a checkerboard of tiles.
   mapEl.dataset.basemapOwner = "map-engine-v3";
