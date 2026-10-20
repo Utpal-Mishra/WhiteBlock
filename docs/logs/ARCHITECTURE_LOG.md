@@ -69,3 +69,10 @@
 - Date: 2026-10-20; status: branch.
 - Pattern: internal state.regionInventories.bray and .wicklow remain separate ingestion pools; presentation aggregates them as County Wicklow, de-duplicates stable IDs and derives locality from Bray metadata.
 - Guardrail: county totals count source assets once; no inferred live occupancy or cross-pilot duplicate representation.
+
+## ARCH-20261020-CL01 — View-state-aware, pixel-distance ranked clusters
+- Model: national county totals → county locality totals → destination-level ranked individual locations.
+- Ranked overlay: groups real location coordinates by 56px projected-screen proximity at zoom below 17, displays one count marker per group and individual numbered markers at zoom 17+; no altered stored positions.
+- Geometry: only show matched/estimated footprint polygons at zoom 14+ and only for non-clustered point groups. County/national browsing renders no destination-rank overlay.
+- Existing Leaflet all-inventory markerCluster layer remains separate; no additional source of parking location counts.
+
