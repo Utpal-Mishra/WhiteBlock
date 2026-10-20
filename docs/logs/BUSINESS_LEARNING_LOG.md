@@ -53,3 +53,10 @@
 - Learning: a county filter should not require a second town/locality tap before parking evidence becomes visible. Cluster where markers collide, reveal actual locations with zoom.
 - Commercial trust: mapped locations are not live vacant bays. Label any live vacancies separately and only where provider-backed records are available.
 
+## BUS-20261020-MAP04 — Map reliability is part of parking trust
+
+- Date: 2026-10-20.
+- Learning: correct inventory counts are not enough if the underlying geographic map appears broken; users cannot trust or interpret spatial coverage when only partial tiles render.
+- Product implication: basemap completeness and recovery must be treated as a core availability requirement, independent of parking-data quality.
+- Architecture implication: graceful degradation must stay geographic; analytical layouts are supplementary rather than substitutes for a failed road map.
+- Status: incorporated into renderer design.
