@@ -15,6 +15,10 @@
   const POINT_CIRCLE = "whiteblock-ranked-parking-point";
   const POINT_LABEL = "whiteblock-ranked-parking-label";
   const MAX_RESULTS = 10;
+  const CLUSTER_RADIUS_PX = 56;
+  const INDIVIDUAL_MARKER_ZOOM = 17;
+  const FOOTPRINT_MIN_ZOOM = 14;
+  const EMPTY_FEATURES = () => ({ type: "FeatureCollection", features: [] });
   const OVERPASS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter"
@@ -27,6 +31,9 @@
   let selectionWrapped = false;
 
   function currentResults() {
+    // County and Ireland browsing show county/locality aggregates, never the
+    // previously ranked Cork destination markers or their footprint polygons.
+    if (!state.destination || state.overviewMode === true || state.regionFocus) return [];
     let rows = [];
     try {
       if (typeof currentData === "function") rows = currentData() || [];
@@ -178,27 +185,81 @@
     return coords;
   }
 
+  function rankedGroupsAtZoom(rows) {
+    const zoom = leafMap.getZoom();
+    const groups = [];
+    const visited = new Set();
+    const points = rows.map(item => leafMap.project(L.latLng(Number(item.lat), Number(item.lng)), zoom));
+
+    rows.forEach((item, index) => {
+      if (visited.has(index)) return;
+      visited.add(index);
+      const members = [index];
+      // For few ranked results, pixel-distance connected components avoid
+      // visually overlapping numbers while keeping distinct mapped positions.
+      if (zoom < INDIVIDUAL_MARKER_ZOOM) {
+        for (let cursor = 0; cursor < members.length; cursor += 1) {
+          const a = points[members[cursor]];
+          for (let other = 0; other < rows.length; other += 1) {
+            if (visited.has(other)) continue;
+            const b = points[other];
+            if (Math.hypot(a.x - b.x, a.y - b.y) <= CLUSTER_RADIUS_PX) {
+              visited.add(other);
+              members.push(other);
+            }
+          }
+        }
+      }
+      groups.push(members);
+    });
+    return groups;
+  }
+
   function featureCollection(rows, mapped = new Map()) {
     const features = [];
-    rows.forEach((item, index) => {
+    const zoom = leafMap.getZoom();
+    const groups = rankedGroupsAtZoom(rows);
+
+    groups.forEach(members => {
+      if (members.length > 1) {
+        const membersRows = members.map(index => rows[index]);
+        const lat = membersRows.reduce((sum, item) => sum + Number(item.lat), 0) / membersRows.length;
+        const lng = membersRows.reduce((sum, item) => sum + Number(item.lng), 0) / membersRows.length;
+        features.push({
+          type: "Feature",
+          properties: {
+            kind: "cluster",
+            count: members.length,
+            rank: String(members.length),
+            colour: "#78E6AA"
+          },
+          geometry: { type: "Point", coordinates: [lng, lat] }
+        });
+        return;
+      }
+
+      const index = members[0];
+      const item = rows[index];
       const coords = mapped.get(item.id) || estimatedRing(item);
       const isMapped = mapped.has(item.id);
       const rank = String(index + 1).padStart(2, "0");
       const selected = item.id === state.selectedId;
       const colour = statusColour(item);
-      features.push({
-        type: "Feature",
-        properties: {
-          kind: "polygon",
-          parking_id: item.id,
-          rank,
-          name: item.name || "Parking",
-          selected: selected ? 1 : 0,
-          mapped: isMapped ? 1 : 0,
-          colour
-        },
-        geometry: { type: "Polygon", coordinates: [coords] }
-      });
+      if (zoom >= FOOTPRINT_MIN_ZOOM) {
+        features.push({
+          type: "Feature",
+          properties: {
+            kind: "polygon",
+            parking_id: item.id,
+            rank,
+            name: item.name || "Parking",
+            selected: selected ? 1 : 0,
+            mapped: isMapped ? 1 : 0,
+            colour
+          },
+          geometry: { type: "Polygon", coordinates: [coords] }
+        });
+      }
       features.push({
         type: "Feature",
         properties: {
@@ -282,9 +343,9 @@
           id: POINT_CIRCLE,
           type: "circle",
           source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "point"],
+          filter: ["any", ["==", ["get", "kind"], "point"], ["==", ["get", "kind"], "cluster"]],
           paint: {
-            "circle-radius": ["case", ["==", ["get", "selected"], 1], 18, 15],
+            "circle-radius": ["case", ["==", ["get", "kind"], "cluster"], 22, ["==", ["get", "selected"], 1], 18, 15],
             "circle-color": ["get", "colour"],
             "circle-stroke-color": ["case", ["==", ["get", "selected"], 1], "#FFFFFF", "#07110D"],
             "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 4, 3],
@@ -297,7 +358,7 @@
           id: POINT_LABEL,
           type: "symbol",
           source: SOURCE_ID,
-          filter: ["==", ["get", "kind"], "point"],
+          filter: ["any", ["==", ["get", "kind"], "point"], ["==", ["get", "kind"], "cluster"]],
           layout: {
             "text-field": ["get", "rank"],
             "text-size": 13,
@@ -329,7 +390,7 @@
     const generation = ++renderGeneration;
     const rows = currentResults();
     if (!rows.length) {
-      updateSource({ type: "FeatureCollection", features: [] });
+      updateSource(EMPTY_FEATURES());
       return;
     }
 
@@ -389,6 +450,15 @@
     };
     glMap.on?.("style.load", onStyleReady);
     glMap.on?.("idle", onStyleReady);
+    glMap.on?.("click", POINT_CIRCLE, event => {
+      const feature = event?.features?.[0];
+      if (feature?.properties?.kind !== "cluster" || !state.destination || state.overviewMode || state.regionFocus) return;
+      const coords = feature.geometry?.coordinates;
+      if (!Array.isArray(coords) || coords.length < 2) return;
+      // Zoom towards the real locations in this cluster; the zoomend handler
+      // rebuilds individual ranks as they become spatially distinguishable.
+      leafMap.flyTo([Number(coords[1]), Number(coords[0])], Math.min(INDIVIDUAL_MARKER_ZOOM, leafMap.getZoom() + 2), { animate: true });
+    });
     window.setTimeout(onStyleReady, 100);
     wrapSelection();
     renderOverlay({ fit: true });
@@ -399,6 +469,11 @@
     renderOverlay({ fit: true });
   }, 120));
   document.addEventListener("whiteblock:kildare-attributes-ready", () => window.setTimeout(() => renderOverlay({ fit: false }), 100));
+  document.addEventListener("whiteblock:coverage-browse", () => {
+    // Remove all ranked circles, number labels and inferred footprints at once.
+    ++renderGeneration; // Cancel an in-flight geometry fetch from a prior destination.
+    updateSource(EMPTY_FEATURES());
+  });
   document.addEventListener("click", event => {
     if (event.target.closest?.("#search-button") || event.target.closest?.("#destination-suggestions") || event.target.closest?.(".chip")) {
       window.setTimeout(() => renderOverlay({ fit: true }), 650);
