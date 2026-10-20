@@ -137,3 +137,11 @@
 - Risk: boundary layer obscures map content.
 - Mitigation: fill opacity 0.045, non-interactive pane below parking footprint/point layers.
 - Status: controlled.
+
+## RISK-20261020-MAP06 — Cluster count confused with rank or vacant spaces
+- Date: 2026-10-20.
+- Risk: users may interpret `3` as third-best parking or three free bays instead of three grouped locations.
+- Impact: high for decision confidence.
+- Mitigation: `3 OPTIONS` in search mode, `3 LOCATIONS` in browse mode, `#3` for rank and separate `N FREE` availability label.
+- Additional risk: unknown availability could be read as zero. Mitigation: use `LIVE —`, never `0 FREE` when the feed is absent.
+- Status: mitigated.
