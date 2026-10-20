@@ -83,7 +83,7 @@ jobs:
           for key, (label, iso2, relation_id) in regions.items():
               url = (
                   "https://raw.githubusercontent.com/hyperknot/country-levels-export/"
-                  f"{commit}/geojson/high/iso2/IE/{iso2}.geojson"
+                  f"{commit}/geojson/medium/iso2/IE/{iso2}.geojson"
               )
               request = urllib.request.Request(url, headers={"User-Agent": "WHITEBLOCK/1.0 boundary fallback"})
               with urllib.request.urlopen(request, timeout=30) as response:
