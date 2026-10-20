@@ -865,10 +865,8 @@
     // and show their clustered real coordinates immediately. No invented
     // destination and no intermediate locality-only map are required.
     document.dispatchEvent(new CustomEvent("whiteblock:coverage-browse", { detail: { scope: "region", region: key } }));
-    const rows = renderCountyParkingMarkers(key, { fit: false });
-    void renderRegionBoundary(key, { fit: true }).then(drawn => {
-      if (!drawn && state.regionFocus === key && !state.overviewMode) fitCountyParking(key, rows);
-    });
+    const rows = renderCountyParkingMarkers(key, { fit: true });
+    void renderRegionBoundary(key, { fit: true });
     // A locality pilot may load before the larger county snapshot (e.g. Bray
     // before County Wicklow). The administrative border remains the camera
     // frame, while late parking data only refreshes the markers inside it.
@@ -975,12 +973,8 @@
     } else if (state.regionFocus && !state.regionSubareaGroup) {
       const key = state.regionFocus;
       const shouldFit = state.regionPendingFit === key;
-      const rows = renderCountyParkingMarkers(key, { fit: false });
-      if (shouldFit) {
-        void renderRegionBoundary(key, { fit: true }).then(drawn => {
-          if (!drawn && state.regionFocus === key && !state.overviewMode) fitCountyParking(key, rows);
-        });
-      }
+      const rows = renderCountyParkingMarkers(key, { fit: shouldFit });
+      if (shouldFit) void renderRegionBoundary(key, { fit: true });
       if (rows.length && Array.isArray(state.regionInventories[key]) &&
           state.regionInventories[key].length &&
           Array.isArray(snapshotFor(key)?.locations)) {
