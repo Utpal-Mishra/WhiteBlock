@@ -86,3 +86,9 @@
 - Do not draw a synthetic border from parking-marker extent.
 - Keep the outline visually strong enough to survive bright Street tiles while the fill remains subtle enough not to obscure roads or parking markers.
 - Status: adopted.
+
+## REC-20261020-MAP06 — Never show unexplained numbers on parking markers
+- Date: 2026-10-20.
+- Recommendation: all quantity markers require a noun; all recommendation positions require an ordinal prefix; all availability numbers require a live/free-space qualifier.
+- Preferred vocabulary: `OPTIONS`, `LOCATIONS`, `#N`, `N FREE`, and `LIVE —` when no live feed exists.
+- Status: adopted.
