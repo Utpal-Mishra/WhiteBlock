@@ -130,3 +130,12 @@
 - Feature branch test run `39472300266`: SUCCESS. Main branch test run `39472445119`: SUCCESS.
 - Pages deployment run `39472445106` launched at merge; actual live phone visual QA must be checked when publishing completes.
 - All 15+ granular project logs were updated with architecture, data, UX, evidence, risks, test coverage and expansion rules.
+
+## RELEASE-20261020-MAP04 — Mobile Street tile-integrity repair
+
+- Date: 2026-10-20.
+- Branch: `fix/mobile-map-tile-integrity-2026-10-20`.
+- Code: `web/map-fix.js`, `web/map-engine-v2.js`, runtime/index cache keys and map regression tests.
+- Behaviour: eliminates duplicate startup basemap creation; repairs map geometry on responsive/state changes; fails over stalled/partial raster grids automatically.
+- Data: no inventory/evidence changes.
+- Status: fix branch implemented; PR/CI/Pages/device validation pending.
