@@ -162,3 +162,12 @@
 - User-visible result: quantity clusters, ordinal ranks and live availability now have distinct visual/label semantics.
 - Data semantics: unchanged.
 - Status: feature branch implemented; CI/Pages/mobile review pending.
+
+## RELEASE-20261020-MAP07 — Default Hybrid basemap
+- Date: 2026-10-20.
+- Branch: `feat/default-hybrid-map`.
+- PR: #45.
+- Changed: initial Leaflet first-paint map, persistent MapLibre basemap, compact toolbar, Parking Layout default-state logic, map-context styling, cache keys and regression tests.
+- User-visible result: labelled aerial Hybrid is shown by default; all other modes are under +.
+- Data semantics: unchanged.
+- Status: feature branch implemented; CI/Pages/mobile validation pending.
