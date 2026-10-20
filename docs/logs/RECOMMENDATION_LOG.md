@@ -79,3 +79,10 @@
 - Renderer rule: maintain one basemap owner and keep analytical Parking Layout user-invoked.
 - Longer-term recommendation: before material traffic scale, replace best-effort public tile dependencies with a production map provider/hosting contract and explicit SLA/usage terms.
 - Status: adopted.
+
+## REC-20261020-MAP05 — Use exact administrative outlines for region focus
+- Date: 2026-10-20.
+- Recommendation: when a county filter is active, keep the selected county border visible throughout county-level parking exploration so spatial context is unambiguous.
+- Do not draw a synthetic border from parking-marker extent.
+- Keep the outline visually strong enough to survive bright Street tiles while the fill remains subtle enough not to obscure roads or parking markers.
+- Status: adopted.
