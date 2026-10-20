@@ -286,6 +286,9 @@
         return data;
       })
       .catch(error => {
+        // Allow a later region selection to retry after a transient local-file
+        // or network failure instead of caching a failed boundary request forever.
+        regionBoundaryPromise = null;
         console.warn("WHITEBLOCK selected-region boundary unavailable", error);
         return null;
       });
