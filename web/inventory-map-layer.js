@@ -16,7 +16,7 @@
   state.inventoryMarkerControl = null;
 
   function coverageBrowseActive() {
-    return state.overviewMode === true || Boolean(state.regionFocus);
+    return window.WHITEBLOCK_MARKER_POLICY.browseActive(state);
   }
 
   function setControlVisibility(visible) {
@@ -243,8 +243,8 @@
           chunkedLoading: true,
           chunkInterval: 80,
           chunkDelay: 30,
-          maxClusterRadius: 46,
-          disableClusteringAtZoom: 17,
+          maxClusterRadius: POLICY.inventoryRadiusPx,
+          disableClusteringAtZoom: POLICY.detailZoom,
           spiderfyOnMaxZoom: true,
           showCoverageOnHover: false,
           removeOutsideVisibleBounds: true,
