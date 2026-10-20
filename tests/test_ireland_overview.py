@@ -35,7 +35,7 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('regionKey === "bray" ? "wicklow"', discover)
         self.assertIn('const bray = state.regionInventories?.bray || [];', overview)
         self.assertIn('region: "Wicklow"', bray)
-        self.assertIn('app.js?v=20261020-2', index)
+        self.assertIn('app.js?v=20261020-3', index)
 
     def test_live_availability_is_not_inferred(self):
         js = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
