@@ -402,6 +402,27 @@
     return "#F1C46B";
   }
 
+  function rankedAvailabilityLabel(item) {
+    const available = Number(item?.available);
+    return Number.isFinite(available) && available >= 0
+      ? `${Math.round(available)} FREE`
+      : "LIVE —";
+  }
+
+  function rankedOptionIcon(item, index, selected) {
+    const rank = `#${index + 1}`;
+    const availability = rankedAvailabilityLabel(item);
+    const colour = statusColour(item);
+    return L.divIcon({
+      className: "wb-ranked-option-wrapper",
+      html: `<div class="wb-ranked-option-marker${selected ? " selected" : ""}" style="--wb-option-colour:${colour}">
+        <strong>${rank}</strong><small>${availability}</small>
+      </div>`,
+      iconSize: [54, 54],
+      iconAnchor: [27, 27]
+    });
+  }
+
   function resultItems() {
     try {
       if (typeof currentData === "function") {
@@ -483,11 +504,11 @@
         L.marker([lat, lng], {
           icon: L.divIcon({
             className: "wb-parking-cluster-wrapper",
-            html: `<div class="wb-parking-cluster"><span>${count}</span><small>parking</small></div>`,
-            iconSize: [54, 54], iconAnchor: [27, 27]
+            html: `<div class="wb-parking-cluster options"><span>${count}</span><small>options</small></div>`,
+            iconSize: [58, 58], iconAnchor: [29, 29]
           })
         }).addTo(parkingAreaLayer)
-          .bindTooltip(count + " mapped parking locations · tap to zoom", { className: "wb-tooltip" })
+          .bindTooltip(count + " ranked parking options · tap to separate", { className: "wb-tooltip" })
           .on("click", () => map.flyTo([lat, lng], Math.min(policy.detailZoom, zoom + 2), { duration: .7 }));
       });
       return;
@@ -514,19 +535,19 @@
       );
       polygon.on("click", () => typeof selectParking === "function" && selectParking(item.id));
 
-      L.circleMarker([lat, lng], {
+      L.marker([lat, lng], {
         pane: "wbParkingPointPane",
-        radius: selected ? 9 : 6.5,
-        color: "#07110D",
-        weight: 2.5,
-        fillColor: colour,
-        fillOpacity: 1,
+        icon: rankedOptionIcon(item, index, selected),
+        keyboard: true,
         interactive: true
-      }).bindTooltip(`${escapeHtml(item.name || "Parking")} · option ${index + 1}`, {
-        direction: "top",
-        offset: [0, -10],
-        className: "wb-tooltip"
-      }).on("click", () => typeof selectParking === "function" && selectParking(item.id))
+      }).bindTooltip(
+        `${escapeHtml(item.name || "Parking")} · #${index + 1} · ${rankedAvailabilityLabel(item)}`,
+        {
+          direction: "top",
+          offset: [0, -22],
+          className: "wb-tooltip"
+        }
+      ).on("click", () => typeof selectParking === "function" && selectParking(item.id))
         .addTo(parkingAreaLayer);
     });
 
