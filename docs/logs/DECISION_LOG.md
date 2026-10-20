@@ -51,7 +51,7 @@
 - Status: accepted.
 
 ## DEC-20261019-WW01 — Wicklow inventory separate from Bray pilot
-- Date: 2026-10-19; decision: include exact-county OSM mapped parking outside the existing Bray 5 km evidence pilot, preserving Bray as an independent region.
+- Date: 2026-10-19; decision: include exact-county OSM mapped parking outside the existing Bray 5 km evidence pilot, preserving Bray as a separately sourced locality pilot within County Wicklow.
 - Rationale: broaden useful parking knowledge without duplicating Bray records or implying live availability.
 - Alternatives rejected: approximate rectangular OSM county query; invented capacity/occupancy; wholesale application of town-wide by-law rates; partnership-dependent initial inventory.
 - Risk accepted: current OSM coverage is incomplete, and some records have unresolved access/restriction evidence.
@@ -63,3 +63,9 @@
 - Keep: independent Bray curated source data, IDs, 5 km overlap guard and individual tariff/restriction evidence.
 - Scope: overview, Discover, Inventory Coverage, local city drill-down and national county counts.
 - Status: feature branch, CI/deployment review pending.
+
+## DEC-20261020-WW02 — Eliminate legacy Bray top-level map coverage marker
+- Date: 2026-10-20; decision: only county networks receive top-level map coverage nodes. Bray stays a Wicklow locality and retains its independently sourced seven-asset pilot inventory and search destinations.
+- Identified root cause: the older `web/app.js` coverage-area list still contained Bray even though the newer Ireland switcher, Discover and Inventory Coverage were already county-normalized.
+- Action: remove only that legacy coverage marker and stale status copy; retain destination search and OSM Bray overlap exclusion. No changes to capacity, pricing, evidence, availability or geolocation.
+- Status: proposed fix on `fix/remove-legacy-bray-region-marker-20261020`; QA and production verification required.
