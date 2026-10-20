@@ -118,3 +118,11 @@
 - Ranked GeoJSON properties: `display_rank`, `caption`, `availability_label`, plus existing evidence/status fields.
 - Rendering: cluster quantity is drawn with a dark stacked/ring visual; ordinal rank is prefixed with `#`; availability is rendered as a secondary label below an individual recommendation.
 - Status: accepted/implemented.
+
+## ARCH-20261020-MAP07 — Hybrid is a layered basemap, not a screenshot-style asset
+- Date: 2026-10-20.
+- Hybrid composition: Esri World Imagery as the raster base plus a transparent World Hybrid reference overlay carrying roads/place context.
+- Pure Satellite remains a separate imagery-only mode.
+- Parking markers, recommendation ranks, county boundaries and footprints remain independent layers above the basemap.
+- Runtime does not use Google Maps tiles or copy Google map styling/data.
+- Status: accepted/implemented.
