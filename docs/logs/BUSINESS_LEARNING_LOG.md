@@ -73,3 +73,9 @@
 - Product implication: WHITEBLOCK should never rely on shape/colour alone when multiple parking quantities coexist.
 - Adopted language: destination cluster = `N OPTIONS`; browse/inventory cluster = `N LOCATIONS`; individual recommendation = `#1/#2/#3`; live spaces = separate `N FREE` label.
 - Status: implemented.
+
+## BUS-20261020-MAP07 — Aerial context should be the default parking context
+- Date: 2026-10-20.
+- Learning: parking discovery benefits from seeing real physical land use, road geometry, buildings and access context immediately; a labelled aerial basemap communicates this better than a plain street map for WHITEBLOCK's spatial-intelligence use case.
+- Product implication: Hybrid becomes the default, while Street/Terrain/pure Satellite remain user-selectable.
+- Status: adopted.

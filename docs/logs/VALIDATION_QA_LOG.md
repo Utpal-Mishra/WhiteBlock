@@ -209,3 +209,19 @@
   - live-space count, when present, is below its individual marker and never inside cluster count;
   - county browse shows `N LOCATIONS`, not `N OPTIONS`.
 - Status: pending CI and live review.
+
+## QA-20261020-MAP07 — Hybrid default regression gate
+- Date: 2026-10-20.
+- Automated expectations:
+  - first paint contains World Imagery + Hybrid reference overlay;
+  - persistent engine starts with `styleFor("hybrid")`;
+  - toolbar primary control is Hybrid;
+  - + menu includes Street, Terrain and Satellite;
+  - Parking Layout preserves Hybrid as the selected default;
+  - MapLibre failure retains geographic Hybrid, then Street fallback if Hybrid stalls.
+- Manual checks after deploy:
+  - reload on desktop/mobile and confirm Hybrid appears before interaction;
+  - + menu switches to Street/Terrain/Satellite and back to Hybrid;
+  - county outlines, parking clusters and #rank markers remain legible;
+  - orientation/background/foreground recovery retains selected basemap.
+- Status: pending CI and live review.

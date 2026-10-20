@@ -70,3 +70,9 @@
 - Rule: current and future counties inherit the same cluster/rank/availability language through the universal marker policy and shared renderers.
 - No county-specific number interpretation is permitted.
 - Status: adopted.
+
+## EXPAND-20261020-MAP07 — One default map language across all regions
+- Date: 2026-10-20.
+- Rule: current and future WHITEBLOCK regions inherit Hybrid as the initial basemap; no county-specific default is allowed.
+- Region/county boundary focus, clustering and parking marker semantics remain independent of basemap choice.
+- Status: adopted.

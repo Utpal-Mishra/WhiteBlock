@@ -168,7 +168,7 @@
     layoutButton?.setAttribute("aria-pressed", String(enabled));
     // A schematic is a distinct mode, not the Street basemap selected state.
     document.querySelectorAll(".wb-map-layer-button[data-layer]").forEach(button => {
-      const selected = !enabled && button.dataset.layer === (mapEl.dataset.basemap || "street");
+      const selected = !enabled && button.dataset.layer === (mapEl.dataset.basemap || "hybrid");
       button.classList.toggle("active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
@@ -202,15 +202,15 @@
     return true;
   }
 
-  function preserveStreetDefault() {
-    // Street is the product default. Secondary basemaps are explicit opt-in
-    // choices from the compact + menu and must never take over at startup.
-    mapEl.dataset.preferredBasemap = "street";
+  function preserveHybridDefault() {
+    // Hybrid (aerial imagery + road/place reference labels) is the product
+    // default. Street, Terrain, pure Satellite and Parking Layout are opt-in.
+    mapEl.dataset.preferredBasemap = "hybrid";
   }
 
   createPanel();
   installLayoutButton();
-  window.requestAnimationFrame(preserveStreetDefault);
+  window.requestAnimationFrame(preserveHybridDefault);
 
   const parkingList = document.getElementById("parking-list");
   if (parkingList && typeof MutationObserver !== "undefined") {

@@ -108,3 +108,10 @@
 - Source parking IDs, coordinates, access, capacity, live availability and recommendation scoring remain unchanged.
 - Cluster counts are derived from distinct ranked result rows; availability is never summed into the cluster number.
 - Status: no data migration required.
+
+## DATA-20261020-MAP07 — Basemap-only change
+- Date: 2026-10-20.
+- No parking-source, asset-ID, access, capacity, availability, geometry, confidence or recommendation data was changed.
+- Hybrid imagery/reference tiles are presentation dependencies only.
+- Parking evidence continues to render in WHITEBLOCK-owned overlays above the basemap.
+- Status: no migration required.

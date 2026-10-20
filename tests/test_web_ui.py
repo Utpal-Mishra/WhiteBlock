@@ -91,6 +91,8 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("tile.openstreetmap.org", js)  # emergency fallback only
         self.assertIn("tile.opentopomap.org", js)
         self.assertIn("World_Imagery", js)
+        self.assertIn('label: "Hybrid"', js)
+        self.assertIn("World_Hybrid_Overlay", js)
         self.assertIn('label: "Street"', js)
         self.assertIn('kind: "vector"', js)
         self.assertIn('label: "Terrain"', js)
@@ -109,6 +111,7 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("wb-map-more-button", js)
         self.assertIn("wb-map-layer-menu", js)
         self.assertIn("wb-map-layer-menu", css)
+        self.assertIn("wb-map-hybrid", css)
         self.assertIn("wb-map-satellite", css)
         self.assertIn("wb-map-terrain", css)
 

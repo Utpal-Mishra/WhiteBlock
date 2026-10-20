@@ -98,3 +98,12 @@
 - Browse mode uses a separate LOCATIONS cluster component and keeps individual browse markers number-free.
 - Leaflet fallback mirrors the same semantics so WebGL/raster degradation does not change meaning.
 - Status: implemented on feature branch.
+
+## SYS-20261020-MAP07 — Hybrid is the default basemap state
+- Date: 2026-10-20.
+- Default state: aerial imagery + transparent road/place reference overlay.
+- First paint: `app.js` renders Hybrid immediately.
+- Persistent owner: map-engine v3 starts directly with Hybrid and retains the existing parking overlay stack.
+- Menu contract: only Hybrid remains permanently visible; Street, Terrain, Satellite, Street View and Parking Layout are under `+`.
+- Recovery: MapLibre Hybrid -> Leaflet Hybrid -> Street raster -> alternate Street raster.
+- Status: implemented on feature branch.

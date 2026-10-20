@@ -115,3 +115,11 @@
 - Rejected: continuing with bare numeric circles differentiated only by colour.
 - Reason: colour is insufficient and the same numeral can otherwise encode three different concepts.
 - Status: accepted/implemented.
+
+## DEC-20261020-MAP07 — Make Hybrid the product default
+- Date: 2026-10-20.
+- Decision: labelled aerial Hybrid replaces Street as the startup/default basemap.
+- Secondary modes: Street, Terrain and pure Satellite move under +; Street View and Parking Layout remain contextual tools in the same menu.
+- Reason: Hybrid provides real physical context while retaining road/place orientation, which is more useful for parking/spatial intelligence.
+- Rejected: pure Satellite as default because missing labels reduces orientation; Street as default because it hides physical parking context.
+- Status: accepted/implemented.

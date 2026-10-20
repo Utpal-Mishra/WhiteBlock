@@ -9,7 +9,7 @@ WEB = ROOT / "web"
 class MapEngineV3Tests(unittest.TestCase):
     def test_runtime_loads_cache_busted_persistent_engine(self):
         runtime = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("map-engine-v2.js?v=20261020-6", runtime)
+        self.assertIn("map-engine-v2.js?v=20261020-hybrid1", runtime)
         self.assertIn("loadWhiteblockMapEngineV2", runtime)
 
     def test_one_persistent_maplibre_layer_switches_styles(self):
@@ -20,6 +20,10 @@ class MapEngineV3Tests(unittest.TestCase):
         self.assertIn('const STREET_STYLE = "https://tiles.openfreemap.org/styles/liberty"', source)
         self.assertIn('const TERRAIN_TILE = "https://a.tile.opentopomap.org/{z}/{x}/{y}.png"', source)
         self.assertIn('const SATELLITE_TILE = "https://server.arcgisonline.com/', source)
+        self.assertIn("HYBRID_OVERLAY_TILE", source)
+        self.assertIn('hybrid: "Hybrid"', source)
+        self.assertIn('activeBasemap = "hybrid"', source)
+        self.assertIn('style: styleFor("hybrid")', source)
         self.assertNotIn('pane: "tilePane"', source)
         self.assertIn("L.tileLayer(config.url", source)
         self.assertIn("STREET_RASTER_TILE", source)

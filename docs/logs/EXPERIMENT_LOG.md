@@ -78,3 +78,10 @@
 - Treatment: stacked/ring cluster with `N OPTIONS`; pin/circle recommendation with `#N`; availability as a separate lower label; county browse uses `N LOCATIONS`.
 - Acceptance: a user should be able to explain what every displayed number means without opening a tooltip.
 - Status: implementation ready for live/mobile review.
+
+## EXP-20261020-MAP07 — Labelled aerial default
+- Date: 2026-10-20.
+- Hypothesis: users can orient faster around parking supply when aerial imagery, road geometry and place labels are visible simultaneously.
+- Treatment: Hybrid default; Street/Terrain/Satellite become secondary.
+- Acceptance: first map paint and persistent engine show the same Hybrid mode, toolbar highlights Hybrid, parking overlays remain legible, and + switches reliably to all other modes.
+- Status: implementation ready for CI/mobile review.

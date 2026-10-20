@@ -1,6 +1,7 @@
 "use strict";
 // Simulate an Android device with failed MapLibre/WebGL. WHITEBLOCK must keep
-// an actual geographical raster basemap and must NEVER auto-open Parking Layout.
+// the default aerial+labels Hybrid map geographically usable and must NEVER
+// auto-open Parking Layout. Street remains the final independent fallback.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -112,20 +113,23 @@ function scenario(kind) {
 
 const error = scenario("throw");
 assert.equal(error.rasterPresent(), true, "MapLibre exception must immediately leave a geographical map");
-assert.ok(error.sources[0].includes("tile.openstreetmap.org"), "Default fallback uses real street tiles");
+assert.ok(error.sources.some(url => url.includes("World_Imagery")), "Default fallback must keep aerial imagery");
+assert.ok(error.sources.some(url => url.includes("World_Hybrid_Overlay")), "Default fallback must keep road/place labels");
 assert.equal(error.mapEl.dataset.basemapEngine, "raster-fallback");
+assert.equal(error.mapEl.dataset.basemap, "hybrid");
 assert.equal(error.mapEl.classList.contains("layout-active"), false, "Layout must not activate automatically");
-const incompleteGridWatchdog = error.timeouts.find(task => task.ms === 3200);
-assert.ok(incompleteGridWatchdog, "Raster street fallback must have an incomplete-grid watchdog");
-incompleteGridWatchdog.fn();
-assert.ok(error.sources.some(url => url.includes("cartocdn.com")), "Stalled partial street tiles must fail over even without tileerror events");
-assert.ok(!error.document.querySelector(".wb-parking-layout-button"));
-error.flushLayerRemoval();
-assert.equal(error.rasterPresent(), true, "Legacy layer cleanup must not delete the fallback tiles");
-assert.ok(error.status.some(([title]) => title.includes("Street map")), "Visible map status should identify street compatibility mode");
 
-for (let i = 0; i < 3; i++) error.tile.events.get("tileerror")?.();
-assert.ok(error.sources.some(url => url.includes("cartocdn.com")), "Repeated OSM tile failures retry with alternate road tiles");
+const hybridWatchdog = error.timeouts.find(task => task.ms === 3200);
+assert.ok(hybridWatchdog, "Hybrid raster fallback must have an incomplete-grid watchdog");
+hybridWatchdog.fn();
+assert.ok(error.sources.some(url => url.includes("tile.openstreetmap.org")), "Stalled Hybrid imagery must fail over to an independent Street map");
+assert.ok(!error.document.querySelector(".wb-parking-layout-button"));
+
+for (let i = 0; i < 2; i++) error.tile.events.get("tileerror")?.();
+assert.ok(error.sources.some(url => url.includes("cartocdn.com")), "Repeated Street tile failures retry with alternate road tiles");
+error.flushLayerRemoval();
+assert.equal(error.rasterPresent(), true, "Legacy layer cleanup must not delete fallback tiles");
+assert.ok(error.status.some(([title]) => title.includes("Hybrid map")), "Visible status should identify the Hybrid compatibility fallback");
 assert.equal(error.mapEl.dataset.basemapEngine, "raster-fallback");
 
 const stalled = scenario("stalled");
@@ -133,6 +137,8 @@ assert.equal(stalled.rasterPresent(), false, "Healthy-looking GL renderer may in
 const health = stalled.timeouts.find(task => task.ms === 4500);
 assert.ok(health, "Vector style must have a bounded watchdog");
 health.fn();
-assert.equal(stalled.rasterPresent(), true, "A stalled vector style must recover to actual geographical tiles");
+assert.equal(stalled.rasterPresent(), true, "A stalled Hybrid renderer must recover to actual geographical tiles");
+assert.ok(stalled.sources.some(url => url.includes("World_Imagery")));
+assert.ok(stalled.sources.some(url => url.includes("World_Hybrid_Overlay")));
 assert.equal(stalled.mapEl.classList.contains("layout-active"), false);
-console.log("MapLibre exception, stalled style, raster fallback, backup tiles and no forced schematic: PASS");
+console.log("Hybrid default, stalled renderer recovery, Street backup and no forced schematic: PASS");

@@ -86,3 +86,12 @@
 - Scenario: three parking recommendations can display a cluster labelled `3`, while individual recommendations are also numbered 1/2/3 and live availability may itself be numeric.
 - Finding: the existing bare cluster number is semantically ambiguous.
 - Response: explicit semantic marker language implemented; no external market assumption required.
+
+## EVID-20261020-MAP07 — Hybrid basemap composition reference
+- Date: 2026-10-20.
+- Esri developer documentation describes an imagery-with-labels basemap as World Imagery plus a reference layer above it.
+- Esri's current legacy-basemap notice identifies World Hybrid Overlay / World Boundaries and Places / World Transportation as legacy reference services with migration paths toward modern Imagery Hybrid / Hybrid Reference layers.
+- Sources:
+  - https://developers.arcgis.com/web-scene-specification/objects/baseMap/
+  - https://www.esri.com/arcgis-blog/products/arcgis-living-atlas/announcements/sunsetting-legacy-basemaps
+- Product use: current prototype Hybrid composition only; provider migration is tracked before legacy-service retirement.

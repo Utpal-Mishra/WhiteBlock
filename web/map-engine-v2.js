@@ -4,7 +4,7 @@
 // container into Leaflet's tilePane. That was fragile on Android Chrome: Leaflet
 // overlays survived while the basemap canvas could disappear. This version mirrors
 // the stable XPLORE pattern: one persistent L.maplibreGL layer is added normally,
-// and Street / Terrain / Satellite switch styles inside that same MapLibre map.
+// and Hybrid / Street / Terrain / Satellite switch styles inside that same MapLibre map.
 // Leaflet remains responsible for destinations, clusters and parking polygons.
 
 (() => {
@@ -24,6 +24,7 @@
   const STREET_STYLE = "https://tiles.openfreemap.org/styles/liberty";
   const TERRAIN_TILE = "https://a.tile.opentopomap.org/{z}/{x}/{y}.png";
   const SATELLITE_TILE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+  const HYBRID_OVERLAY_TILE = "https://who.maptiles.arcgis.com/arcgis/rest/services/World_Hybrid_Overlay/MapServer/tile/{z}/{y}/{x}";
   const STREET_RASTER_TILE = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
   const STREET_BACKUP_TILE = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
   const OVERPASS = [
@@ -31,13 +32,14 @@
     "https://overpass.kumi.systems/api/interpreter"
   ];
 
-  const LAYER_LABELS = { street: "Street", terrain: "Terrain", satellite: "Satellite" };
+  const LAYER_LABELS = { hybrid: "Hybrid", street: "Street", terrain: "Terrain", satellite: "Satellite" };
   let basemapLayer = null;
   let glMap = null;
   let rasterFallbackLayer = null;
+  let rasterFallbackExtraLayers = [];
   let rasterFallbackSource = null;
   let fallbackGeneration = 0;
-  let activeBasemap = "street";
+  let activeBasemap = "hybrid";
   let styleGeneration = 0;
   let styleHealthTimer = null;
   let styleErrors = 0;
@@ -79,7 +81,37 @@
     };
   }
 
+  function hybridStyle() {
+    return {
+      version: 8,
+      sources: {
+        "whiteblock-hybrid-imagery": {
+          type: "raster",
+          tiles: [SATELLITE_TILE],
+          tileSize: 256,
+          minzoom: 0,
+          maxzoom: 19,
+          attribution: "Tiles © Esri, Maxar, Earthstar Geographics and GIS User Community"
+        },
+        "whiteblock-hybrid-reference": {
+          type: "raster",
+          tiles: [HYBRID_OVERLAY_TILE],
+          tileSize: 256,
+          minzoom: 0,
+          maxzoom: 19,
+          attribution: "Reference overlay © Esri and contributors"
+        }
+      },
+      layers: [
+        { id: "whiteblock-hybrid-background", type: "background", paint: { "background-color": "#111914" } },
+        { id: "whiteblock-hybrid-imagery", type: "raster", source: "whiteblock-hybrid-imagery", minzoom: 0, maxzoom: 22 },
+        { id: "whiteblock-hybrid-reference", type: "raster", source: "whiteblock-hybrid-reference", minzoom: 0, maxzoom: 22 }
+      ]
+    };
+  }
+
   function styleFor(key) {
+    if (key === "hybrid") return hybridStyle();
     if (key === "terrain") {
       return rasterStyle(
         "whiteblock-terrain",
@@ -116,7 +148,7 @@
 
   function removeLegacyBasemaps() {
     map.eachLayer(layer => {
-      if (layer === basemapLayer || layer === rasterFallbackLayer) return;
+      if (layer === basemapLayer || layer === rasterFallbackLayer || rasterFallbackExtraLayers.includes(layer)) return;
       if (!(layer instanceof L.TileLayer) && !isMapLibreLayer(layer)) return;
       try { map.removeLayer(layer); } catch (_) {}
     });
@@ -134,7 +166,7 @@
     activeBasemap = key;
     mapEl.dataset.basemapEngine = "maplibre-v3";
     mapEl.dataset.basemap = key;
-    mapEl.classList.remove("wb-map-street", "wb-map-terrain", "wb-map-satellite");
+    mapEl.classList.remove("wb-map-hybrid", "wb-map-street", "wb-map-terrain", "wb-map-satellite");
     mapEl.classList.add(`wb-map-${key}`);
     updateToolbar(key);
   }
@@ -164,13 +196,14 @@
   // When WebGL or a vector style cannot load on a mobile browser, continue
   // showing a *geographical* Leaflet tile map. A schematic must never replace
   // the real map without an explicit user request.
-  function activateRasterFallback(reason, key = "street") {
+  function activateRasterFallback(reason, key = "hybrid") {
     const generation = ++fallbackGeneration;
     ++styleGeneration; // invalidate style health callbacks from the failed GL map
     clearStyleHealthTimer();
-    const selected = LAYER_LABELS[key] ? key : "street";
+    const selected = LAYER_LABELS[key] ? key : "hybrid";
     const source = selected === "terrain" ? "terrain"
-      : selected === "satellite" ? "satellite" : "street";
+      : selected === "satellite" ? "satellite"
+      : selected === "hybrid" ? "hybrid" : "street";
     const configs = {
       street: {
         url: STREET_RASTER_TILE, maxNativeZoom: 19, maxZoom: 19,
@@ -187,12 +220,21 @@
       satellite: {
         url: SATELLITE_TILE, maxNativeZoom: 19, maxZoom: 19,
         attribution: "Tiles &copy; Esri and contributors"
+      },
+      hybrid: {
+        url: SATELLITE_TILE, maxNativeZoom: 19, maxZoom: 19,
+        overlays: [HYBRID_OVERLAY_TILE],
+        attribution: "Tiles &copy; Esri, Maxar, Earthstar Geographics and GIS User Community"
       }
     };
     function attachTiles(provider) {
       if (generation !== fallbackGeneration) return;
       clearRasterLoadWatchdog();
       if (rasterFallbackLayer && map.hasLayer(rasterFallbackLayer)) map.removeLayer(rasterFallbackLayer);
+      rasterFallbackExtraLayers.forEach(extra => {
+        try { if (map.hasLayer(extra)) map.removeLayer(extra); } catch (_) {}
+      });
+      rasterFallbackExtraLayers = [];
       rasterFallbackLayer = null;
       if (basemapLayer && map.hasLayer(basemapLayer)) {
         try { map.removeLayer(basemapLayer); } catch (_) {}
@@ -224,7 +266,7 @@
           // Do not leave a checkerboard on screen: switch provider as soon as
           // the primary street tile grid proves incomplete.
           attachTiles("backup");
-        } else if (tileErrors >= 2 && (provider === "terrain" || provider === "satellite")) {
+        } else if (tileErrors >= 2 && (provider === "terrain" || provider === "satellite" || provider === "hybrid")) {
           activateRasterFallback(LAYER_LABELS[selected] + " tiles unavailable · switched to Street", "street");
         } else if (tileErrors >= 2 && provider === "backup" && typeof setMapStatus === "function") {
           setMapStatus("Street tiles unavailable", "Both street-map tile sources failed · check network connectivity");
@@ -239,6 +281,17 @@
       });
 
       layer.addTo(map);
+      (config.overlays || []).forEach(url => {
+        const overlay = L.tileLayer(url, {
+          maxZoom: config.maxZoom,
+          maxNativeZoom: config.maxNativeZoom,
+          updateWhenIdle: false,
+          updateWhenZooming: false,
+          keepBuffer: 3,
+          attribution: config.attribution
+        }).addTo(map);
+        rasterFallbackExtraLayers.push(overlay);
+      });
       updateMapTheme(selected);
       mapEl.dataset.basemapEngine = "raster-fallback";
       mapEl.dataset.basemapSource = provider;
@@ -259,7 +312,7 @@
           attachTiles("backup");
           return;
         }
-        if (provider === "terrain" || provider === "satellite") {
+        if (provider === "terrain" || provider === "satellite" || provider === "hybrid") {
           activateRasterFallback(LAYER_LABELS[selected] + " tile grid incomplete · switched to Street", "street");
           return;
         }
@@ -304,13 +357,13 @@
       try { loaded = Boolean(currentGl?.isStyleLoaded?.()); } catch (_) {}
       if (loaded) return recovered();
 
-      if (key !== "street") {
+      if (key !== "hybrid") {
         if (typeof setMapStatus === "function") {
-          setMapStatus(`${LAYER_LABELS[key]} temporarily unavailable`, "Returning to Street map");
+          setMapStatus(`${LAYER_LABELS[key]} temporarily unavailable`, "Returning to Hybrid map");
         }
-        switchBasemap("street", { quiet: true });
+        switchBasemap("hybrid", { quiet: true });
       } else {
-        activateRasterFallback("Vector map unavailable · OpenStreetMap street tiles shown");
+        activateRasterFallback("Hybrid renderer unavailable · showing aerial imagery with labels", "hybrid");
       }
     }, 4500);
   }
@@ -320,10 +373,18 @@
     glMap.__whiteblockHealthBound = true;
     glMap.on?.("error", event => {
       // MapLibre can report isolated glyph/tile errors while the map remains usable.
-      // Only act after a sustained burst from the currently selected non-Street style.
+      // Only act after a sustained burst from the currently selected non-Hybrid style.
       styleErrors += 1;
-      if (styleErrors >= 16 && activeBasemap !== "street") {
-        switchBasemap("street", { quiet: true });
+      if (styleErrors >= 16) {
+        styleErrors = 0;
+        if (activeBasemap !== "hybrid") {
+          switchBasemap("hybrid", { quiet: true });
+        } else {
+          // If Hybrid itself is the failing MapLibre source, preserve the user's
+          // default visual first through Leaflet raster Hybrid, then let the
+          // bounded tile watchdog fall back to Street only if imagery also fails.
+          activateRasterFallback("Hybrid source degraded · retrying aerial imagery with labels", "hybrid");
+        }
       }
       if (event?.error) console.debug("WHITEBLOCK map source warning", event.error.message || event.error);
     });
@@ -334,7 +395,7 @@
     try {
       // Intentionally mirrors XPLORE: no custom pane and no custom canvas sizing.
       basemapLayer = L.maplibreGL({
-        style: STREET_STYLE,
+        style: styleFor("hybrid"),
         interactive: false,
         attributionControl: false
       });
@@ -342,7 +403,7 @@
       basemapLayer.addTo(map);
     } catch (error) {
       console.warn("WHITEBLOCK MapLibre could not initialise", error);
-      activateRasterFallback("MapLibre could not start · showing geographical street tiles");
+      activateRasterFallback("MapLibre could not start · showing aerial imagery with labels", "hybrid");
       return false;
     }
 
@@ -350,13 +411,13 @@
       glMap = getGlMap();
       if (!glMap) {
         if (attempt < 80) return window.setTimeout(() => connect(attempt + 1), 50);
-        activateRasterFallback("Map canvas unavailable · showing geographical street tiles");
+        activateRasterFallback("Map canvas unavailable · showing aerial imagery with labels", "hybrid");
         return;
       }
       bindGlHealth();
       const generation = ++styleGeneration;
-      updateMapTheme("street");
-      armStyleHealth("street", generation);
+      updateMapTheme("hybrid");
+      armStyleHealth("hybrid", generation);
       repairMapGeometry(0);
     };
     connect();
@@ -364,7 +425,7 @@
   }
 
   function switchBasemap(key, { quiet = false } = {}) {
-    if (!LAYER_LABELS[key]) key = "street";
+    if (!LAYER_LABELS[key]) key = "hybrid";
     // The toolbar always restores an actual map, even after a GL failure.
     document.dispatchEvent(new CustomEvent("whiteblock:map-basemap-selected", { detail: { key } }));
     if (!glMap) {
@@ -388,8 +449,8 @@
       }
     } catch (error) {
       console.warn(`WHITEBLOCK could not switch to ${key}`, error);
-      if (key !== "street") switchBasemap("street", { quiet: true });
-      else activateRasterFallback("Street vector style failed · showing geographical street tiles");
+      if (key !== "hybrid") switchBasemap("hybrid", { quiet: true });
+      else activateRasterFallback("Hybrid map failed · showing aerial imagery with labels", "hybrid");
     }
     window.requestAnimationFrame(resizeBasemap);
   }
@@ -763,7 +824,7 @@
     if (layer === basemapLayer) return;
     if (layer instanceof L.TileLayer || isMapLibreLayer(layer)) {
       window.setTimeout(() => {
-        if (layer === basemapLayer || layer === rasterFallbackLayer) return;
+        if (layer === basemapLayer || layer === rasterFallbackLayer || rasterFallbackExtraLayers.includes(layer)) return;
         try { if (map.hasLayer(layer)) map.removeLayer(layer); } catch (_) {}
       }, 0);
     }

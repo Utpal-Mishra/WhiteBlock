@@ -145,3 +145,12 @@
 - Mitigation: `3 OPTIONS` in search mode, `3 LOCATIONS` in browse mode, `#3` for rank and separate `N FREE` availability label.
 - Additional risk: unknown availability could be read as zero. Mitigation: use `LIVE —`, never `0 FREE` when the feed is absent.
 - Status: mitigated.
+
+## RISK-20261020-MAP07 — Hybrid provider/reference-layer dependency
+- Date: 2026-10-20.
+- Risk: current Hybrid reference overlay is a legacy Esri service scheduled for future retirement.
+- Impact: future loss of road/place labels if migration is not completed.
+- Mitigation: keep provider logic isolated in the basemap engine; track migration to modern Imagery Hybrid / Hybrid Reference before retirement; Street remains an independent fallback.
+- Risk: Hybrid imagery may be heavier than Street on mobile networks.
+- Mitigation: bounded tile watchdog, responsive repair and explicit user access to Street mode under +.
+- Status: controlled for prototype; provider migration remains open.

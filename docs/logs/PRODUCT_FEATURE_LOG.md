@@ -123,3 +123,11 @@
   - individual browse points carry no ordinal number.
 - Result cards now use the same `#N` ordinal notation as the map.
 - Status: implemented.
+
+## FEAT-20261020-MAP07 — Hybrid default map
+- Date: 2026-10-20.
+- Default map now combines aerial imagery with road/place labels.
+- Always-visible toolbar: `Hybrid` + `+`.
+- + menu: Street, Terrain, Satellite, Street View and Parking Layout.
+- Satellite remains imagery-only so users can deliberately remove labels when needed.
+- Status: implemented on feature branch.

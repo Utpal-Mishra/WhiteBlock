@@ -231,10 +231,18 @@ function initMap() {
   }
 
   state.map = L.map("map", { zoomControl: true, attributionControl: true }).setView([CORK_CENTER.lat, CORK_CENTER.lng], 14);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  // Immediate first paint mirrors the product default: aerial imagery with
+  // transparent roads/place labels. The persistent map engine takes ownership
+  // moments later and keeps the same Hybrid visual language.
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: "Tiles &copy; Esri, Maxar, Earthstar Geographics, and GIS User Community"
   }).addTo(state.map);
+  L.tileLayer("https://who.maptiles.arcgis.com/arcgis/rest/services/World_Hybrid_Overlay/MapServer/tile/{z}/{y}/{x}", {
+    maxZoom: 19,
+    attribution: "Reference overlay &copy; Esri and contributors"
+  }).addTo(state.map);
+  mapEl.dataset.basemap = "hybrid";
 
   parkingData.forEach(item => {
     const icon = L.divIcon({

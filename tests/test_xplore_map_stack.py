@@ -13,7 +13,7 @@ class XploreMapStackContractTests(unittest.TestCase):
         maplibre = html.index("maplibre-gl@5/dist/maplibre-gl.js")
         bridge = html.index("maplibre-gl-leaflet/leaflet-maplibre-gl.js")
         app = html.index("./app.js")
-        adapter = html.index("./map-fix.js?v=20261020-3")
+        adapter = html.index("./map-fix.js?v=20261020-hybrid1")
 
         self.assertLess(leaflet, maplibre)
         self.assertLess(maplibre, bridge)
@@ -21,13 +21,16 @@ class XploreMapStackContractTests(unittest.TestCase):
         self.assertLess(app, adapter)
         self.assertIn("maplibre-gl@5/dist/maplibre-gl.css", html)
 
-    def test_default_street_basemap_uses_xplore_vector_path(self):
+    def test_street_option_keeps_xplore_vector_path_while_hybrid_is_default(self):
         js = (WEB / "map-fix.js").read_text(encoding="utf-8")
         self.assertIn("tiles.openfreemap.org/styles/dark", js)
         self.assertIn("L.maplibreGL", js)
         self.assertIn('kind: "vector"', js)
         self.assertIn('mapEl.dataset.basemapEngine = "vector"', js)
         self.assertIn("vector basemap unavailable; using raster fallback", js)
+        self.assertIn('label: "Hybrid"', js)
+        self.assertIn('activeLayerKey = "hybrid"', js)
+        self.assertIn("World_Hybrid_Overlay", js)
 
 
 if __name__ == "__main__":
