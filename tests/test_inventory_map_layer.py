@@ -17,17 +17,20 @@ class InventoryMapLayerTests(unittest.TestCase):
         self.assertIn("coverageBrowseActive", js)
         self.assertIn("whiteblock:coverage-browse", js)
         self.assertIn("removeExistingInventoryLayer", js)
+        self.assertIn("<small>locations</small>", js)
         self.assertIn("Kildare", (ROOT / "web" / "region-network.js").read_text(encoding="utf-8"))
         self.assertIn("state.regionInventories.dublin", (ROOT / "web" / "dublin-network.js").read_text(encoding="utf-8"))
 
     def test_runtime_loads_inventory_map_layer(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("inventory-map-layer.js?v=20261020-2", runtime)
+        self.assertIn("inventory-map-layer.js?v=20261020-3", runtime)
         self.assertIn("loadWhiteblockInventoryMapLayer", runtime)
 
     def test_map_layer_styles_exist(self):
         css = (ROOT / "web" / "inventory-map-layer.css").read_text(encoding="utf-8")
         self.assertIn(".wb-parking-cluster", css)
+        self.assertIn(".wb-ranked-option-marker", css)
+        self.assertIn(".wb-parking-cluster.options", css)
         self.assertIn(".wb-inventory-marker.accessible", css)
         self.assertIn(".wb-inventory-marker.ev", css)
         self.assertIn(".wb-inventory-map-control", css)
