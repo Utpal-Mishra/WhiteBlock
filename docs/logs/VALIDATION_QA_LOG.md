@@ -122,3 +122,6 @@
 - Caveat: future Galway/Donegal tests are synthetic. They do not prove physical source coverage or live vacancy there.
 - Status: CI/publishing and device verification outstanding.
 
+### Renderer duplication gate — 2026-10-20
+- `map-engine-v2.js` stops drawing duplicate ranked Leaflet circles/polygons when the native GL overlay is live; GL readiness releases any provisional fallback.
+- Universal regression test enforces the ownership event and fallback clustering. Manual verify Android switch from provisional to GL never leaves two icons per location.
