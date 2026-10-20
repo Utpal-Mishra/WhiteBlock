@@ -1,5 +1,5 @@
 // WHITEBLOCK all-inventory parking map layer.
-// Renders every connected Cork + Kildare + Dublin parking asset using clustering
+// Renders mapped assets from all current and future regions using clustering
 // so the full inventory remains legible and performant on mobile.
 
 (() => {
@@ -60,31 +60,12 @@
     });
   }
 
+  const POLICY = window.WHITEBLOCK_MARKER_POLICY;
+  // Inventory keys are discovered from state, never a hardcoded county list.
+  // Canonical pools take priority over legacy Cork County/Bray sub-pools;
+  // stable parking IDs are counted only once across current/future regions.
   function connectedInventory() {
-    const rows = [];
-    const seen = new Set();
-    const inventories = state.regionInventories || {};
-
-    Object.entries(inventories).forEach(([region, items]) => {
-      if (!Array.isArray(items)) return;
-      items.forEach(item => {
-        if (!item?.id || seen.has(item.id)) return;
-        if (!Number.isFinite(Number(item.lat)) || !Number.isFinite(Number(item.lng))) return;
-        seen.add(item.id);
-        rows.push({ ...item, region });
-      });
-    });
-
-    // During initial Cork hydration regionInventories may not yet be populated.
-    if (!rows.length && Array.isArray(parkingData)) {
-      parkingData.forEach(item => {
-        if (!item?.id || seen.has(item.id)) return;
-        if (!Number.isFinite(Number(item.lat)) || !Number.isFinite(Number(item.lng))) return;
-        seen.add(item.id);
-        rows.push({ ...item, region: state.activeRegion || "cork" });
-      });
-    }
-    return rows;
+    return POLICY.connectedInventory(state, parkingData);
   }
 
   function capabilityClass(item) {
@@ -271,15 +252,46 @@
         })
       : L.layerGroup();
 
-    const markers = items.map(item => {
-      const marker = makeMarker(item);
-      state.inventoryMarkerLookup.set(item.id, marker);
-      state.markers.set(item.id, marker);
-      return marker;
-    });
-
-    if (clustered && typeof layer.addLayers === "function") layer.addLayers(markers);
-    else markers.forEach(marker => layer.addLayer(marker));
+    state.inventoryClusterFallback = !clustered;
+    if (clustered && typeof layer.addLayers === "function") {
+      const markers = items.map(item => {
+        const marker = makeMarker(item);
+        state.inventoryMarkerLookup.set(item.id, marker);
+        state.markers.set(item.id, marker);
+        return marker;
+      });
+      layer.addLayers(markers);
+    } else {
+      // CDN/network failures must not revert 10,000+ parking locations to
+      // overlapping pins. Reuse the same universal grouping policy without
+      // relying on an external clustering plugin.
+      const zoom = state.map.getZoom();
+      const groups = POLICY.groupNearby(items, zoom,
+        item => state.map.project(L.latLng(Number(item.lat), Number(item.lng)), zoom),
+        { radiusPx: POLICY.inventoryRadiusPx, detailZoom: POLICY.detailZoom });
+      groups.forEach(indices => {
+        if (indices.length === 1) {
+          const item = items[indices[0]];
+          const marker = makeMarker(item);
+          state.inventoryMarkerLookup.set(item.id, marker);
+          layer.addLayer(marker);
+          return;
+        }
+        const members = indices.map(index => items[index]);
+        const lat = members.reduce((sum, item) => sum + Number(item.lat), 0) / members.length;
+        const lng = members.reduce((sum, item) => sum + Number(item.lng), 0) / members.length;
+        const marker = L.marker([lat, lng], {
+          icon: clusterIcon({ getChildCount: () => members.length }),
+          keyboard: true
+        });
+        marker.bindTooltip(members.length.toLocaleString() + " mapped parking locations · zoom for detail", {
+          direction: "top", className: "wb-tooltip"
+        });
+        marker.on("click", () => state.map.flyTo([lat, lng],
+          Math.min(POLICY.detailZoom, state.map.getZoom() + 2), { animate: true }));
+        layer.addLayer(marker);
+      });
+    }
 
     state.inventoryMarkerLayer = layer;
     if (state.inventoryMarkersEnabled) layer.addTo(state.map);
@@ -337,6 +349,10 @@
     if (!region) return;
     window.setTimeout(renderInventoryLayer, 0);
   });
+  state.map?.on?.("zoomend", () => {
+    if (state.inventoryClusterFallback && !coverageBrowseActive()) renderInventoryLayer();
+  });
+
 
   loadClusterPlugin().then(() => {
     renderInventoryLayer();
