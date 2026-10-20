@@ -10,6 +10,8 @@ on:
       - "scripts/ingest_cork_county_parking_stable.py"
       - "scripts/export_web_snapshot.py"
       - "scripts/ingest_wicklow_county_parking.py"
+      - "scripts/build_ireland_region_boundaries.py"
+      - "config/ireland_region_boundaries.json"
       - "scripts/ingest_kildare_parking.py"
       - "scripts/ingest_kildare_county_parking.py"
       - "scripts/ingest_kildare_county_parking_stable.py"
@@ -53,6 +55,35 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Build selected-region administrative boundaries
+        run: |
+          rm -f web/data/ireland_region_boundaries.geojson
+          if timeout 180s python scripts/build_ireland_region_boundaries.py             --config config/ireland_region_boundaries.json             --output web/data/ireland_region_boundaries.geojson; then
+            echo "Selected-region county boundary layer built"
+          else
+            echo "::warning::Live county boundary refresh unavailable; attempting last published layer"
+            rm -f web/data/ireland_region_boundaries.geojson
+            curl --fail --silent --show-error --location --max-time 20               "https://utpal-mishra.github.io/WhiteBlock/data/ireland_region_boundaries.geojson"               --output web/data/ireland_region_boundaries.geojson
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("web/data/ireland_region_boundaries.geojson")
+          data = json.loads(path.read_text())
+          expected = {"cork": 332631, "kildare": 285833, "dublin": 282800, "wicklow": 282760}
+          features = data.get("features") or []
+          actual = {
+              str(feature.get("properties", {}).get("region_key", "")).lower():
+              int(feature.get("properties", {}).get("osm_relation_id") or 0)
+              for feature in features
+          }
+          if actual != expected:
+              raise SystemExit(f"Selected-region boundary set mismatch: {actual!r}")
+          if any(feature.get("geometry", {}).get("type") not in {"Polygon", "MultiPolygon"} for feature in features):
+              raise SystemExit("Selected-region boundary layer contains invalid geometry")
+          print("Validated selected-region boundaries:", ", ".join(sorted(actual)))
+          PY
 
       # Cork City is still refreshed when the upstream source responds, but a
       # temporary source outage must not block publication of validated Dublin
