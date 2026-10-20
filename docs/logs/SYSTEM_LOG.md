@@ -62,3 +62,9 @@
 - Affected: all currently connected counties (Cork, Kildare, Dublin, Wicklow) and future validated county datasets; Bray remains nested in Wicklow.
 - Behaviour: grouped map markers collapse at low zoom and separate when geographically distinguishable; no stale ranked results on national/county browsing.
 
+## SYS-20261020-MAP03 — Preserve a geographical map on renderer failure
+- Evidence: Android Cork screenshot displayed only the optional dark Parking Layout while Street was selected.
+- Root cause: `web/map-engine-v2.js` automatically clicked Parking Layout when MapLibre initialisation failed or its 4.5-second street style watchdog expired.
+- Change: replace forced schematic with Leaflet raster street basemap, keep map overlays, preserve toolbar operation, and offer alternate raster street provider after repeated tile errors.
+- Status: PR #40 / release verification pending.
+
