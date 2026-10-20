@@ -147,3 +147,10 @@
 - Changed: Ireland overview rendering and asset cache versions; selected county now receives an exact outline/fill layer.
 - Data semantics: no parking records, counts, access rules, availability or capacity changed.
 - Status: feature branch implementation complete; CI/Pages/mobile validation pending.
+
+### MAP05 merge / deployment status — 2026-10-20
+- PR #43 merged to `main` as `11e8677dce463592dd8402c3cd03daf03cf82b2d`.
+- Feature-branch CI run #330: PASS.
+- Main CI run #331: PASS.
+- GitHub Pages run #274 started from the merge; its new **Build selected-region administrative boundaries** gate completed successfully before the regional parking snapshot refresh continued.
+- Public Pages publication/mobile visual verification remains pending until run #274 completes.
