@@ -97,3 +97,10 @@
 - Risk: visual collisions within dense areas near zoom 17. Mitigation: pixel-connected clusters below zoom 17, preserve mapped locations at detailed zoom; verify on narrow mobile screens.
 - Risk: differing asynchronous overlay and basemap events. Mitigation: cache-busted GL loader, CI regressions and pending manual mobile smoke validation.
 
+## RISK-20261020-MAP02 — Universal marker regression and source expansion
+- R1: future region mislabelled county without trusted inventory; mitigation demand non-empty snapshot + valid coordinates before automatic county navigation registration.
+- R2: network-blocked cluster plugin; mitigation internal zoom-reactive group fallback instead of unclustered inventory points.
+- R3: two different IDs refer to same physical car park; stable-ID deduplication alone is insufficient; mitigation evidence-based asset reconciliation.
+- R4: venues with identical exact coordinates may not separate by zoom 17; preserve IDs and add spiderfy/list disambiguation if required, never arbitrarily relocate sites.
+- R5: heavy locality source: use approximate linear screen grid grouping; viewport-filter detailed markers.
+
