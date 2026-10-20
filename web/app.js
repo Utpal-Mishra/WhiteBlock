@@ -95,7 +95,7 @@ function parkingCard(item, index) {
     <article class="parking-card surface${selected}" data-parking-id="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="View ${escapeHtml(item.name)} on map">
       <div class="parking-top">
         <div class="parking-rank">
-          <span class="rank">${String(index + 1).padStart(2, "0")}</span>
+          <span class="rank">#${index + 1}</span>
           <div class="parking-title">
             <h3>${escapeHtml(item.name)}</h3>
             <small>${escapeHtml(item.area || "Cork")} · ${escapeHtml(item.id.replace("WB-PARK-IE-CORK-", "WB-"))}</small>

@@ -35,7 +35,7 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('regionKey === "bray" ? "wicklow"', discover)
         self.assertIn('const bray = state.regionInventories?.bray || [];', overview)
         self.assertIn('region: "Wicklow"', bray)
-        self.assertIn('app.js?v=20261020-2', index)
+        self.assertIn('app.js?v=20261020-3', index)
 
     def test_live_availability_is_not_inferred(self):
         js = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
@@ -60,6 +60,8 @@ class IrelandOverviewTests(unittest.TestCase):
         self.assertIn('clusterGroups(visible, MARKER_POLICY.inventoryRadiusPx', js)
         self.assertIn('focusSubarea', js)
         self.assertIn('parking locations', js)
+        self.assertIn('wb-location-cluster', js)
+        self.assertIn('LOCATIONS', js)
 
     def test_discover_receives_common_region_ready_events(self):
         js = (ROOT / "web" / "ireland-overview.js").read_text(encoding="utf-8")
@@ -69,8 +71,8 @@ class IrelandOverviewTests(unittest.TestCase):
 
     def test_runtime_loads_overview_assets(self):
         runtime = (ROOT / "web" / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn('ireland-overview.css?v=20261020-2', runtime)
-        self.assertIn('ireland-overview.js?v=20261020-6', runtime)
+        self.assertIn('ireland-overview.css?v=20261020-3', runtime)
+        self.assertIn('ireland-overview.js?v=20261020-7', runtime)
         self.assertIn('loadWhiteblockIrelandOverview()', runtime)
 
 

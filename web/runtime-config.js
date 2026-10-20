@@ -41,7 +41,7 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
 function loadWhiteblockParkingGeometry() {
   if (document.querySelector('script[data-whiteblock-parking-gl-overlay]')) return;
   const script = document.createElement('script');
-  script.src = './parking-gl-overlay.js?v=20261020-3';
+  script.src = './parking-gl-overlay.js?v=20261020-4';
   script.defer = true;
   script.dataset.whiteblockParkingGlOverlay = 'true';
   document.body.appendChild(script);
@@ -55,7 +55,7 @@ function loadWhiteblockMapEngineV2() {
     return;
   }
   const script = document.createElement('script');
-  script.src = './map-engine-v2.js?v=20261020-5';
+  script.src = './map-engine-v2.js?v=20261020-6';
   script.async = false;
   script.dataset.whiteblockMapEngineV2 = 'true';
   script.addEventListener('load', loadWhiteblockParkingGeometry, { once: true });
@@ -65,7 +65,7 @@ function loadWhiteblockMapEngineV2() {
 function loadWhiteblockInventoryMapLayer() {
   if (document.querySelector('script[data-whiteblock-inventory-map]')) return;
   const script = document.createElement('script');
-  script.src = './inventory-map-layer.js?v=20261020-2';
+  script.src = './inventory-map-layer.js?v=20261020-3';
   script.defer = true;
   script.dataset.whiteblockInventoryMap = 'true';
   document.body.appendChild(script);
@@ -243,13 +243,13 @@ function loadWhiteblockIrelandOverview() {
   if (!document.querySelector('link[data-whiteblock-ireland-overview]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = './ireland-overview.css?v=20261020-2';
+    style.href = './ireland-overview.css?v=20261020-3';
     style.dataset.whiteblockIrelandOverview = 'true';
     document.head.appendChild(style);
   }
   if (document.querySelector('script[data-whiteblock-ireland-overview]')) return;
   const script = document.createElement('script');
-  script.src = './ireland-overview.js?v=20261020-6';
+  script.src = './ireland-overview.js?v=20261020-7';
   script.defer = true;
   script.dataset.whiteblockIrelandOverview = 'true';
   document.body.appendChild(script);

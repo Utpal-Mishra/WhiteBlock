@@ -110,3 +110,16 @@
 - Switching region replaces the outline; returning to Ireland or selecting a destination removes it.
 - Styling: high-contrast lime outline, subtle translucent green interior.
 - Status: implemented on feature branch.
+
+## FEAT-20261020-MAP06 — Clear parking option marker language
+- Date: 2026-10-20.
+- Destination search:
+  - nearby grouped results show `N OPTIONS`;
+  - individual recommendations show `#1`, `#2`, etc.;
+  - reported live free spaces appear separately as `N FREE`;
+  - missing live data appears as `LIVE —`.
+- County/general browse:
+  - clustered mapped parking displays `N LOCATIONS`;
+  - individual browse points carry no ordinal number.
+- Result cards now use the same `#N` ordinal notation as the map.
+- Status: implemented.

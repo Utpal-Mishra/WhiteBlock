@@ -69,14 +69,20 @@ const ranked = fs.readFileSync(path.join(root, "web/parking-gl-overlay.js"), "ut
 const legacyMap = fs.readFileSync(path.join(root, "web/map-engine-v2.js"), "utf8");
 const olderMapFix = fs.readFileSync(path.join(root, "web/map-fix.js"), "utf8");
 const overview = fs.readFileSync(path.join(root, "web/ireland-overview.js"), "utf8");
+const app = fs.readFileSync(path.join(root, "web/app.js"), "utf8");
 assert.ok(index.indexOf("parking-marker-policy.js") < index.indexOf("runtime-config.js"), "policy initializes before map adapters");
-assert.ok(runtime.includes("inventory-map-layer.js?v=20261020-2"));
-assert.ok(runtime.includes("parking-gl-overlay.js?v=20261020-3"));
-assert.ok(runtime.includes("ireland-overview.js?v=20261020-6"));
+assert.ok(runtime.includes("inventory-map-layer.js?v=20261020-3"));
+assert.ok(runtime.includes("parking-gl-overlay.js?v=20261020-4"));
+assert.ok(runtime.includes("ireland-overview.js?v=20261020-7"));
 assert.ok(inventoryJs.includes("POLICY.connectedInventory(state, parkingData)"));
 assert.ok(inventoryJs.includes("POLICY.groupNearby(items"), "inventory fallback still clusters when Leaflet plugin unavailable");
 assert.ok(inventoryJs.includes('state.map?.on?.("zoomend"'), "fallback must re-cluster with zoom");
 assert.ok(ranked.includes("POLICY.groupNearby(rows"));
+assert.ok(ranked.includes('caption: "OPTIONS"'), "ranked clusters must identify quantity as OPTIONS");
+assert.ok(ranked.includes("display_rank: displayRank"), "individual ranked markers must have explicit # rank labels");
+assert.ok(ranked.includes("availability_label: freeLabel"), "availability must be a separate marker label");
+assert.ok(ranked.includes("POINT_CLUSTER_CAPTION"), "cluster quantity needs a separate semantic caption layer");
+assert.ok(ranked.includes("POINT_AVAILABILITY"), "individual availability needs a separate map label layer");
 assert.ok(ranked.includes("POLICY.browseActive(state)"), "ranked overlay must not show inside Ireland or any county browse");
 assert.ok(legacyMap.includes("window.__WHITEBLOCK_PARKING_GL_OVERLAY__"), "fallback Leaflet source must yield to the ranked MapLibre layer");
 assert.ok(legacyMap.includes("policy.groupNearby(rows"), "fallback Leaflet ranked points must still cluster");
@@ -88,6 +94,11 @@ assert.ok(index.includes("map-fix.js?v=20261020-3"), "mobile clients should load
 
 
 assert.ok(overview.includes("MARKER_POLICY.groupNearby(rows"), "county locality and parking drill-down must cluster");
+assert.ok(overview.includes("LOCATIONS"), "browse clusters must say LOCATIONS rather than show an unexplained number");
+assert.ok(inventoryJs.includes("<small>locations</small>"), "inventory clusters must label their number as locations");
+assert.ok(legacyMap.includes("<small>options</small>"), "destination-result fallback clusters must label their number as options");
+assert.ok(legacyMap.includes("rankedOptionIcon"), "fallback individual options must show ordinal ranks");
+assert.ok(app.includes('<span class="rank">#${index + 1}</span>'), "result cards must use the same explicit # ordinal rank");
 assert.ok(overview.includes("registerNewRegionalInventories()"), "future source-backed counties join the national map automatically");
 assert.ok(overview.includes("state.regionSubareaGroup"), "zoomend preserves locality drill-down selection");
 assert.ok(!overview.includes("group.items.slice(0, 300)"), "locality visual aggregation must not silently drop assets");

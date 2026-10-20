@@ -108,3 +108,10 @@
 - Rejected: rectangular coverage boxes, marker convex hulls and approximate hand-drawn borders.
 - Ireland default remains uncluttered; the strong outline appears only for the selected county.
 - Status: accepted/implemented.
+
+## DEC-20261020-MAP06 — Use nouns and ordinal prefixes to remove numeric ambiguity
+- Date: 2026-10-20.
+- Decision: cluster quantities must include `OPTIONS` or `LOCATIONS`; recommendation positions must use `#N`; live spaces must be visually separate.
+- Rejected: continuing with bare numeric circles differentiated only by colour.
+- Reason: colour is insufficient and the same numeral can otherwise encode three different concepts.
+- Status: accepted/implemented.

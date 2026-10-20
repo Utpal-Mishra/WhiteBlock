@@ -66,3 +66,10 @@
 - Learning: zooming into a county is not always enough to communicate the exact operating area; a visible administrative outline materially improves interpretation of the parking inventory.
 - Product implication: geographic scope should be explicit without implying complete parking coverage.
 - Status: incorporated into map UX.
+
+## BUS-20261020-MAP06 — Numeric map markers need explicit semantics
+- Date: 2026-10-20.
+- Learning: a bare number on a parking map can be misread as rank, cluster size or vacant-space count.
+- Product implication: WHITEBLOCK should never rely on shape/colour alone when multiple parking quantities coexist.
+- Adopted language: destination cluster = `N OPTIONS`; browse/inventory cluster = `N LOCATIONS`; individual recommendation = `#1/#2/#3`; live spaces = separate `N FREE` label.
+- Status: implemented.

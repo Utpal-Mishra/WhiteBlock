@@ -67,3 +67,10 @@
 - Recovery: if the live refresh fails, reuse the last published boundary layer; first-deploy fallback uses pinned OSM-derived county GeoJSON with relation-ID validation.
 - Validation: deployment requires exactly Cork 332631, Kildare 285833, Dublin 282800 and Wicklow 282760 with Polygon/MultiPolygon geometry.
 - Status: implemented.
+
+## AUTO-20261020-MAP06 — Zoom-driven semantic transition
+- Date: 2026-10-20.
+- Behaviour: universal screen-distance clustering automatically changes nearby ranked results from `N OPTIONS` to separate `#N` markers as zoom reaches detail level.
+- Reverse behaviour: zooming out recombines nearby recommendations into the explicit option-count cluster.
+- No live availability is generated during clustering; availability labels are copied only from source-backed result records.
+- Status: implemented.

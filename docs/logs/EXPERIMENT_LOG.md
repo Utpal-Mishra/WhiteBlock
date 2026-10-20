@@ -71,3 +71,10 @@
 - Control: existing county auto-fit with no boundary.
 - Acceptance: user can identify the focused county at a glance; parking clusters remain legible; Ireland reset removes the outline; switching county never leaves the previous border.
 - Status: implementation ready for CI/mobile validation.
+
+## EXP-20261020-MAP06 — Distinct cluster/rank marker language
+- Date: 2026-10-20.
+- Hypothesis: users will interpret parking maps faster when quantity clusters and recommendation ranks have different shapes and labels.
+- Treatment: stacked/ring cluster with `N OPTIONS`; pin/circle recommendation with `#N`; availability as a separate lower label; county browse uses `N LOCATIONS`.
+- Acceptance: a user should be able to explain what every displayed number means without opening a tooltip.
+- Status: implementation ready for live/mobile review.

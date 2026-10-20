@@ -12,8 +12,11 @@
   const POLYGON_FILL = "whiteblock-ranked-parking-fill";
   const POLYGON_LINE_MAPPED = "whiteblock-ranked-parking-line-mapped";
   const POLYGON_LINE_ESTIMATED = "whiteblock-ranked-parking-line-estimated";
+  const POINT_CLUSTER_RING = "whiteblock-ranked-parking-cluster-ring";
   const POINT_CIRCLE = "whiteblock-ranked-parking-point";
   const POINT_LABEL = "whiteblock-ranked-parking-label";
+  const POINT_CLUSTER_CAPTION = "whiteblock-ranked-parking-cluster-caption";
+  const POINT_AVAILABILITY = "whiteblock-ranked-parking-availability";
   const MAX_RESULTS = 10;
   const POLICY = window.WHITEBLOCK_MARKER_POLICY;
   const INDIVIDUAL_MARKER_ZOOM = POLICY.detailZoom;
@@ -51,6 +54,13 @@
     if (ratio >= 0.25) return "#52D98D";
     if (ratio >= 0.12) return "#C8F56B";
     return "#F1C46B";
+  }
+
+  function availabilityLabel(item) {
+    const available = Number(item?.available);
+    return Number.isFinite(available) && available >= 0
+      ? `${Math.round(available)} FREE`
+      : "LIVE —";
   }
 
   function estimateRadius(item) {
@@ -208,7 +218,12 @@
             kind: "cluster",
             count: members.length,
             rank: String(members.length),
-            colour: "#78E6AA"
+            display_rank: String(members.length),
+            caption: "OPTIONS",
+            availability_label: "",
+            colour: "#0B1712",
+            stroke_colour: "#C8F56B",
+            label_colour: "#EDF7F1"
           },
           geometry: { type: "Point", coordinates: [lng, lat] }
         });
@@ -220,8 +235,10 @@
       const coords = mapped.get(item.id) || estimatedRing(item);
       const isMapped = mapped.has(item.id);
       const rank = String(index + 1).padStart(2, "0");
+      const displayRank = `#${index + 1}`;
       const selected = item.id === state.selectedId;
       const colour = statusColour(item);
+      const freeLabel = availabilityLabel(item);
       if (zoom >= FOOTPRINT_MIN_ZOOM) {
         features.push({
           type: "Feature",
@@ -229,6 +246,7 @@
             kind: "polygon",
             parking_id: item.id,
             rank,
+            display_rank: displayRank,
             name: item.name || "Parking",
             selected: selected ? 1 : 0,
             mapped: isMapped ? 1 : 0,
@@ -243,10 +261,15 @@
           kind: "point",
           parking_id: item.id,
           rank,
+          display_rank: displayRank,
+          caption: "",
+          availability_label: freeLabel,
           name: item.name || "Parking",
           selected: selected ? 1 : 0,
           mapped: isMapped ? 1 : 0,
-          colour
+          colour,
+          stroke_colour: selected ? "#FFFFFF" : "#07110D",
+          label_colour: "#07110D"
         },
         geometry: { type: "Point", coordinates: [Number(item.lng), Number(item.lat)] }
       });
@@ -315,6 +338,21 @@
           }
         });
       }
+      if (!layerExists(POINT_CLUSTER_RING)) {
+        glMap.addLayer({
+          id: POINT_CLUSTER_RING,
+          type: "circle",
+          source: SOURCE_ID,
+          filter: ["==", ["get", "kind"], "cluster"],
+          paint: {
+            "circle-radius": 28,
+            "circle-color": "rgba(11,23,18,0)",
+            "circle-stroke-color": "rgba(200,245,107,0.34)",
+            "circle-stroke-width": 3,
+            "circle-opacity": 1
+          }
+        });
+      }
       if (!layerExists(POINT_CIRCLE)) {
         glMap.addLayer({
           id: POINT_CIRCLE,
@@ -322,10 +360,10 @@
           source: SOURCE_ID,
           filter: ["any", ["==", ["get", "kind"], "point"], ["==", ["get", "kind"], "cluster"]],
           paint: {
-            "circle-radius": ["case", ["==", ["get", "kind"], "cluster"], 22, ["==", ["get", "selected"], 1], 18, 15],
+            "circle-radius": ["case", ["==", ["get", "kind"], "cluster"], 24, ["==", ["get", "selected"], 1], 18, 16],
             "circle-color": ["get", "colour"],
-            "circle-stroke-color": ["case", ["==", ["get", "selected"], 1], "#FFFFFF", "#07110D"],
-            "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 4, 3],
+            "circle-stroke-color": ["get", "stroke_colour"],
+            "circle-stroke-width": ["case", ["==", ["get", "kind"], "cluster"], 2.5, ["==", ["get", "selected"], 1], 4, 3],
             "circle-opacity": 1
           }
         });
@@ -337,15 +375,59 @@
           source: SOURCE_ID,
           filter: ["any", ["==", ["get", "kind"], "point"], ["==", ["get", "kind"], "cluster"]],
           layout: {
-            "text-field": ["get", "rank"],
-            "text-size": 13,
+            "text-field": ["get", "display_rank"],
+            "text-size": ["case", ["==", ["get", "kind"], "cluster"], 15, 12],
+            "text-offset": ["case", ["==", ["get", "kind"], "cluster"], ["literal", [0, -0.24]], ["literal", [0, 0]]],
             "text-allow-overlap": true,
             "text-ignore-placement": true
           },
           paint: {
-            "text-color": "#07110D",
-            "text-halo-color": "rgba(255,255,255,0.45)",
-            "text-halo-width": 0.6
+            "text-color": ["get", "label_colour"],
+            "text-halo-color": ["case", ["==", ["get", "kind"], "cluster"], "rgba(7,17,13,0.9)", "rgba(255,255,255,0.42)"],
+            "text-halo-width": ["case", ["==", ["get", "kind"], "cluster"], 1, 0.6]
+          }
+        });
+      }
+      if (!layerExists(POINT_CLUSTER_CAPTION)) {
+        glMap.addLayer({
+          id: POINT_CLUSTER_CAPTION,
+          type: "symbol",
+          source: SOURCE_ID,
+          filter: ["==", ["get", "kind"], "cluster"],
+          layout: {
+            "text-field": ["get", "caption"],
+            "text-size": 7.5,
+            "text-letter-spacing": 0.08,
+            "text-offset": [0, 1.18],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true
+          },
+          paint: {
+            "text-color": "#C8F56B",
+            "text-halo-color": "rgba(7,17,13,0.92)",
+            "text-halo-width": 0.8
+          }
+        });
+      }
+      if (!layerExists(POINT_AVAILABILITY)) {
+        glMap.addLayer({
+          id: POINT_AVAILABILITY,
+          type: "symbol",
+          source: SOURCE_ID,
+          minzoom: Math.max(0, INDIVIDUAL_MARKER_ZOOM - 1),
+          filter: ["==", ["get", "kind"], "point"],
+          layout: {
+            "text-field": ["get", "availability_label"],
+            "text-size": 9,
+            "text-letter-spacing": 0.04,
+            "text-offset": [0, 2.65],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true
+          },
+          paint: {
+            "text-color": "#EDF7F1",
+            "text-halo-color": "rgba(7,17,13,0.94)",
+            "text-halo-width": 2
           }
         });
       }
@@ -438,8 +520,8 @@
       if (feature?.properties?.kind !== "cluster" || !state.destination || POLICY.browseActive(state)) return;
       const coords = feature.geometry?.coordinates;
       if (!Array.isArray(coords) || coords.length < 2) return;
-      // Zoom towards the real locations in this cluster; the zoomend handler
-      // rebuilds individual ranks as they become spatially distinguishable.
+      // The cluster number is a quantity ("N OPTIONS"), never an ordinal rank.
+      // Zoom reveals individual "#1", "#2" recommendation markers.
       leafMap.flyTo([Number(coords[1]), Number(coords[0])], Math.min(INDIVIDUAL_MARKER_ZOOM, leafMap.getZoom() + 2), { animate: true });
     });
     window.setTimeout(onStyleReady, 100);

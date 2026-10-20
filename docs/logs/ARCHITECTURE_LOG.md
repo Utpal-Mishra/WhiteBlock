@@ -111,3 +111,10 @@
 - Styling: strong lime outline, very light green fill, no pointer interaction.
 - Separation: boundary geometry has no effect on parking identity, capacity, access, availability or recommendation eligibility.
 - Status: accepted/implemented.
+
+## ARCH-20261020-MAP06 — Separate quantity, ordinal and availability channels
+- Date: 2026-10-20.
+- Decision: map marker payloads must encode three distinct concepts rather than overloading one numeric label.
+- Ranked GeoJSON properties: `display_rank`, `caption`, `availability_label`, plus existing evidence/status fields.
+- Rendering: cluster quantity is drawn with a dark stacked/ring visual; ordinal rank is prefixed with `#`; availability is rendered as a secondary label below an individual recommendation.
+- Status: accepted/implemented.

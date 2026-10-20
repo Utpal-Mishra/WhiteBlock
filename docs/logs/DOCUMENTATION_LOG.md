@@ -40,3 +40,9 @@
 - Date: 2026-10-20.
 - Documented the county relation configuration, GeoJSON build/recovery path, rendering pane, state transitions, risks and QA expectations.
 - No commercial/partner workflow changed.
+
+## DOC-20261020-MAP06 — Parking marker semantic language
+- Date: 2026-10-20.
+- Documented the explicit map-number vocabulary: `OPTIONS` for grouped ranked results, `LOCATIONS` for browse/inventory clusters, `#N` for ordinal recommendation rank, and separate live-space labels.
+- Updated QA expectations so future marker changes cannot reintroduce bare-number ambiguity.
+- Status: documented with implementation.

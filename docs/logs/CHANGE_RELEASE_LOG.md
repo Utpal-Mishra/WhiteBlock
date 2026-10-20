@@ -154,3 +154,11 @@
 - Main CI run #331: PASS.
 - GitHub Pages run #274 started from the merge; its new **Build selected-region administrative boundaries** gate completed successfully before the regional parking snapshot refresh continued.
 - Public Pages publication/mobile visual verification remains pending until run #274 completes.
+
+## RELEASE-20261020-MAP06 — Parking marker semantic redesign
+- Date: 2026-10-20.
+- Branch: `feat/parking-marker-semantics`.
+- Changed: ranked MapLibre overlay, Leaflet ranked fallback, county browse clusters, inventory clusters, result-card rank notation, CSS and cache versions.
+- User-visible result: quantity clusters, ordinal ranks and live availability now have distinct visual/label semantics.
+- Data semantics: unchanged.
+- Status: feature branch implemented; CI/Pages/mobile review pending.
