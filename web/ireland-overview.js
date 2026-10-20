@@ -491,9 +491,13 @@
         const lat = members.reduce((sum, item) => sum + Number(item.lat), 0) / members.length;
         const lng = members.reduce((sum, item) => sum + Number(item.lng), 0) / members.length;
         const icon = L.divIcon({
-          className: "wb-region-settlement-wrapper",
-          html: `<div class="wb-region-settlement-node"><strong>${formatInteger(indices.length)} parking locations</strong><span>Zoom to separate</span><small>${escapeHtml(group.label)}</small></div>`,
-          iconSize: [126, 66], iconAnchor: [63, 33]
+          className: "wb-location-cluster-wrapper",
+          html: `<div class="wb-location-cluster">
+            <span>${formatInteger(indices.length)}</span>
+            <small>LOCATIONS</small>
+            <em>Zoom to separate</em>
+          </div>`,
+          iconSize: [78, 72], iconAnchor: [39, 36]
         });
         L.marker([lat, lng], { icon, keyboard: true, pane: "wbOverviewPane" })
           .addTo(state.irelandOverviewLayer)
