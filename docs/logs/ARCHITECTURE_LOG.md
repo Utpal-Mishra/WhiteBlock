@@ -88,3 +88,9 @@
 - Renderer ownership: rasterFallbackLayer is preserved from layeradd cleanup; failed MapLibre layer removed, stale style watchdog generations invalidated.
 - Parking Layout remains a user-invoked optional presentation layer with a dedicated exit button.
 
+## ARCH-20261020-COV04 — Two-level navigation with progressive detail
+- Ireland overview: four source-connected county markers (future source-backed counties auto-register) with `regionStats` mapped-location totals; authoritative Ireland-wide bounds and no background interval camera reset.
+- Region focus: derive stable-ID-deduplicated full county parking asset rows; fit geographical bounds to real coordinates, cap auto zoom, render clusters using `WHITEBLOCK_MARKER_POLICY` and reveal actual site coordinates at detail zoom.
+- Wicklow includes Bray locality asset records without creating a fifth national region; late county source triggers pending all-county fit.
+- Preservation: zoom/pan by user is retained during asynchronous count/data refresh, except pending first full-county source fit when a prior pilot-only preview was shown.
+
