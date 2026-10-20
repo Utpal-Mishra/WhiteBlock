@@ -79,3 +79,9 @@
 - Date: 2026-10-20; status: branch, pending merge and Pages verification.
 - Change: combine county coverage presentation while retaining two separate sourcing/adapters; remove duplicate filter across overview and Discover surfaces.
 - Rollback: revert this commit if county aggregation omits Bray or doubles inventory values.
+
+## RELEASE-20261020-WW02 — Legacy Bray map taxonomy cleanup
+- Date: 2026-10-20; status: feature branch, pending tests and merge.
+- Change: remove standalone Bray coverage marker in the base map, adjust Ireland status copy to 4 county networks, version-bump `app.js` to help invalidate prior client cache.
+- Invariant: the Bray dataset stays independently ingested; Wicklow includes it for national summaries; country/region filters contain no fifth Bray option.
+- Rollback: revert this targeted patch if regional navigation or Bray destination lookup is affected.

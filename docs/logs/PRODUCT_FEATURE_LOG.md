@@ -58,3 +58,9 @@
 - Date: 2026-10-20; status: branch.
 - UX contract: national and inventory-region filters list exactly Cork, Kildare, Dublin and Wicklow. Bray appears inside Wicklow as a locality; clicking Wicklow shows its parking plus Bray locations.
 - Provenance: individual Bray source remains labelled as the seafront pilot.
+
+## FEAT-20261020-WW02 — County-only coverage markers and preserved town search
+- Date: 2026-10-20; feature scope: remove a legacy Bray top-level map marker that visually suggested an additional county; county navigation remains Cork, Kildare, Dublin and Wicklow.
+- Bray remains a named Wicklow locality and searchable destination; curated parking evidence and Wicklow county aggregation are unchanged.
+- Implementation: `web/app.js` legacy marker/status cleanup; cache version bump for initial HTML entry.
+- Status: awaiting PR validation; no standalone Bray region/filter expected.
