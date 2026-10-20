@@ -6,7 +6,7 @@ const CORK_PILOT_RADIUS_KM = 25;
 
 const coverageAreas = [
   { name: "Cork", lat: 51.8985, lng: -8.4756, status: "live", label: "Pilot intelligence live" },
-  { name: "Bray", lat: 53.2048, lng: -6.0996, status: "live", label: "Seafront evidence pilot live" },
+  // Bray is a Wicklow locality and must never appear as a separate county-level pin.
   { name: "Dublin", lat: 53.3498, lng: -6.2603, status: "next", label: "Next expansion" },
   { name: "Galway", lat: 53.2707, lng: -9.0568, status: "planned", label: "Planned" },
   { name: "Limerick", lat: 52.6638, lng: -8.6267, status: "planned", label: "Planned" },
@@ -578,7 +578,7 @@ function showIrelandOverview() {
   state.map.fitBounds(IRELAND_BOUNDS, { padding: [18, 18] });
   const mapTitle = document.getElementById("map-title");
   if (mapTitle) mapTitle.textContent = "WHITEBLOCK across Ireland";
-  setMapStatus("Ireland Coverage View", "Cork pilot · Bray seafront evidence pilot · Dublin next · Galway/Limerick/Waterford planned");
+  setMapStatus("Ireland Coverage View", "Cork · Kildare · Dublin · Wicklow connected (including Bray) · Galway/Limerick/Waterford planned");
 }
 
 function initAddressSearch() {
