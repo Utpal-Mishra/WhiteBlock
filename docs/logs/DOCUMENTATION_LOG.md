@@ -35,3 +35,8 @@
 - Updated project audit trail to record the mobile checkerboard incident, single-renderer architecture, incomplete-grid watchdog, responsive geometry repair and device QA gate.
 - No user-data, source-data or commercial-integration documentation changed.
 - Status: documented with implementation.
+
+## DOC-20261020-MAP05 — Selected-region boundary design
+- Date: 2026-10-20.
+- Documented the county relation configuration, GeoJSON build/recovery path, rendering pane, state transitions, risks and QA expectations.
+- No commercial/partner workflow changed.
