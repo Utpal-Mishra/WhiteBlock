@@ -131,3 +131,92 @@
   stroke-linejoin: round;
 }
 
+/* Parking marker semantics: quantity clusters look stacked and say LOCATIONS.
+   Individual browse points remain plain dots, so a bare number is never mistaken
+   for an ordinal recommendation rank. */
+.wb-location-cluster-wrapper {
+  background: transparent !important;
+  border: 0 !important;
+  overflow: visible !important;
+}
+
+.wb-location-cluster {
+  position: relative;
+  box-sizing: border-box;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: rgba(7,17,13,.97);
+  border: 2px solid rgba(120,230,170,.78);
+  box-shadow: 0 10px 26px rgba(0,0,0,.40), inset 0 0 0 4px rgba(120,230,170,.05);
+  color: #EDF7F1;
+  backdrop-filter: blur(8px);
+}
+
+.wb-location-cluster::before,
+.wb-location-cluster::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border-radius: 50%;
+  border: 1px solid rgba(120,230,170,.24);
+  background: rgba(7,17,13,.52);
+}
+
+.wb-location-cluster::before { transform: translate(-7px, -5px); }
+.wb-location-cluster::after { transform: translate(7px, 5px); }
+
+.wb-location-cluster span,
+.wb-location-cluster small,
+.wb-location-cluster em {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.wb-location-cluster span {
+  font: 800 16px/1 "Manrope", sans-serif;
+}
+
+.wb-location-cluster small {
+  margin-top: 4px;
+  color: #78E6AA;
+  font: 800 7px/1 "DM Sans", sans-serif;
+  letter-spacing: .08em;
+}
+
+.wb-location-cluster em {
+  position: absolute;
+  left: 50%;
+  top: 68px;
+  transform: translateX(-50%);
+  min-width: max-content;
+  padding: 3px 6px;
+  border: 1px solid rgba(120,230,170,.18);
+  border-radius: 999px;
+  background: rgba(7,17,13,.90);
+  color: #9CB1A7;
+  font: 600 7px/1 "DM Sans", sans-serif;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .wb-location-cluster {
+    width: 56px;
+    height: 56px;
+  }
+
+  .wb-location-cluster span {
+    font-size: 15px;
+  }
+
+  .wb-location-cluster em {
+    top: 62px;
+  }
+}
+
