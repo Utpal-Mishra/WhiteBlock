@@ -29,6 +29,7 @@
   const geometryCache = new Map();
   let latestFeatureCollection = { type: "FeatureCollection", features: [] };
   let selectionWrapped = false;
+  let glSourceAnnounced = false;
 
   function currentResults() {
     // County and Ireland browsing show county/locality aggregates, never the
@@ -421,8 +422,14 @@
     }
 
     const onStyleReady = () => {
-      ensureGlLayers();
+      const ready = ensureGlLayers();
       updateSource(latestFeatureCollection);
+      if (ready && !glSourceAnnounced) {
+        glSourceAnnounced = true;
+        // Leaflet's duplicate ranked circles are a fallback only. As soon as
+        // native ranked MapLibre overlay is available, remove the fallback.
+        document.dispatchEvent?.(new CustomEvent("whiteblock:ranked-gl-overlay-ready"));
+      }
     };
     glMap.on?.("style.load", onStyleReady);
     glMap.on?.("idle", onStyleReady);
