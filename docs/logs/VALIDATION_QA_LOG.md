@@ -125,3 +125,9 @@
 ### Renderer duplication gate — 2026-10-20
 - `map-engine-v2.js` stops drawing duplicate ranked Leaflet circles/polygons when the native GL overlay is live; GL readiness releases any provisional fallback.
 - Universal regression test enforces the ownership event and fallback clustering. Manual verify Android switch from provisional to GL never leaves two icons per location.
+
+## QA reconciliation — universal marker implementation merged
+- Date: 2026-10-20; PR #39 feature CI run `39459853465` concluded SUCCESS.
+- Assertions include regional coverage and code integrations: Cork/Kildare/Dublin/Wicklow + synthetic Galway/Donegal; Bray nested within Wicklow; ranked/inventory/legacy renderer isolation.
+- Source-backed future registration follows `docs/UNIVERSAL_MARKER_POLICY.md`; synthetic fixture success is not live-site validation.
+- Outstanding: main deployment run `39459997110` and in-browser Android map zoom, cluster tap and visual checks. Do not mark visual QA passed until observed.
