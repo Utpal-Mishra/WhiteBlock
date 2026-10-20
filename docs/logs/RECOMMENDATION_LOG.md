@@ -56,3 +56,8 @@
 - Detailed mode: reveal distinct ranked parking IDs and actual coordinates as zoom permits; keep source evidence and live availability indicators separate.
 - Interaction: tapping a cluster progressively zooms; do not scatter markers to artificial coordinates or leave previous destination ranks on national map.
 
+## REC-20261020-MAP02 — One zoom UI standard for expansion
+- Recommendation: use one shared pixel-radius grouping algorithm for all county and subcounty maps, rather than separate per-county marker implementations.
+- Avoid external-only clustering dependencies; keep a local fallback if MarkerCluster does not load.
+- Use labels explicitly counting parking locations; preserve raw IDs, access restrictions and evidence.
+
