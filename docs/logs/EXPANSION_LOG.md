@@ -58,3 +58,9 @@
 - Existing baseline counties: Cork, Kildare, Dublin, Wicklow (Bray nested). Future test fixtures must not be confused with deployed coverage.
 - Before claiming capacity/free bays, require verified capacity or live telemetry as appropriate.
 
+## EXPAND-20261020-MAP05 — Boundary onboarding requirement for future counties
+- Date: 2026-10-20.
+- Future source-backed county additions should include a verified administrative boundary relation/geometry before the county is considered fully map-ready.
+- Existing automatic inventory registration may still expose a future county without a border if no verified geometry is configured; the UI must not synthesize one.
+- Preferred onboarding: add relation ID/ISO code to `config/ireland_region_boundaries.json`, then let the deployment builder publish the geometry.
+- Status: adopted.
