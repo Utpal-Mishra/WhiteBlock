@@ -192,3 +192,20 @@
 - Main tests after merge: PASS (run #331).
 - Pages boundary-generation/validation step in run #274: PASS.
 - Remaining gate: completion of the full Pages deployment and on-device visual confirmation of Cork/Kildare/Dublin/Wicklow outlines.
+
+## QA-20261020-MAP06 — Marker semantic regression gate
+- Date: 2026-10-20.
+- Automated contracts:
+  - destination cluster carries `OPTIONS`;
+  - individual ranked marker carries explicit `#` rank;
+  - availability is a separate property/layer;
+  - inventory cluster says `locations`;
+  - county browse cluster says `LOCATIONS`;
+  - Leaflet fallback mirrors MapLibre semantics;
+  - cache-busted assets load the new renderers.
+- Manual checks after deploy:
+  - search with 3 close results: one `3 OPTIONS` cluster;
+  - zoom in: `#1`, `#2`, `#3`;
+  - live-space count, when present, is below its individual marker and never inside cluster count;
+  - county browse shows `N LOCATIONS`, not `N OPTIONS`.
+- Status: pending CI and live review.
