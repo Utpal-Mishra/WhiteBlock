@@ -86,6 +86,9 @@ jobs:
       - name: Test ranked map marker clustering
         run: node tests/test_ranked_gl_clustering.js
 
+      - name: Test Ireland county totals and full-inventory zoom
+        run: node tests/test_ireland_county_map.js
+
       - name: Test universal marker policy for current and future regions
         run: node tests/test_universal_marker_policy.js
 
