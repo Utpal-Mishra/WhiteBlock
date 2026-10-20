@@ -9,7 +9,7 @@ WEB = ROOT / "web"
 class MapEngineV3Tests(unittest.TestCase):
     def test_runtime_loads_cache_busted_persistent_engine(self):
         runtime = (WEB / "runtime-config.js").read_text(encoding="utf-8")
-        self.assertIn("map-engine-v2.js?v=20261020-2", runtime)
+        self.assertIn("map-engine-v2.js?v=20261020-3", runtime)
         self.assertIn("loadWhiteblockMapEngineV2", runtime)
 
     def test_one_persistent_maplibre_layer_switches_styles(self):
@@ -21,7 +21,9 @@ class MapEngineV3Tests(unittest.TestCase):
         self.assertIn('const TERRAIN_TILE = "https://a.tile.opentopomap.org/{z}/{x}/{y}.png"', source)
         self.assertIn('const SATELLITE_TILE = "https://server.arcgisonline.com/', source)
         self.assertNotIn('pane: "tilePane"', source)
-        self.assertNotIn("L.tileLayer(", source)
+        self.assertIn("L.tileLayer(config.url", source)
+        self.assertIn("STREET_RASTER_TILE", source)
+        self.assertIn("STREET_BACKUP_TILE", source)
 
     def test_blank_canvas_css_overrides_are_removed(self):
         css = (WEB / "map-engine-v2.css").read_text(encoding="utf-8")
@@ -44,9 +46,11 @@ class MapEngineV3Tests(unittest.TestCase):
 
     def test_map_has_provider_independent_fallback(self):
         source = (WEB / "map-engine-v2.js").read_text(encoding="utf-8")
-        self.assertIn("activateLayoutFallback", source)
-        self.assertIn("wb-parking-layout-button", source)
+        self.assertIn("activateRasterFallback", source)
+        self.assertNotIn("activateLayoutFallback", source)
         self.assertIn("isStyleLoaded", source)
+        self.assertIn('layer === rasterFallbackLayer', source)
+        self.assertIn("Street map · compatibility mode", source)
 
 
 if __name__ == "__main__":
