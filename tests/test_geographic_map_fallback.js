@@ -87,6 +87,7 @@ function scenario(kind) {
     dispatchEvent() {}
   };
   const window = {
+    WHITEBLOCK_MARKER_POLICY: { browseActive: () => false },
     setTimeout(fn, ms) { timeouts.push({ fn, ms }); return timeouts.length; },
     clearTimeout() {},
     requestAnimationFrame(fn) { fn(); },
