@@ -9,7 +9,7 @@
 
   const STORAGE_KEY = "whiteblock.inventoryCandidates.v1";
   const DISPLAY_LIMIT = 100;
-  const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin", "Wicklow", "Bray"];
+  const CONNECTED_REGIONS = ["Cork", "Kildare", "Dublin", "Wicklow"];
   const KILDARE_BOUNDS = {
     south: 52.89292777262258,
     west: -7.094685794312817,
@@ -56,6 +56,7 @@
 
   function normalizeRegion(item) {
     const explicit = String(item?.discoverRegion || item?.candidateRegion || "").trim();
+    if (explicit === "Bray") return "Wicklow"; // Legacy saved candidates stay in their county.
     if (CONNECTED_REGIONS.includes(explicit)) return explicit;
 
     const regionKey = String(item?.discoverRegionKey || "").toLowerCase();
@@ -63,7 +64,7 @@
     if (regionKey === "kildare") return "Kildare";
     if (regionKey === "cork") return "Cork";
     if (regionKey === "wicklow") return "Wicklow";
-    if (regionKey === "bray") return "Bray";
+    if (regionKey === "bray") return "Wicklow";
 
     const haystack = [
       item?.area,
@@ -78,7 +79,7 @@
     if (haystack.includes("kildare") || haystack.includes("-kildare-")) return "Kildare";
     if (haystack.includes("cork") || haystack.includes("-cork-")) return "Cork";
     if (haystack.includes("wicklow") || haystack.includes("-wicklow-")) return "Wicklow";
-    if (haystack.includes("bray") || haystack.includes("-ww-bray-")) return "Bray";
+    if (haystack.includes("bray") || haystack.includes("-ww-bray-")) return "Wicklow";
     return item?.area || "Other";
   }
 
@@ -135,8 +136,7 @@
     const snapshots = state.regionSnapshots || {};
     if (region === "Dublin") return snapshots.dublin || null;
     if (region === "Kildare") return snapshots.kildare || null;
-    if (region === "Wicklow") return snapshots.wicklow || null;
-    if (region === "Bray") return snapshots.bray || null;
+    if (region === "Wicklow") return snapshots.wicklow || snapshots.bray || null;
     if (region === "Cork") return snapshots.corkCounty || snapshots.cork || state.discoverySnapshot || state.parkingSnapshot || null;
     return null;
   }
@@ -233,7 +233,6 @@
             <option value="kildare">Kildare</option>
             <option value="dublin">Dublin</option>
             <option value="wicklow">Wicklow</option>
-            <option value="bray">Bray</option>
           </select>
         </label>
         <label class="inventory-filter-field">
@@ -320,15 +319,13 @@
         ? "Four-authority County Dublin evidence"
         : region === "Kildare"
           ? "Kildare CoCo + OpenStreetMap"
-          : region === "Wicklow" ? "OpenStreetMap exact county boundary (excluding Bray pilot)"
-          : region === "Bray" ? "Curated Bray seafront pilot"
+          : region === "Wicklow" ? "County Wicklow mapped parking + curated Bray pilot"
           : "Cork City + County Cork evidence";
       const mode = region === "Dublin"
         ? "Exact-boundary mapped network"
         : region === "Kildare"
           ? "Exact-county mapped network"
-          : region === "Wicklow" ? "Mapped county network · partial/non-live"
-          : region === "Bray" ? "Evidence pilot · non-live"
+          : region === "Wicklow" ? "Mapped county + Bray pilot · partial/non-live"
           : "City live + county mapped";
       return `
         <article class="surface discover-region-card inventory-region-card" data-inventory-region-card="${escape(region.toLowerCase())}">
