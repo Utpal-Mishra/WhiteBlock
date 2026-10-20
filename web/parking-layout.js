@@ -219,6 +219,12 @@
     }).observe(parkingList, { childList: true, subtree: true });
   }
 
+  // Any Ireland/county coverage action must reveal the real geographical map,
+  // even if the user previously opened the optional schematic.
+  document.addEventListener("whiteblock:coverage-browse", () => {
+    if (layoutMode) setLayoutMode(false);
+  });
+
   document.addEventListener("whiteblock:data-ready", () => {
     if (layoutMode) renderLayout();
   });
