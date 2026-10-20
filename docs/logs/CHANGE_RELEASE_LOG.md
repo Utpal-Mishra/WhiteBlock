@@ -113,3 +113,8 @@
 - Asset version bumps, new mock Node failure and timeout test, updated map/layout Python contracts.
 - PR #40: pending CI/Pages; manual Android confirmation still needed.
 
+## RELEASE-20261020-MAP03 merged implementation
+- PR #40 merged to `main`, commit `8cc276f4302a798042eb8b62610c3bc6fb48067d`.
+- Branch CI `39467188332`: SUCCESS with simulated MapLibre initialization failure, style timeout and street tile backup regression, plus existing Python/unit tests.
+- Main branch test run: `39467328613`; Pages publishing run: `39467328592`, both triggered at merge. Production/mobile smoke verification not yet completed.
+- Previous “pending CI” notes reflect their original timestamps; this entry is the updated audit record.
