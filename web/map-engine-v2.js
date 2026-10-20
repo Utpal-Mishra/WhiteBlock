@@ -4,7 +4,7 @@
 // container into Leaflet's tilePane. That was fragile on Android Chrome: Leaflet
 // overlays survived while the basemap canvas could disappear. This version mirrors
 // the stable XPLORE pattern: one persistent L.maplibreGL layer is added normally,
-// and Street / Terrain / Satellite switch styles inside that same MapLibre map.
+// and Hybrid / Street / Terrain / Satellite switch styles inside that same MapLibre map.
 // Leaflet remains responsible for destinations, clusters and parking polygons.
 
 (() => {
@@ -196,7 +196,7 @@
   // When WebGL or a vector style cannot load on a mobile browser, continue
   // showing a *geographical* Leaflet tile map. A schematic must never replace
   // the real map without an explicit user request.
-  function activateRasterFallback(reason, key = "street") {
+  function activateRasterFallback(reason, key = "hybrid") {
     const generation = ++fallbackGeneration;
     ++styleGeneration; // invalidate style health callbacks from the failed GL map
     clearStyleHealthTimer();
@@ -373,7 +373,7 @@
     glMap.__whiteblockHealthBound = true;
     glMap.on?.("error", event => {
       // MapLibre can report isolated glyph/tile errors while the map remains usable.
-      // Only act after a sustained burst from the currently selected non-Street style.
+      // Only act after a sustained burst from the currently selected non-Hybrid style.
       styleErrors += 1;
       if (styleErrors >= 16 && activeBasemap !== "hybrid") {
         switchBasemap("hybrid", { quiet: true });
