@@ -666,7 +666,7 @@
     if (!item) return;
     try { map.setView([Number(item.lat), Number(item.lng)], 17, { animate: false }); } catch (_) {}
     renderParkingAreas();
-    window.setTimeout(resizeBasemap, 40);
+    repairMapGeometry(40);
   }
 
   function openStreetView() {
@@ -752,7 +752,7 @@
     wrapSelection();
     renderDestinationContext();
     renderParkingAreas();
-    window.setTimeout(resizeBasemap, 40);
+    repairMapGeometry(40);
   });
   document.addEventListener("whiteblock:coverage-browse", () => {
     // Ireland/region browsing owns the visible overlay while there is no
@@ -763,12 +763,12 @@
     parkingAreaLayer = null;
     selectedFootprintLayer = null;
     destinationContextLayer = null;
-    window.setTimeout(resizeBasemap, 30);
+    repairMapGeometry(30);
   });
   document.addEventListener("whiteblock:kildare-attributes-ready", renderParkingAreas);
   document.addEventListener("whiteblock:ranked-gl-overlay-ready", renderParkingAreas);
   map.on("zoomend", renderParkingAreas);
-  document.addEventListener("whiteblock:inventory-map-ready", () => window.setTimeout(resizeBasemap, 30));
+  document.addEventListener("whiteblock:inventory-map-ready", () => repairMapGeometry(30));
 
   document.addEventListener("click", event => {
     if (event.target.closest?.("#ireland-overview-button")) {
@@ -777,14 +777,14 @@
         if (typeof IRELAND_BOUNDS !== "undefined") {
           map.fitBounds(IRELAND_BOUNDS, { padding: [24, 24], maxZoom: 7, animate: false });
         }
-        resizeBasemap();
+        repairMapGeometry(0);
       }, 20);
     }
     if (event.target.closest?.("#search-button") || event.target.closest?.("#destination-suggestions") || event.target.closest?.(".chip")) {
       window.setTimeout(() => {
         renderDestinationContext();
         renderParkingAreas();
-        resizeBasemap();
+        repairMapGeometry(0);
       }, 520);
     }
   });
