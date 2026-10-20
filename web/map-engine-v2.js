@@ -197,6 +197,8 @@
         if (tileErrors >= 3 && provider === "street") {
           // Stay on an actual road map, even if OSM tile requests are blocked.
           attachTiles("backup");
+        } else if (tileErrors >= 3 && (provider === "terrain" || provider === "satellite")) {
+          activateRasterFallback(LAYER_LABELS[selected] + " tiles unavailable · switched to Street", "street");
         } else if (tileErrors >= 3 && provider === "backup" && typeof setMapStatus === "function") {
           setMapStatus("Street tiles unavailable", "Both street-map tile sources failed · check network connectivity");
         }
