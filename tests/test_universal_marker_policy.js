@@ -72,7 +72,7 @@ const overview = fs.readFileSync(path.join(root, "web/ireland-overview.js"), "ut
 assert.ok(index.indexOf("parking-marker-policy.js") < index.indexOf("runtime-config.js"), "policy initializes before map adapters");
 assert.ok(runtime.includes("inventory-map-layer.js?v=20261020-2"));
 assert.ok(runtime.includes("parking-gl-overlay.js?v=20261020-3"));
-assert.ok(runtime.includes("ireland-overview.js?v=20261020-2"));
+assert.ok(runtime.includes("ireland-overview.js?v=20261020-4"));
 assert.ok(inventoryJs.includes("POLICY.connectedInventory(state, parkingData)"));
 assert.ok(inventoryJs.includes("POLICY.groupNearby(items"), "inventory fallback still clusters when Leaflet plugin unavailable");
 assert.ok(inventoryJs.includes('state.map?.on?.("zoomend"'), "fallback must re-cluster with zoom");
