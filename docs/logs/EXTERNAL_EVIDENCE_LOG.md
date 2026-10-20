@@ -79,3 +79,10 @@
   - Wicklow: OSM relation 282760.
 - Pinned fallback dataset: OSM-derived GeoJSON from `hyperknot/country-levels-export` at commit `536b86946e69d407d544405d6b1a18c6e20eb651`.
 - Use: map-focus presentation only; no parking inventory or access inference.
+
+## EVID-20261020-MAP06 — Owner-observed marker ambiguity
+- Date: 2026-10-20.
+- Evidence type: direct product review/use-case from the project owner.
+- Scenario: three parking recommendations can display a cluster labelled `3`, while individual recommendations are also numbered 1/2/3 and live availability may itself be numeric.
+- Finding: the existing bare cluster number is semantically ambiguous.
+- Response: explicit semantic marker language implemented; no external market assumption required.
