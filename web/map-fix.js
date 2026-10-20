@@ -63,7 +63,7 @@
     if (!document.querySelector('link[data-wb-map-context]')) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "./map-context.css";
+      link.href = "./map-context.css?v=20261020-hybrid1";
       link.dataset.wbMapContext = "true";
       document.head.appendChild(link);
     }
