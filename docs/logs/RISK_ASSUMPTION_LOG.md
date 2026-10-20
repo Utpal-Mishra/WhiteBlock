@@ -111,3 +111,10 @@
 - R4 Street selected while Parking Layout visible: clear basemap pressed state during schematic; provide visible Back to map, document capture listener to restore even with MapLibre intercepted clicks.
 - R5 External tile-provider terms/attribution/network reliability: preserve attribution; evaluate hosting strategy and tile policy before scale-up.
 
+## RISK-20261020-COV04 — All-region parking map
+- R1 “available spots” misread as vacant bays. Evidence: inventory snapshots do not contain continuous live occupancy for all sites; mitigation county badges say mapped locations and separately show reported vacant bays or “Vacancies unverified”.
+- R2 heavy county source crowding/mobile performance. Mitigation reuse grid-based zoom clustering, viewport-limited site dots at detail zoom; retain full records without arbitrary top-300 truncation.
+- R3 late county source after pilot-only display. Mitigation pending county fit until source-backed canonical region inventory and snapshot arrive.
+- R4 unexpected camera recenter while inspecting Ireland. Mitigation refresh counts and markers without recurring `fitBounds`; fit only on explicit Ireland/county action and pending initial county source.
+- R5 any source rows outside Irish bounds or duplicate IDs. Mitigation filter invalid coordinates and stable-ID duplicates; physical duplicate IDs still need evidence reconciliation.
+
