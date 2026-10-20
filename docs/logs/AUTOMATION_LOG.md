@@ -38,3 +38,8 @@
 - Deterministic 7-site fixtures for Cork, Kildare, Dublin, Wicklow, Galway and Donegal, plus Bray nested/duplicate-Cork guard and script integration.
 - Region adapters still refresh source-backed JSON independently; new county onboarding requires valid snapshot before county activation.
 
+## AUTO-20261020-MAP03 — Geographical fallback CI
+- `tests/test_geographic_map_fallback.js` tests immediate MapLibre exception and style watchdog timeout, real raster tile attachment, backup street tiles and no automatic Parking Layout activation.
+- Existing marker/ranked/county regression suite retained; Python layout/map engine version and fallback expectations updated.
+- PR #40 CI / main Pages deployment to be recorded after conclusion.
+
