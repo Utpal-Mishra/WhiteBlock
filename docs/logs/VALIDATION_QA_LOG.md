@@ -97,3 +97,8 @@
 - Assertions: exact County Wicklow relation 282760; no Bray overlap; no generated available_spaces; correct null capacity/access semantics; never create polygon from non-closed way.
 - Post-build gate: nonempty source-backed snapshot, non-exhaustive flag, correct boundary metadata, no duplicated Bray records.
 - Manual test queue: Wicklow Town, Greystones, Arklow, Blessington and Glendalough map/search/locality.
+
+## QA-20261020-WW01 — Four counties with Bray inside Wicklow
+- Date: 2026-10-20; status: CI tests prepared.
+- Assertions: no Bray county-level filter; no separate Bray national card; retained Bray inventory loading and navigation; Wicklow county totals and town grouping include Bray; provenance and unknown availability unchanged.
+- Deployment: review counts and click Wicklow -> Bray locality -> individual locations before closing QA.
