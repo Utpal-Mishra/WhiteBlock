@@ -64,3 +64,9 @@
 - Existing automatic inventory registration may still expose a future county without a border if no verified geometry is configured; the UI must not synthesize one.
 - Preferred onboarding: add relation ID/ISO code to `config/ireland_region_boundaries.json`, then let the deployment builder publish the geometry.
 - Status: adopted.
+
+## EXPAND-20261020-MAP06 — Marker semantics apply nationwide
+- Date: 2026-10-20.
+- Rule: current and future counties inherit the same cluster/rank/availability language through the universal marker policy and shared renderers.
+- No county-specific number interpretation is permitted.
+- Status: adopted.
