@@ -178,3 +178,12 @@
 - Main CI run #349: PASS.
 - GitHub Pages deployment run #277 started from the merge and is rebuilding the regional deployment artifact.
 - Release state: merged and test-green; public Pages publication pending completion of run #277.
+
+## CHANGE-20261021-001 — Ranked map spacing and mobile viewport correction
+
+- Date: 2026-10-21.
+- Branch: `fix/mobile-ranked-map-spacing-2026-10-21`.
+- Changed: ranked MapLibre overlay, mobile map sizing, cache keys, universal marker documentation and regression tests.
+- Behaviour: crowded detailed markers fan out rather than stack; real coordinates remain unchanged; unreported availability is blank rather than `0 FREE`.
+- Mobile map: 460px at <=820px; 480px at <=520px.
+- Release state: feature-branch implementation complete; CI/Pages gates pending.
