@@ -126,3 +126,11 @@
 - Parking markers, recommendation ranks, county boundaries and footprints remain independent layers above the basemap.
 - Runtime does not use Google Maps tiles or copy Google map styling/data.
 - Status: accepted/implemented.
+
+## ARCH-20261021-001 — Canonical coordinates remain immutable; display coordinates may fan out
+
+- Date: 2026-10-21.
+- Decision: resolve dense marker collisions in the presentation layer rather than mutating canonical parking coordinates or deleting source-backed assets.
+- Architecture: true asset coordinates remain in the canonical inventory and footprints; at detailed zoom a temporary display coordinate may be derived in screen space and connected back to the true point with a line.
+- Rationale: supports complete evidence retention while keeping the mobile map legible.
+- Status: accepted.
