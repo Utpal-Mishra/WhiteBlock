@@ -116,6 +116,13 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("wb-map-terrain", css)
 
 
+    def test_mobile_map_has_useful_vertical_space(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        css = (WEB / "styles.css").read_text(encoding="utf-8")
+        self.assertIn('href="./styles.css?v=20261021-1"', html)
+        self.assertIn("#map { height:460px; }", css)
+        self.assertIn("#map { height:480px; }", css)
+
     def test_mobile_alignment_contracts(self):
         discover_css = (WEB / "discover.css").read_text(encoding="utf-8")
         settlement = (WEB / "dublin-settlement-integration.js").read_text(encoding="utf-8")
