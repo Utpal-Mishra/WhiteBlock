@@ -84,3 +84,12 @@
   4. alternate Street raster when the first Street source also stalls/errors.
 - Existing 3.2 s incomplete-grid watchdog and responsive geometry repair remain active.
 - Status: implemented.
+
+## AUTO-20261021-001 — Automatic re-layout of ranked markers by zoom
+
+- Date: 2026-10-21.
+- Automation: the ranked overlay recalculates grouping/collision state on every map `zoomend`.
+- Low/medium zoom: nearby recommendations remain clustered.
+- Detailed zoom: residual screen collisions automatically fan out; no county-specific manual marker layout is required.
+- Trigger scope: destination results across all regions.
+- Status: implemented.
