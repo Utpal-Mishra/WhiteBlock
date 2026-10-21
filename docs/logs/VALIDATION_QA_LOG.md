@@ -231,3 +231,16 @@
 - Main regression suite after merge: PASS (run #349).
 - Verified contracts include Hybrid first-paint/default state, + menu secondary modes, Hybrid-to-Street degradation, existing clustering/count semantics and county-map regressions.
 - Remaining gate: Pages run #277 completion plus visual mobile confirmation.
+
+## QA-20261021-001 — Dense ranked-marker regression coverage
+
+- Date: 2026-10-21.
+- Automated checks added:
+  - close detailed markers produce spider connector lines;
+  - all ranked options remain present after fan-out;
+  - detailed fan-out contains no residual cluster;
+  - null availability produces no `0 FREE` label;
+  - refreshed JS/CSS cache keys are present;
+  - mobile map heights are 460px/480px at the intended breakpoints.
+- Existing checks retained: national/county browse isolation, low-zoom clustering and rank order.
+- Status: tests updated; CI pending.
