@@ -10,7 +10,7 @@ This is the **only** marker grouping contract for WHITEBLOCK's current and futur
 4. **Destination results:** nearby ranked parking locations use the same screen-space clustering. A group badge shows the count of **locations**, and individual labels 01–10 appear at detailed zoom when geographically distinguishable.
 5. **Full inventory map:** MarkerCluster groups every loaded source-backed region's parking assets. If the external plugin fails to load, an internal map-level clustering fallback still avoids thousands of unclustered markers.
 
-Shared defaults in `web/parking-marker-policy.js`: 56px parking-radius grouping, 132px locality cards, detailed parking marker zoom 17, detailed locality zoom 16, parking footprint display zoom 14. These are presentation defaults, **not** geographic distances or evidence of real-time vacant spaces.
+Shared defaults in `web/parking-marker-policy.js`: 56px parking-radius grouping, 132px locality cards, detailed parking marker zoom 17, detailed locality zoom 16, parking footprint display zoom 14. The ranked MapLibre layer adds a 46px collision check at detail zoom and a display-only spider fan when individual markers would still collide. These are presentation defaults, **not** geographic distances or evidence of real-time vacant spaces.
 
 ## Current/future data adapter contract
 - Write source-backed normalized locations into `state.regionInventories[regionKey]` with stable IDs and numeric coordinates, and the validated snapshot into `state.regionSnapshots[regionKey]`.
@@ -23,7 +23,7 @@ Shared defaults in `web/parking-marker-policy.js`: 56px parking-radius grouping,
 ## Operational guardrails
 - Group labels count mapped **parking locations**, not individual bays or confirmed vacant spaces.
 - Never re-center or refit the user-selected map view on ordinary zoom.
-- At zoom 17, multiple distinct assets with exactly identical coordinates can still physically overlap. Their IDs remain independent, and additional disambiguation (e.g. a spiderfy/list UI) should be added if verified duplicates share one entrance.
+- At detailed zoom, screen-colliding ranked options are fanned into a display-only spider layout with connector lines back to their true coordinates. Their canonical coordinates never change. This applies generically to all regions and avoids unreadable marker stacks where several source-backed records share an entrance or lie only a few metres apart.
 - Do not stop at an arbitrary 300 visible parking-site cutoff. Draw aggregated sites at broad scales, and only detailed points in/near the current viewport at high zoom.
 - The MarkerCluster CDN is a best-effort enhancement: the built-in grouping fallback remains available if external scripts are blocked.
 
