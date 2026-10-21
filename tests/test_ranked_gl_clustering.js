@@ -50,6 +50,10 @@ const leafMap = {
     const scale = 256 * 2 ** requestedZoom / 360;
     return { x: point.lng * scale, y: point.lat * scale };
   },
+  unproject(point, requestedZoom) {
+    const scale = 256 * 2 ** requestedZoom / 360;
+    return { lng: Number(point[0]) / scale, lat: Number(point[1]) / scale };
+  },
   on(event, listener) { mapHandlers.set(event, listener); },
   flyTo(point, requestedZoom) { lastFly = { point, zoom: requestedZoom }; zoom = requestedZoom; }
 };
@@ -99,6 +103,24 @@ assert.deepEqual(
   "01,02,03,04,05,06,07",
   "Detailed markers retain their original recommendation rank"
 );
+assert.ok(
+  detailed.filter(feature => feature.properties.kind === "point").every(feature => feature.properties.availability_label === ""),
+  "Null live availability must not become a misleading 0 FREE label"
+);
+
+// Very close/duplicate source locations must remain individually legible at
+// detailed zoom rather than stack their circles and labels on top of each other.
+parkingData[0].lat = cork.lat;
+parkingData[0].lng = cork.lng;
+parkingData[1].lat = cork.lat + 0.00001;
+parkingData[1].lng = cork.lng + 0.00001;
+parkingData[2].lat = cork.lat + 0.00002;
+parkingData[2].lng = cork.lng + 0.00002;
+mapHandlers.get("zoomend")();
+const crowded = sourceData.features;
+assert.ok(crowded.some(feature => feature.properties.kind === "spider-line"), "Crowded detail markers should fan out with connector lines");
+assert.equal(crowded.filter(feature => feature.properties.kind === "point").length, 7, "Spider layout must preserve every ranked option");
+assert.equal(crowded.filter(feature => feature.properties.kind === "cluster").length, 0, "Detailed spider layout replaces the unreadable cluster");
 
 state.overviewMode = true;
 state.destination = null;

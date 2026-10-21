@@ -52,3 +52,10 @@
 - Documented Hybrid composition, + menu hierarchy, recovery order, provider lifecycle risk and QA expectations.
 - Clarified that pure Satellite remains a separate secondary view.
 - Status: documented with implementation.
+
+## DOC-20261021-001 — Universal marker policy updated for dense detailed locations
+
+- Date: 2026-10-21.
+- Document: `docs/UNIVERSAL_MARKER_POLICY.md`.
+- Added: detailed collision check, display-only spider fan, connector-line semantics and canonical-coordinate immutability.
+- Status: updated.

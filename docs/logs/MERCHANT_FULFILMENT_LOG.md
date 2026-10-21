@@ -16,3 +16,10 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Merchant/operator integration remains separate: publish live availability only after partner/data-source agreement and trustworthy timestamps; county map rendering does not create partner commitments.
 - No merchant fulfilment workflow or booking capability changed.
 
+## MERCH-20261021-001 — No merchant/partner dependency introduced by map-spacing fix
+
+- Date: 2026-10-21.
+- Change impact: none on operator, merchant, payment, booking or fulfilment contracts.
+- Reason logged: dense parking records remain canonical regardless of future partnership state; the correction is presentation-only.
+- Future relevance: partner-provided facility segmentation can later improve physical reconciliation without changing the renderer contract.
+- Status: no action required.

@@ -76,3 +76,10 @@
 - Rule: current and future WHITEBLOCK regions inherit Hybrid as the initial basemap; no county-specific default is allowed.
 - Region/county boundary focus, clustering and parking marker semantics remain independent of basemap choice.
 - Status: adopted.
+
+## EXPAND-20261021-001 — Dense-marker behaviour standardised for every region
+
+- Date: 2026-10-21.
+- Expansion implication: new counties do not need bespoke marker spacing logic when several parking records share an entrance or lie close together.
+- Shared rule: broad-scale cluster → detailed collision check → display-only fan-out when required.
+- Status: adopted as universal behaviour.

@@ -85,3 +85,13 @@
 - Treatment: Hybrid default; Street/Terrain/Satellite become secondary.
 - Acceptance: first map paint and persistent engine show the same Hybrid mode, toolbar highlights Hybrid, parking overlays remain legible, and + switches reliably to all other modes.
 - Status: implementation ready for CI/mobile review.
+
+## EXP-20261021-001 — Kildare Town dense-marker reproduction
+
+- Date: 2026-10-21.
+- Input: latest successful Pages deployment snapshot and mobile screenshots.
+- Reproduction set: 15 Kildare Town source-backed records; multiple pairs/groups are within tens of metres.
+- Notable distances: St Brigid's Square source/canonical records share effectively the same coordinate; Top Nolan's records are roughly 0.8–9.2 m apart.
+- Result: the former zoom-17 policy produced stacked rank circles and overlapping availability labels.
+- Fix experiment: preserve all rows, apply a 46px detailed collision check and fan collision groups around a 54px display ring.
+- Status: implemented; CI/mobile deployment validation pending.

@@ -95,3 +95,12 @@
   - https://developers.arcgis.com/web-scene-specification/objects/baseMap/
   - https://www.esri.com/arcgis-blog/products/arcgis-living-atlas/announcements/sunsetting-legacy-basemaps
 - Product use: current prototype Hybrid composition only; provider migration is tracked before legacy-service retirement.
+
+## EXT-20261021-001 — Deployed Kildare snapshot confirms dense physical/source records
+
+- Date: 2026-10-21.
+- Evidence source: latest successful WHITEBLOCK GitHub Pages deployment artifact, `data/kildare_parking_snapshot.json`.
+- Kildare Town subset: 15 mapped/evidence-backed records in the deployed partial Kildare inventory.
+- Dense examples: St Brigid's Square records have effectively identical coordinates; Top Nolan's source/canonical records sit within approximately 1–9 m of one another.
+- Interpretation: the overlap is not only a viewport issue; it is a valid dense-record rendering case.
+- Use: supports the universal collision-aware renderer rather than Kildare-specific marker offsets.

@@ -72,7 +72,7 @@ const overview = fs.readFileSync(path.join(root, "web/ireland-overview.js"), "ut
 const app = fs.readFileSync(path.join(root, "web/app.js"), "utf8");
 assert.ok(index.indexOf("parking-marker-policy.js") < index.indexOf("runtime-config.js"), "policy initializes before map adapters");
 assert.ok(runtime.includes("inventory-map-layer.js?v=20261020-3"));
-assert.ok(runtime.includes("parking-gl-overlay.js?v=20261020-4"));
+assert.ok(runtime.includes("parking-gl-overlay.js?v=20261021-1"));
 assert.ok(runtime.includes("ireland-overview.js?v=20261020-7"));
 assert.ok(inventoryJs.includes("POLICY.connectedInventory(state, parkingData)"));
 assert.ok(inventoryJs.includes("POLICY.groupNearby(items"), "inventory fallback still clusters when Leaflet plugin unavailable");
@@ -80,9 +80,12 @@ assert.ok(inventoryJs.includes('state.map?.on?.("zoomend"'), "fallback must re-c
 assert.ok(ranked.includes("POLICY.groupNearby(rows"));
 assert.ok(ranked.includes('caption: "OPTIONS"'), "ranked clusters must identify quantity as OPTIONS");
 assert.ok(ranked.includes("display_rank: displayRank"), "individual ranked markers must have explicit # rank labels");
-assert.ok(ranked.includes("availability_label: freeLabel"), "availability must be a separate marker label");
+assert.ok(ranked.includes('availability_label: spidered ? "" : freeLabel'), "availability must be a separate marker label and suppressed inside spider fans");
 assert.ok(ranked.includes("POINT_CLUSTER_CAPTION"), "cluster quantity needs a separate semantic caption layer");
 assert.ok(ranked.includes("POINT_AVAILABILITY"), "individual availability needs a separate map label layer");
+assert.ok(ranked.includes("POINT_SPIDER_LINE"), "crowded detailed markers need connector lines");
+assert.ok(ranked.includes("detailedCollisionGroups"), "detail zoom must retain collision awareness");
+assert.ok(ranked.includes("spiderPositions"), "detail collisions must fan apart without changing source coordinates");
 assert.ok(ranked.includes("POLICY.browseActive(state)"), "ranked overlay must not show inside Ireland or any county browse");
 assert.ok(legacyMap.includes("window.__WHITEBLOCK_PARKING_GL_OVERLAY__"), "fallback Leaflet source must yield to the ranked MapLibre layer");
 assert.ok(legacyMap.includes("policy.groupNearby(rows"), "fallback Leaflet ranked points must still cluster");

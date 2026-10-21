@@ -154,3 +154,12 @@
 - Risk: Hybrid imagery may be heavier than Street on mobile networks.
 - Mitigation: bounded tile watchdog, responsive repair and explicit user access to Street mode under +.
 - Status: controlled for prototype; provider migration remains open.
+
+## RISK-20261021-001 — Display fan-out could be mistaken for true parking coordinates
+
+- Date: 2026-10-21.
+- Risk: visually displaced detailed markers may appear to represent different physical coordinates.
+- Likelihood: medium.
+- Impact: medium-high for spatial trust.
+- Mitigation: source coordinates and polygons remain unchanged; display-only points retain canonical IDs; connector lines visibly anchor each fanned marker to its real coordinate; fan-out occurs only when screen collisions make exact rendering unreadable.
+- Status: controlled.

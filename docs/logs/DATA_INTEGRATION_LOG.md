@@ -115,3 +115,11 @@
 - Hybrid imagery/reference tiles are presentation dependencies only.
 - Parking evidence continues to render in WHITEBLOCK-owned overlays above the basemap.
 - Status: no migration required.
+
+## DATA-20261021-001 — Preserve dense Kildare records while correcting null availability semantics
+
+- Date: 2026-10-21.
+- Data rule: no source-backed Kildare record is deleted or coordinate-shifted as part of the map fix.
+- Rendering: temporary display coordinates exist only in the generated MapLibre feature collection.
+- Availability correction: raw `null`/empty availability is checked before numeric conversion, preventing JavaScript `Number(null) === 0` from producing a false `0 FREE` label.
+- Status: implemented.
