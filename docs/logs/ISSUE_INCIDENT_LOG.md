@@ -84,3 +84,16 @@
   - add persistent-engine `ResizeObserver`, orientation/visibility/resize repair and map-state repair hooks.
 - Data impact: none.
 - Status: implemented on branch `fix/mobile-map-tile-integrity-2026-10-20`; CI/device deployment validation pending.
+
+## INC-20261021-001 — Kildare destination markers overlap at detailed zoom
+
+- Date: 2026-10-21.
+- Severity: medium.
+- Symptoms: low zoom showed a 7-option cluster plus a separated ranked option; after zooming, several numbered markers and `0 FREE` labels stacked on top of one another.
+- Root causes:
+  - detailed zoom forced every record into an individual marker without retaining collision awareness;
+  - several Kildare Town source-backed records are only metres apart;
+  - null availability was converted with `Number(null)`, yielding the misleading numeric zero label;
+  - mobile map height constrained the usable spatial canvas.
+- Corrective action: detailed collision fan-out, connector lines, null-availability guard and larger mobile map.
+- Status: implemented on feature branch; release validation pending.
