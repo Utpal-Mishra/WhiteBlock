@@ -187,3 +187,10 @@
 - Behaviour: crowded detailed markers fan out rather than stack; real coordinates remain unchanged; unreported availability is blank rather than `0 FREE`.
 - Mobile map: 460px at <=820px; 480px at <=520px.
 - Release state: feature-branch implementation complete; CI/Pages gates pending.
+
+### Deployment update — 2026-10-21
+
+- PR #46 merged to `main` as `c3ef5d0d9221d9c4a8e80733ff22d938965ad055`.
+- Feature-branch regression suite: PASS after updating the stale overlay cache-version assertion.
+- GitHub Pages deployment run #283: PASS.
+- Release state: live.
