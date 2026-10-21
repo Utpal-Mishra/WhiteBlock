@@ -131,3 +131,12 @@
 - + menu: Street, Terrain, Satellite, Street View and Parking Layout.
 - Satellite remains imagery-only so users can deliberately remove labels when needed.
 - Status: implemented on feature branch.
+
+## PROD-20261021-001 — Mobile dense-parking fan-out
+
+- Date: 2026-10-21.
+- Feature: detailed destination maps automatically fan overlapping ranked parking options into individually readable `#1…#N` markers.
+- Visual aid: each displaced marker has a connector to its true location.
+- Mobile viewport: map receives materially more vertical space for dense urban parking.
+- Availability: unreported live availability no longer displays as zero.
+- Status: implemented on feature branch.
