@@ -574,7 +574,7 @@
         if (state.destination && Number.isFinite(Number(state.destination.lat)) && Number.isFinite(Number(state.destination.lng))) {
           bounds.extend([Number(state.destination.lat), Number(state.destination.lng)]);
         }
-        if (bounds.isValid()) leafMap.fitBounds(bounds.pad(0.14), { padding: [36, 54], maxZoom: 15, animate: false });
+        if (bounds.isValid()) leafMap.fitBounds(bounds.pad(0.14), { padding: [36, 54], maxZoom: 16, animate: false });
       } catch (_) {}
     }
 
