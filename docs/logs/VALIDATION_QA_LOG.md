@@ -244,3 +244,13 @@
   - mobile map heights are 460px/480px at the intended breakpoints.
 - Existing checks retained: national/county browse isolation, low-zoom clustering and rank order.
 - Status: tests updated; CI pending.
+
+### QA deployment result — 2026-10-21
+
+- PR #46 ranked-map clustering regression: PASS.
+- Geographic fallback test: PASS.
+- Ireland county/full-inventory map test: PASS.
+- Universal marker policy test: PASS.
+- Full Python test suite: PASS.
+- GitHub Pages deployment #283: PASS, including Cork, Kildare, Dublin and Wicklow snapshot validation.
+- Status: deployed successfully; mobile visual re-check can now be performed against the live build.
