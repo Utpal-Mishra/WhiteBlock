@@ -123,3 +123,13 @@
 - Reason: Hybrid provides real physical context while retaining road/place orientation, which is more useful for parking/spatial intelligence.
 - Rejected: pure Satellite as default because missing labels reduces orientation; Street as default because it hides physical parking context.
 - Status: accepted/implemented.
+
+## DEC-20261021-001 — Do not solve marker overlap by deleting evidence-backed parking records
+
+- Date: 2026-10-21.
+- Decision: keep canonical records intact and solve dense destination-marker collisions in the presentation layer.
+- Chosen approach: screen-space collision detection plus display-only spider fan and connector lines.
+- Rejected approach: arbitrary coordinate jitter persisted into inventory.
+- Rejected approach: dropping records solely because they are geographically close.
+- Separate follow-up: true duplicate/alias reconciliation remains a data-quality task and should be evidence-driven.
+- Status: accepted.
