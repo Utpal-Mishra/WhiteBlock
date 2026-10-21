@@ -107,3 +107,13 @@
 - Menu contract: only Hybrid remains permanently visible; Street, Terrain, Satellite, Street View and Parking Layout are under `+`.
 - Recovery: MapLibre Hybrid -> Leaflet Hybrid -> Street raster -> alternate Street raster.
 - Status: implemented on feature branch.
+
+## SYS-20261021-001 — Collision-aware ranked parking rendering
+
+- Date: 2026-10-21.
+- Change: destination-result markers now re-check screen-space collisions at detailed zoom instead of blindly drawing every ranked marker at its raw coordinate.
+- Behaviour: close markers fan around their shared screen centroid with connector lines to the true coordinates; normal separated markers remain at their source coordinates.
+- Mobile layout: Find map height increases from 355px to 460px at <=820px and to 480px at <=520px.
+- Availability guard: null/unreported availability no longer becomes the misleading label `0 FREE`.
+- Scope: generic for every current/future region using the shared ranked MapLibre overlay.
+- Status: implemented on feature branch.
