@@ -79,3 +79,11 @@
 - Learning: parking discovery benefits from seeing real physical land use, road geometry, buildings and access context immediately; a labelled aerial basemap communicates this better than a plain street map for WHITEBLOCK's spatial-intelligence use case.
 - Product implication: Hybrid becomes the default, while Street/Terrain/pure Satellite remain user-selectable.
 - Status: adopted.
+
+## BUS-20261021-001 — Complete parking coverage can create display-density problems
+
+- Date: 2026-10-21.
+- Observation: Kildare Town contains several evidence-backed records only metres apart, including records that share or nearly share an entrance/coordinate.
+- Learning: broader inventory completeness increases the need to separate **data truth** from **map presentation**. Deleting records merely to make a map cleaner would weaken the evidence model.
+- Product implication: preserve source-backed records, then use collision-aware clustering/fan-out for presentation.
+- Status: adopted.
