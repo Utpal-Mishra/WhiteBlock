@@ -41,7 +41,7 @@ window.WHITEBLOCK_CONFIG = window.WHITEBLOCK_CONFIG || {
 function loadWhiteblockParkingGeometry() {
   if (document.querySelector('script[data-whiteblock-parking-gl-overlay]')) return;
   const script = document.createElement('script');
-  script.src = './parking-gl-overlay.js?v=20261020-4';
+  script.src = './parking-gl-overlay.js?v=20261021-1';
   script.defer = true;
   script.dataset.whiteblockParkingGlOverlay = 'true';
   document.body.appendChild(script);
