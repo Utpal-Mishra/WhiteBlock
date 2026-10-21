@@ -13,6 +13,7 @@
   const POLYGON_LINE_MAPPED = "whiteblock-ranked-parking-line-mapped";
   const POLYGON_LINE_ESTIMATED = "whiteblock-ranked-parking-line-estimated";
   const POINT_CLUSTER_RING = "whiteblock-ranked-parking-cluster-ring";
+  const POINT_SPIDER_LINE = "whiteblock-ranked-parking-spider-line";
   const POINT_CIRCLE = "whiteblock-ranked-parking-point";
   const POINT_LABEL = "whiteblock-ranked-parking-label";
   const POINT_CLUSTER_CAPTION = "whiteblock-ranked-parking-cluster-caption";
@@ -21,6 +22,8 @@
   const POLICY = window.WHITEBLOCK_MARKER_POLICY;
   const INDIVIDUAL_MARKER_ZOOM = POLICY.detailZoom;
   const FOOTPRINT_MIN_ZOOM = POLICY.minimumFootprintZoom;
+  const DETAIL_COLLISION_RADIUS_PX = 46;
+  const SPIDER_RING_RADIUS_PX = 54;
   const EMPTY_FEATURES = () => ({ type: "FeatureCollection", features: [] });
   const OVERPASS = [
     "https://overpass-api.de/api/interpreter",
@@ -57,10 +60,13 @@
   }
 
   function availabilityLabel(item) {
-    const available = Number(item?.available);
+    // Number(null) is 0, so guard the raw value first. Kildare and other
+    // inventory-only regions must never display "0 FREE" when no live feed exists.
+    if (item?.available == null || item.available === "") return "";
+    const available = Number(item.available);
     return Number.isFinite(available) && available >= 0
       ? `${Math.round(available)} FREE`
-      : "LIVE —";
+      : "";
   }
 
   function estimateRadius(item) {
@@ -196,10 +202,135 @@
     return coords;
   }
 
+  function detailedCollisionGroups(rows, zoom) {
+    const points = rows.map(item => leafMap.project(
+      L.latLng(Number(item.lat), Number(item.lng)), zoom
+    ));
+    const parent = rows.map((_, index) => index);
+    const find = index => {
+      while (parent[index] !== index) {
+        parent[index] = parent[parent[index]];
+        index = parent[index];
+      }
+      return index;
+    };
+    const union = (a, b) => {
+      const ra = find(a), rb = find(b);
+      if (ra !== rb) parent[rb] = ra;
+    };
+
+    for (let i = 0; i < points.length; i += 1) {
+      for (let j = i + 1; j < points.length; j += 1) {
+        const dx = Number(points[i]?.x) - Number(points[j]?.x);
+        const dy = Number(points[i]?.y) - Number(points[j]?.y);
+        if (!Number.isFinite(dx) || !Number.isFinite(dy)) continue;
+        if (Math.hypot(dx, dy) < DETAIL_COLLISION_RADIUS_PX) union(i, j);
+      }
+    }
+
+    const groups = new Map();
+    rows.forEach((_, index) => {
+      const key = find(index);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(index);
+    });
+    return [...groups.values()].sort((a, b) => a[0] - b[0]);
+  }
+
   function rankedGroupsAtZoom(rows) {
-    return POLICY.groupNearby(rows, leafMap.getZoom(),
-      item => leafMap.project(L.latLng(Number(item.lat), Number(item.lng)), leafMap.getZoom()),
+    const zoom = leafMap.getZoom();
+    if (zoom >= INDIVIDUAL_MARKER_ZOOM) return detailedCollisionGroups(rows, zoom);
+    return POLICY.groupNearby(rows, zoom,
+      item => leafMap.project(L.latLng(Number(item.lat), Number(item.lng)), zoom),
       { radiusPx: POLICY.rankedRadiusPx, detailZoom: INDIVIDUAL_MARKER_ZOOM });
+  }
+
+  function spiderPositions(rows, members, zoom) {
+    if (typeof leafMap.unproject !== "function" || members.length < 2) return null;
+    const projected = members.map(index => leafMap.project(
+      L.latLng(Number(rows[index].lat), Number(rows[index].lng)), zoom
+    ));
+    const center = projected.reduce((sum, point) => ({
+      x: sum.x + Number(point.x),
+      y: sum.y + Number(point.y)
+    }), { x: 0, y: 0 });
+    center.x /= projected.length;
+    center.y /= projected.length;
+
+    const radius = SPIDER_RING_RADIUS_PX + Math.max(0, members.length - 5) * 4;
+    const result = new Map();
+    members.forEach((index, position) => {
+      const angle = -Math.PI / 2 + position * (Math.PI * 2 / members.length);
+      const display = leafMap.unproject([
+        center.x + Math.cos(angle) * radius,
+        center.y + Math.sin(angle) * radius
+      ], zoom);
+      result.set(index, [Number(display.lng), Number(display.lat)]);
+    });
+    return result;
+  }
+
+  function appendIndividual(features, rows, index, mapped, displayCoordinates = null, spidered = false) {
+    const zoom = leafMap.getZoom();
+    const item = rows[index];
+    const coords = mapped.get(item.id) || estimatedRing(item);
+    const isMapped = mapped.has(item.id);
+    const rank = String(index + 1).padStart(2, "0");
+    const displayRank = `#${index + 1}`;
+    const selected = item.id === state.selectedId;
+    const colour = statusColour(item);
+    const freeLabel = availabilityLabel(item);
+
+    if (zoom >= FOOTPRINT_MIN_ZOOM) {
+      features.push({
+        type: "Feature",
+        properties: {
+          kind: "polygon",
+          parking_id: item.id,
+          rank,
+          display_rank: displayRank,
+          name: item.name || "Parking",
+          selected: selected ? 1 : 0,
+          mapped: isMapped ? 1 : 0,
+          colour
+        },
+        geometry: { type: "Polygon", coordinates: [coords] }
+      });
+    }
+
+    const pointCoordinates = displayCoordinates || [Number(item.lng), Number(item.lat)];
+    if (spidered) {
+      features.push({
+        type: "Feature",
+        properties: { kind: "spider-line", parking_id: item.id, colour },
+        geometry: {
+          type: "LineString",
+          coordinates: [[Number(item.lng), Number(item.lat)], pointCoordinates]
+        }
+      });
+    }
+
+    features.push({
+      type: "Feature",
+      properties: {
+        kind: "point",
+        parking_id: item.id,
+        rank,
+        display_rank: displayRank,
+        caption: "",
+        // Repeated availability labels are the first thing to collide in a
+        // spider fan. Keep the ordinal visible; details remain in result cards.
+        availability_label: spidered ? "" : freeLabel,
+        name: item.name || "Parking",
+        selected: selected ? 1 : 0,
+        mapped: isMapped ? 1 : 0,
+        spidered: spidered ? 1 : 0,
+        colour,
+        stroke_colour: selected ? "#FFFFFF" : "#07110D",
+        label_colour: "#07110D"
+      },
+      geometry: { type: "Point", coordinates: pointCoordinates }
+    });
   }
 
   function featureCollection(rows, mapped = new Map()) {
@@ -208,6 +339,16 @@
     const groups = rankedGroupsAtZoom(rows);
 
     groups.forEach(members => {
+      if (members.length > 1 && zoom >= INDIVIDUAL_MARKER_ZOOM) {
+        const positions = spiderPositions(rows, members, zoom);
+        if (positions) {
+          members.forEach(index => appendIndividual(
+            features, rows, index, mapped, positions.get(index), true
+          ));
+          return;
+        }
+      }
+
       if (members.length > 1) {
         const membersRows = members.map(index => rows[index]);
         const lat = membersRows.reduce((sum, item) => sum + Number(item.lat), 0) / membersRows.length;
@@ -230,49 +371,7 @@
         return;
       }
 
-      const index = members[0];
-      const item = rows[index];
-      const coords = mapped.get(item.id) || estimatedRing(item);
-      const isMapped = mapped.has(item.id);
-      const rank = String(index + 1).padStart(2, "0");
-      const displayRank = `#${index + 1}`;
-      const selected = item.id === state.selectedId;
-      const colour = statusColour(item);
-      const freeLabel = availabilityLabel(item);
-      if (zoom >= FOOTPRINT_MIN_ZOOM) {
-        features.push({
-          type: "Feature",
-          properties: {
-            kind: "polygon",
-            parking_id: item.id,
-            rank,
-            display_rank: displayRank,
-            name: item.name || "Parking",
-            selected: selected ? 1 : 0,
-            mapped: isMapped ? 1 : 0,
-            colour
-          },
-          geometry: { type: "Polygon", coordinates: [coords] }
-        });
-      }
-      features.push({
-        type: "Feature",
-        properties: {
-          kind: "point",
-          parking_id: item.id,
-          rank,
-          display_rank: displayRank,
-          caption: "",
-          availability_label: freeLabel,
-          name: item.name || "Parking",
-          selected: selected ? 1 : 0,
-          mapped: isMapped ? 1 : 0,
-          colour,
-          stroke_colour: selected ? "#FFFFFF" : "#07110D",
-          label_colour: "#07110D"
-        },
-        geometry: { type: "Point", coordinates: [Number(item.lng), Number(item.lat)] }
-      });
+      appendIndividual(features, rows, members[0], mapped);
     });
     return { type: "FeatureCollection", features };
   }
@@ -335,6 +434,20 @@
             "line-width": ["case", ["==", ["get", "selected"], 1], 5, 3],
             "line-opacity": 1,
             "line-dasharray": [3, 2]
+          }
+        });
+      }
+      if (!layerExists(POINT_SPIDER_LINE)) {
+        glMap.addLayer({
+          id: POINT_SPIDER_LINE,
+          type: "line",
+          source: SOURCE_ID,
+          filter: ["==", ["get", "kind"], "spider-line"],
+          paint: {
+            "line-color": ["get", "colour"],
+            "line-width": 1.5,
+            "line-opacity": 0.72,
+            "line-dasharray": [1.2, 1.2]
           }
         });
       }
@@ -421,8 +534,8 @@
             "text-size": 9,
             "text-letter-spacing": 0.04,
             "text-offset": [0, 2.65],
-            "text-allow-overlap": true,
-            "text-ignore-placement": true
+            "text-allow-overlap": false,
+            "text-ignore-placement": false
           },
           paint: {
             "text-color": "#EDF7F1",
@@ -517,12 +630,24 @@
     glMap.on?.("idle", onStyleReady);
     glMap.on?.("click", POINT_CIRCLE, event => {
       const feature = event?.features?.[0];
-      if (feature?.properties?.kind !== "cluster" || !state.destination || POLICY.browseActive(state)) return;
+      if (!feature || !state.destination || POLICY.browseActive(state)) return;
+
+      if (feature.properties?.kind === "point" && feature.properties?.parking_id) {
+        if (typeof selectParking === "function") selectParking(feature.properties.parking_id);
+        return;
+      }
+
+      if (feature.properties?.kind !== "cluster") return;
       const coords = feature.geometry?.coordinates;
       if (!Array.isArray(coords) || coords.length < 2) return;
       // The cluster number is a quantity ("N OPTIONS"), never an ordinal rank.
-      // Zoom reveals individual "#1", "#2" recommendation markers.
-      leafMap.flyTo([Number(coords[1]), Number(coords[0])], Math.min(INDIVIDUAL_MARKER_ZOOM, leafMap.getZoom() + 2), { animate: true });
+      // At detailed zoom, collision groups automatically fan into a spider layout
+      // so extremely close/duplicate source locations remain individually legible.
+      leafMap.flyTo(
+        [Number(coords[1]), Number(coords[0])],
+        Math.min(INDIVIDUAL_MARKER_ZOOM, leafMap.getZoom() + 2),
+        { animate: true }
+      );
     });
     window.setTimeout(onStyleReady, 100);
     wrapSelection();
