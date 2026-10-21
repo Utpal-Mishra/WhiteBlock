@@ -99,3 +99,11 @@
 - Adopted UX: `Hybrid` + `+`; the menu contains Street, Terrain, Satellite, Street View and Parking Layout.
 - Reason: preserves maximum map area on mobile and aligns the visible control with the actual startup state.
 - Status: adopted.
+
+## REC-20261021-001 — Prefer fan-out over forced de-duplication for crowded map options
+
+- Date: 2026-10-21.
+- Recommendation: do not merge/remove distinct source records solely because their points overlap visually.
+- Presentation rule: cluster at broad zoom, then fan genuinely colliding detailed markers around the true location with connector lines.
+- UX rule: suppress repeated availability labels inside the fan and rely on ordinal markers + result cards for detailed facts.
+- Status: adopted.
