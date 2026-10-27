@@ -189,3 +189,12 @@
 
 - Assumption: when physical parking evidence exists but access/rules are unresolved, retaining the record as unresolved is safer and more useful than dropping it.
 - Validation path: resolve through official/operator/rule/field evidence before recommendation promotion.
+
+## RISK-20261027-002 — Parking tariff text can be misinterpreted as a session total
+
+- Date: 2026-10-27.
+- Risk: extracting the first euro figure from a complex tariff can make a wrong parking option look cheaper.
+- Impact: high for driver decision quality.
+- Mitigation: compute only from explicit free or unambiguous single hourly-rate tariffs; display complex tariff text without a numeric total.
+- Residual risk: simple hourly estimates may differ from real operator billing increments/caps, so the UI labels them approximate and preserves the source tariff.
+- Status: mitigated.
