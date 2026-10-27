@@ -48,6 +48,115 @@
     return `${h}:${m}`;
   }
 
+
+  function sourceLabel(item) {
+    const raw = String(item?.sourceKey || item?.source_key || "source not published").trim();
+    if (!raw || raw === "source not published") return "Source not published";
+    return raw
+      .replace(/^whiteblock_/, "")
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  function relativeAge(value) {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return null;
+    const minutes = Math.max(0, Math.round((Date.now() - parsed.getTime()) / 60000));
+    if (minutes < 2) return "just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) return `${hours}h ago`;
+    const days = Math.round(hours / 24);
+    if (days < 60) return `${days}d ago`;
+    const months = Math.round(days / 30);
+    return `${months}mo ago`;
+  }
+
+  function freshnessInfo(item) {
+    const observed = item?.observedAt || item?.observed_at || null;
+    const retrieved = item?.retrievedAt || item?.retrieved_at || null;
+    const observedAge = relativeAge(observed);
+    if (observedAge) return { label: `Observed ${observedAge}`, timestamp: observed, kind: "observed" };
+    const retrievedAge = relativeAge(retrieved);
+    if (retrievedAge) return { label: `Source retrieved ${retrievedAge}`, timestamp: retrieved, kind: "retrieved" };
+    return { label: "Freshness not published", timestamp: null, kind: "unknown" };
+  }
+
+  function estimateSessionCost(item, stayMinutes = requestedStayMinutes()) {
+    const raw = String(item?.pricingRaw || item?.pricing_raw || "").trim();
+    const normalized = raw.toLowerCase();
+
+    // Only calculate when the source publishes a simple, unambiguous tariff.
+    // Tiered tariffs, daily caps and unspecified euro amounts stay uncalculated.
+    const euroValues = [...raw.matchAll(/€\s*([0-9]+(?:[.,][0-9]+)?)/g)]
+      .map(match => Number(match[1].replace(",", ".")))
+      .filter(Number.isFinite);
+
+    if (!euroValues.length && /^(free|no\s+charge|free\s+of\s+charge)\b/i.test(normalized)) {
+      return {
+        amount: 0,
+        comparable: true,
+        label: "€0.00",
+        basis: "Published free parking",
+        note: "Source explicitly describes parking as free."
+      };
+    }
+
+    if (euroValues.length === 1) {
+      const hourly = raw.match(/€\s*([0-9]+(?:[.,][0-9]+)?)\s*(?:\/\s*|per\s+)?(?:hour|hr|h)\b/i);
+      if (hourly) {
+        const hourlyRate = Number(hourly[1].replace(",", "."));
+        const amount = hourlyRate * Math.max(0, Number(stayMinutes) || 0) / 60;
+        return {
+          amount: Math.round(amount * 100) / 100,
+          comparable: true,
+          label: `≈€${amount.toFixed(2)}`,
+          basis: `€${hourlyRate.toFixed(2)}/h × ${formatDuration(stayMinutes)}`,
+          note: "Simple hourly estimate; on-site billing increments or caps may differ."
+        };
+      }
+    }
+
+    return {
+      amount: null,
+      comparable: false,
+      label: raw ? "Not safely calculable" : "Tariff unknown",
+      basis: raw || "Tariff not published",
+      note: raw
+        ? "Published tariff is shown without inventing a session total."
+        : "No tariff source is available for a session-cost estimate."
+    };
+  }
+
+  function decisionExplanation(item) {
+    const rule = item.sessionRule || evaluate(item);
+    const cost = item.sessionCost || estimateSessionCost(item, rule.stayMinutes);
+    const factors = [];
+    if (item.walk != null) factors.push(`~${item.walk} min walk`);
+    if (rule.fitLabel) factors.push(rule.fitLabel.toLowerCase());
+    if (cost.comparable) factors.push(`${cost.label} session estimate`);
+    else factors.push("session cost not comparable");
+    if (item.available != null && item.capacity > 0) {
+      factors.push(`${Math.round(item.available)} reported free`);
+    } else {
+      factors.push("live availability unreported");
+    }
+    if (numeric(item.confidence) != null) factors.push(`${Math.round(numeric(item.confidence))}% evidence confidence`);
+
+    const mode = state.filter === "closest"
+      ? "Closest mode orders suitable options by destination distance."
+      : state.filter === "cheapest"
+        ? "Lowest-cost mode compares only safely calculable session totals first."
+        : state.filter === "accessible"
+          ? "Accessible mode keeps only assets with structured accessible-parking evidence."
+          : state.filter === "ev"
+            ? "EV mode keeps only assets with structured EV-parking evidence."
+            : "Best overall balances distance, reported availability when present, evidence confidence, session cost and rule risk.";
+
+    return `${mode} ${factors.join(" · ")}.`;
+  }
+
   function parseDailyOpeningWindow(raw) {
     const text = String(raw || "").trim();
     if (!text) return null;
@@ -172,6 +281,8 @@
       clone.walk = estimateWalkMinutes(clone.distanceKm);
     }
     clone.sessionRule = evaluate(clone);
+    clone.sessionCost = estimateSessionCost(clone, clone.sessionRule.stayMinutes);
+    clone.freshnessInfo = freshnessInfo(clone);
 
     const observed = clone.available != null && clone.capacity != null
       ? `${Math.round(clone.available)} of ${Math.round(clone.capacity)} spaces reported free`
@@ -201,14 +312,27 @@
     const availability = item.available != null && item.capacity > 0 ? item.available / item.capacity : 0.3;
     const distance = item.distanceKm != null ? Math.max(0, 1 - item.distanceKm / NEARBY_RADIUS_KM) : 0.2;
     const confidence = (numeric(item.confidence) ?? 0) / 100;
-    const price = item.price != null ? Math.max(0, 1 - item.price / 10) : 0.4;
+    const cost = item.sessionCost || estimateSessionCost(item);
+    const costScore = cost.comparable ? Math.max(0, 1 - Number(cost.amount) / 20) : 0.4;
     const rule = item.sessionRule || evaluate(item);
-    return availability * 0.36 + distance * 0.29 + confidence * 0.20 + price * 0.05 + 0.10 - rule.riskPenalty;
+    return availability * 0.36 + distance * 0.29 + confidence * 0.20 + costScore * 0.05 + 0.10 - rule.riskPenalty;
   };
+
+  function compareSessionCost(a, b) {
+    const aCost = a.sessionCost || estimateSessionCost(a);
+    const bCost = b.sessionCost || estimateSessionCost(b);
+    if (aCost.comparable && bCost.comparable) {
+      return Number(aCost.amount) - Number(bCost.amount)
+        || (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity);
+    }
+    if (aCost.comparable) return -1;
+    if (bCost.comparable) return 1;
+    return (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity);
+  }
 
   function sortData(data) {
     if (state.filter === "closest") data.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
-    else if (state.filter === "cheapest") data.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+    else if (state.filter === "cheapest") data.sort(compareSessionCost);
     else data.sort((a, b) => score(b) - score(a));
     return data;
   }
@@ -247,8 +371,16 @@
     const availabilityCopy = item.available != null ? `${Math.round(item.available)} spaces` : "availability unknown";
     const distance = item.distanceKm != null ? `${item.distanceKm.toFixed(1)} km` : "—";
     const walk = item.walk != null ? `~${item.walk} min` : "—";
-    const price = item.pricingRaw || (item.price != null ? `€${Number(item.price).toFixed(2)}` : "Tariff not published");
+    const tariff = item.pricingRaw || item.pricing_raw || "Tariff not published";
     const rule = item.sessionRule || evaluate(item);
+    const cost = item.sessionCost || estimateSessionCost(item, rule.stayMinutes);
+    const freshness = item.freshnessInfo || freshnessInfo(item);
+    const source = sourceLabel(item);
+    const truth = String(item.truthState || item.truth_state || "observed").replaceAll("_", " ");
+    const sourceUrl = /^https?:\/\//i.test(String(item.sourceUrl || item.source_url || ""))
+      ? String(item.sourceUrl || item.source_url)
+      : null;
+    const explanation = decisionExplanation({ ...item, sessionRule: rule, sessionCost: cost });
     const cardClass = ineligible ? " parking-card-ineligible" : rule.nearLimit ? " parking-card-near-limit" : "";
 
     return `
@@ -267,13 +399,21 @@
           </div>
         </div>
         ${ruleChips(item)}
-        <div class="parking-meta">
+        <div class="parking-meta phase2-decision-metrics">
           <span>Distance<b>${escapeHtml(distance)}</b></span>
           <span>Est. walk<b>${escapeHtml(walk)}</b></span>
+          <span>Est. session cost<b>${escapeHtml(cost.label)}</b></span>
           <span>Confidence<b>${item.confidence ?? "—"}%</b></span>
         </div>
-        <p class="reason"><strong>Price:</strong> ${escapeHtml(price)}</p>
+        <p class="reason"><strong>Published tariff:</strong> ${escapeHtml(tariff)}</p>
+        <p class="reason phase2-cost-basis"><strong>Cost basis:</strong> ${escapeHtml(cost.basis)} · ${escapeHtml(cost.note)}</p>
         <p class="reason"><strong>${ineligible ? "Why excluded" : "Session"}:</strong> ${escapeHtml(rule.reason)}</p>
+        ${!ineligible ? `<div class="phase2-ranking-explanation"><strong>Why this ranks here</strong><span>${escapeHtml(explanation)}</span></div>` : ""}
+        <div class="phase2-evidence-meta">
+          <span><small>Source</small>${sourceUrl ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source)}</a>` : `<b>${escapeHtml(source)}</b>`}</span>
+          <span><small>Freshness</small><b>${escapeHtml(freshness.label)}</b></span>
+          <span><small>Truth state</small><b>${escapeHtml(truth)}</b></span>
+        </div>
         ${rule.conditionalCustomer ? '<p class="parking-customer-warning">Customer parking is conditional access, not general public parking. Check on-site signage.</p>' : ""}
       </article>`;
   };
@@ -447,6 +587,9 @@
     requestedArrivalMinutes,
     formatDuration,
     parseDailyOpeningWindow,
+    estimateSessionCost,
+    freshnessInfo,
+    decisionExplanation,
     ineligibleData,
     refresh: refreshSession
   };
