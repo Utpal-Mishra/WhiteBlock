@@ -117,3 +117,19 @@
 - Availability guard: null/unreported availability no longer becomes the misleading label `0 FREE`.
 - Scope: generic for every current/future region using the shared ranked MapLibre overlay.
 - Status: implemented on feature branch.
+
+## SYS-20261027-001 — Phase 1.5 deploy-time coverage auditor
+
+- Date: 2026-10-27.
+- Added: `config/parking_universe_sources.json`, `scripts/build_parking_universe_coverage.py` and deploy artifact `web/data/parking_universe_coverage.json`.
+- Behaviour: every Pages build measures deployed known assets, access/capacity/rules/geometry resolution and source-family progress for Cork, Kildare, Dublin and Wicklow.
+- Guardrail: the report is programme progress, not literal percentage of real-world parking supply.
+- Status: implemented on Phase 1.5 branch.
+
+## SYS-20261027-001 — Phase 1.5 deploy-time coverage auditor
+
+- Date: 2026-10-27.
+- Added: `config/parking_universe_sources.json`, `scripts/build_parking_universe_coverage.py` and deploy artifact `web/data/parking_universe_coverage.json`.
+- Behaviour: every Pages build measures deployed known assets, access/capacity/rules/geometry resolution and source-family progress for Cork, Kildare, Dublin and Wicklow.
+- Guardrail: the report is programme progress, not literal percentage of real-world parking supply.
+- Status: implemented on Phase 1.5 branch.

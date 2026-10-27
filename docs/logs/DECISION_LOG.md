@@ -133,3 +133,11 @@
 - Rejected approach: dropping records solely because they are geographically close.
 - Separate follow-up: true duplicate/alias reconciliation remains a data-quality task and should be evidence-driven.
 - Status: accepted.
+
+## DEC-20261027-001 — Start Phase 1.5 with measurable source-universe coverage
+
+- Date: 2026-10-27.
+- Decision: Phase 1.5 is active and begins with a machine-readable source registry, deployment audit and product-visible gap dashboard.
+- Reason: parking discovery work must be measurable before large-scale source ingestion; otherwise “complete coverage” becomes an untestable claim.
+- Next decision boundary: integrate official ready sources and reconcile them into canonical identities without weakening existing evidence/access rules.
+- Status: accepted/implemented.

@@ -246,6 +246,27 @@ jobs:
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/kildare_parking_snapshot.json --region Kildare
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/bray_parking_snapshot.json --region Bray
 
+      - name: Build Phase 1.5 parking universe coverage report
+        run: |
+          python scripts/build_parking_universe_coverage.py \
+            --config config/parking_universe_sources.json \
+            --snapshot-dir web/data \
+            --output web/data/parking_universe_coverage.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("web/data/parking_universe_coverage.json").read_text())
+          expected = {"cork", "kildare", "dublin", "wicklow"}
+          actual = set(report.get("regions", {}))
+          if actual != expected:
+              raise SystemExit(f"Parking Universe region set mismatch: {actual!r}")
+          if report.get("coverage_claim") != "source_and_geography_completeness_progress_not_literal_real_world_completeness":
+              raise SystemExit("Parking Universe report lost its completeness guardrail")
+          if int(report.get("known_assets_across_deployed_snapshots") or 0) <= 0:
+              raise SystemExit("Parking Universe report contains no deployed parking assets")
+          print("Phase 1.5 Parking Universe coverage report validated:", report["known_assets_across_deployed_snapshots"], "assets")
+          PY
+
       - name: Validate regional snapshots
         run: |
           python - <<'PY'

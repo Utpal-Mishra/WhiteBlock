@@ -95,3 +95,12 @@
 - Result: the former zoom-17 policy produced stacked rank circles and overlapping availability labels.
 - Fix experiment: preserve all rows, apply a 46px detailed collision check and fan collision groups around a 54px display ring.
 - Status: implemented; CI/mobile deployment validation pending.
+
+## EXP-20261027-001 — Parking Universe readiness metric
+
+- Date: 2026-10-27.
+- Experiment: combine source-family progress with field-resolution metrics to create an operational programme-readiness indicator.
+- Inputs: integrated/ready/gap source families plus access, capacity, rules/pricing and polygon resolution.
+- Guardrail: score is explicitly prohibited from being described as percent of all real-world parking.
+- Evaluation: use score movement to measure effect of each source integration and evidence-cleanup batch.
+- Status: implemented for measurement.

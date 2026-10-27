@@ -140,3 +140,11 @@
 - Mobile viewport: map receives materially more vertical space for dense urban parking.
 - Availability: unreported live availability no longer displays as zero.
 - Status: implemented on feature branch.
+
+## PROD-20261027-001 — Discover · Parking Universe Coverage
+
+- Date: 2026-10-27.
+- Feature: new Phase 1.5 section in Discover.
+- Displays per connected region: deployed known assets, access/capacity/rules/polygon resolution, integrated source families, ready-next sources and remaining gaps.
+- Product copy explicitly distinguishes programme progress from literal parking completeness.
+- Status: implemented on Phase 1.5 branch.

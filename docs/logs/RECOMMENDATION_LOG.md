@@ -107,3 +107,11 @@
 - Presentation rule: cluster at broad zoom, then fan genuinely colliding detailed markers around the true location with connector lines.
 - UX rule: suppress repeated availability labels inside the fan and rely on ordinal markers + result cards for detailed facts.
 - Status: adopted.
+
+## REC-20261027-001 — Integrate official source gaps before adding more presentation features
+
+- Date: 2026-10-27.
+- Recommendation: use the Phase 1.5 source-family gap report to choose the next ingestion work.
+- First ready queue: Dublin City multistorey inventory/live feed, Dublin accessible parking, Dublin City parking meters, South Dublin parking meters and DLR parking runs.
+- Parallel priority: resolve access/max-stay/customer restrictions for known physical parking.
+- Status: adopted.

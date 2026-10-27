@@ -245,3 +245,23 @@ After the Cork authoritative feed is running reliably:
 4. structure tariffs/rules;
 5. add licensed imagery only for supply discovery/change detection;
 6. add traffic/events/weather only when the core inventory is reliable.
+
+## 11. Phase 1.5 Parking Universe source registry
+
+Phase 1.5 uses `config/parking_universe_sources.json` as the machine-readable source-family register.
+
+It separates:
+
+- sources already integrated;
+- lawful/structured sources ready for ingestion work;
+- source-family gaps still requiring research or partnership;
+- future-region sources that must not be mistaken for deployed coverage.
+
+The initial ready-to-integrate Dublin queue contains official datasets for multistorey parking/live availability, accessible parking, Dublin City parking meters/tariffs/zones, South Dublin parking meters and DLR parking meters/runs.
+
+The register also records Galway City Council's structured car-parking dataset as a future-region source. This does not make Galway a connected WHITEBLOCK region.
+
+Every Pages build converts the registry plus deployed parking snapshots into `web/data/parking_universe_coverage.json`. See `docs/PARKING_UNIVERSE_COVERAGE.md`.
+
+Source-family progress is an operational work metric only. It is not a claim that every real-world parking asset has been discovered.
+

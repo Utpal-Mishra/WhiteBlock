@@ -93,3 +93,19 @@
 - Detailed zoom: residual screen collisions automatically fan out; no county-specific manual marker layout is required.
 - Trigger scope: destination results across all regions.
 - Status: implemented.
+
+## AUTO-20261027-001 — Recompute Parking Universe progress on every Pages build
+
+- Date: 2026-10-27.
+- Trigger: GitHub Pages deployment after regional snapshots and imagery evidence are assembled.
+- Action: build and validate `parking_universe_coverage.json`.
+- Failure rule: publication fails if the report loses the completeness guardrail, connected-region set or all deployed parking assets.
+- Status: implemented.
+
+## AUTO-20261027-001 — Recompute Parking Universe progress on every Pages build
+
+- Date: 2026-10-27.
+- Trigger: GitHub Pages deployment after regional snapshots and imagery evidence are assembled.
+- Action: build and validate `parking_universe_coverage.json`.
+- Failure rule: publication fails if the report loses the completeness guardrail, connected-region set or all deployed parking assets.
+- Status: implemented.
