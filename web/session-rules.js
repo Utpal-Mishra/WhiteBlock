@@ -152,9 +152,16 @@
           ? "Accessible mode keeps only assets with structured accessible-parking evidence."
           : state.filter === "ev"
             ? "EV mode keeps only assets with structured EV-parking evidence."
-            : "Best overall balances distance, reported availability when present, evidence confidence, session cost and rule risk.";
+            : "Best overall balances only evidenced factors: destination distance, reported availability when present, evidence confidence, safely comparable session cost and rule risk.";
 
-    return `${mode} ${factors.join(" · ")}.`;
+    const ranking = rankingEvidence({ ...item, sessionRule: rule, sessionCost: cost });
+    const evidenceNote = state.filter === "best"
+      ? ranking.missing.length
+        ? ` Unknown ${ranking.missing.join(", ")} receive no ranking credit.`
+        : " All ranking factors are supported by available evidence."
+      : "";
+
+    return `${mode} ${factors.join(" · ")}.${evidenceNote}`;
   }
 
   function parseDailyOpeningWindow(raw) {
@@ -308,14 +315,60 @@
     return data;
   }
 
-  score = function scoreWithSessionRules(item) {
-    const availability = item.available != null && item.capacity > 0 ? item.available / item.capacity : 0.3;
-    const distance = item.distanceKm != null ? Math.max(0, 1 - item.distanceKm / NEARBY_RADIUS_KM) : 0.2;
-    const confidence = (numeric(item.confidence) ?? 0) / 100;
+  function rankingEvidence(item) {
     const cost = item.sessionCost || estimateSessionCost(item);
-    const costScore = cost.comparable ? Math.max(0, 1 - Number(cost.amount) / 20) : 0.4;
+    const availabilityKnown = item.available != null && numeric(item.capacity) != null && numeric(item.capacity) > 0;
+    const distanceKnown = item.distanceKm != null;
+    const confidenceKnown = numeric(item.confidence) != null;
+    const costKnown = cost.comparable === true;
+
+    return {
+      cost,
+      availabilityKnown,
+      distanceKnown,
+      confidenceKnown,
+      costKnown,
+      known: [
+        availabilityKnown ? "reported availability" : null,
+        distanceKnown ? "destination distance" : null,
+        confidenceKnown ? "evidence confidence" : null,
+        costKnown ? "comparable session cost" : null
+      ].filter(Boolean),
+      missing: [
+        !availabilityKnown ? "availability" : null,
+        !distanceKnown ? "distance" : null,
+        !confidenceKnown ? "confidence" : null,
+        !costKnown ? "comparable cost" : null
+      ].filter(Boolean)
+    };
+  }
+
+  score = function scoreWithSessionRules(item) {
+    const evidence = rankingEvidence(item);
     const rule = item.sessionRule || evaluate(item);
-    return availability * 0.36 + distance * 0.29 + confidence * 0.20 + costScore * 0.05 + 0.10 - rule.riskPenalty;
+
+    // Phase 2 evidence guardrail:
+    // unknown values never receive placeholder ranking credit.
+    // Only source-backed / safely calculable factors contribute positively.
+    const availabilityScore = evidence.availabilityKnown
+      ? Math.max(0, Math.min(1, Number(item.available) / Number(item.capacity)))
+      : 0;
+    const distanceScore = evidence.distanceKnown
+      ? Math.max(0, 1 - Number(item.distanceKm) / NEARBY_RADIUS_KM)
+      : 0;
+    const confidenceScore = evidence.confidenceKnown
+      ? Math.max(0, Math.min(1, Number(item.confidence) / 100))
+      : 0;
+    const costScore = evidence.costKnown
+      ? Math.max(0, 1 - Number(evidence.cost.amount) / 20)
+      : 0;
+
+    return availabilityScore * 0.36
+      + distanceScore * 0.29
+      + confidenceScore * 0.20
+      + costScore * 0.05
+      + 0.10
+      - rule.riskPenalty;
   };
 
   function compareSessionCost(a, b) {
