@@ -104,3 +104,12 @@
 - Guardrail: score is explicitly prohibited from being described as percent of all real-world parking.
 - Evaluation: use score movement to measure effect of each source integration and evidence-cleanup batch.
 - Status: implemented for measurement.
+
+## EXP-20261027-001 — Evidence-gap prioritisation model
+
+- Date: 2026-10-27.
+- Experiment: convert deployed inventory field gaps into a deterministic review priority.
+- Initial weights: missing coordinates 100; unknown access 80; candidate state 70; missing rules 55; missing capacity 30; missing polygon 20.
+- Objective: make Phase 1.5 work queue inspectable and repeatable rather than manually choosing records.
+- Evaluation: monitor whether this ordering improves recommendation-safety resolution and candidate promotion throughput.
+- Status: initial implementation.
