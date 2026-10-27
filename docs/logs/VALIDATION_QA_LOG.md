@@ -287,3 +287,16 @@
   - responsive decision/evidence UI.
 - Existing session-rule, access-window, max-stay and ineligible transparency tests remain active.
 - Status: tests authored; CI pending.
+
+### Phase 2 merge validation — 2026-10-27
+
+- PR #50 full regression suite: PASS.
+- Database migrations: PASS.
+- Application syntax: PASS.
+- Geographic map fallback: PASS.
+- Ranked clustering: PASS.
+- Ireland county totals/full-inventory zoom: PASS.
+- Universal marker policy: PASS.
+- Python test suite including Phase 2 cost/explanation/evidence assertions: PASS.
+- Merge commit: `d7fcabbaed320d85a331708c2e5aa943cebdd6d3`.
+- Pages run #315: regional rebuild in progress at the time of validation logging.
