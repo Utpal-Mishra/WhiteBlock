@@ -101,3 +101,10 @@
 - Learning: WHITEBLOCK's strategic value increases when the platform knows the parking landscape before commercial integration. Partner status should enrich an asset, not determine whether the asset is known.
 - Implication: Phase 1.5 is now an active programme with measurable source-family and evidence-resolution gaps.
 - Status: adopted.
+
+## BUS-20261027-002 — Source evidence can expand coverage without expanding recommendations
+
+- Date: 2026-10-27.
+- Learning: official evidence such as accessible bays and parking meters is valuable before full canonical reconciliation, provided WHITEBLOCK keeps evidence records separate from driver-eligible assets.
+- Implication: Phase 1.5 can broaden the parking universe aggressively without lowering recommendation trust.
+- Status: adopted.
