@@ -138,3 +138,11 @@
 - Recommendation: unknown availability, unknown confidence and unsafe/non-comparable pricing should receive no positive ranking credit.
 - Rationale: a neutral-looking placeholder can still materially change ordering and imply evidence that does not exist.
 - Status: adopted.
+\n
+## REC-20261027-003 — Do not let the first Phase 3 baseline change driver ranking
+
+- Date: 2026-10-27.
+- Recommendation: expose the historical arrival baseline for inspection first, but keep Phase 2 Best Overall ranking on its already validated evidence factors.
+- Promotion gate: require sufficient history, backtesting, error metrics, probability calibration review and degradation monitoring before forecast availability can replace/currently supplement the ranking availability factor.
+- Reason: a naive baseline is the benchmark a later forecast model must beat, not evidence that ranking has improved.
+- Status: adopted.\n
