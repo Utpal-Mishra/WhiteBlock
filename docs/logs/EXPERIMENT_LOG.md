@@ -131,3 +131,12 @@
 - Previous behaviour: unknown availability used a 0.3 score surrogate and non-comparable cost used a 0.4 surrogate.
 - New behaviour: unknown factors receive no positive contribution; explanation explicitly states which factors were unavailable.
 - Status: resolved.
+\n
+## EXP-20261027-003 — Phase 3 naive availability baseline benchmark
+
+- Date: 2026-10-27.
+- Question: can time-aware historical availability improve decisions over current-only/static availability evidence?
+- Baseline: hierarchical historical mean selected by same weekday+hour, then same hour, then recent overall history.
+- Minimum samples: 2 / 5 / 12 respectively.
+- Planned evaluation: rolling/holdout MAE and RMSE for available-space counts, empirical availability-probability calibration, error by asset/time bucket, and comparison with current-only/simple persistence baselines.
+- Current status: data collection and benchmark generation implemented; evaluation not yet complete.\n

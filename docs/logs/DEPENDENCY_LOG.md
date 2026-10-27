@@ -34,3 +34,11 @@
 - Independent fallbacks: OpenStreetMap Street, then CARTO Street.
 - Lifecycle note: Esri has announced retirement plans for legacy raster/reference basemaps; migrate this reference layer to a supported modern Hybrid/Imagery Hybrid service before retirement.
 - Status: current prototype dependency configured; migration tracked.
+
+## DEP-20261027-003 — Phase 3 baseline adds no third-party runtime dependency
+
+- Date: 2026-10-27.
+- Python implementation uses the standard library, including `zoneinfo` for Europe/Dublin local-time bucketing.
+- Browser implementation uses existing application globals and Fetch API.
+- Rationale: keep the first benchmark auditable and deployment-light before introducing ML/time-series libraries.
+- Status: accepted.

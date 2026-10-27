@@ -232,3 +232,11 @@
 - Changed: session ranking semantics, per-result explanation, JS cache key, regression tests and roadmap completion note.
 - Behaviour: unknown factors no longer receive positive score credit.
 - Release state: branch implementation complete; CI/merge/deployment pending.
+\n
+## REL-20261027-003 — Phase 3 availability-intelligence foundation
+
+- Date: 2026-10-27.
+- Scope: first Phase 3 production-oriented slice.
+- Added: bounded Cork observation history, hierarchical historical availability baseline, future-arrival UI annotation, Network baseline coverage status, tests and documentation.
+- Safety boundary: experimental forecast values do not affect recommendation ranking.
+- Status: implemented on Phase 3 branch; CI/deployment validation pending.\n

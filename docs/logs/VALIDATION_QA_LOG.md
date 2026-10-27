@@ -311,3 +311,12 @@
   - hidden 0.4 cost fallback is forbidden;
   - ranking explanation must disclose that missing factors receive no credit.
 - Status: tests updated; CI pending.
+
+## QA-20261027-003 — Phase 3 baseline validation coverage
+
+- Date: 2026-10-27.
+- Added unit coverage for history deduplication, stale/invalid observation rejection, empirical statistics and artifact generation.
+- Added static web integration checks requiring the Phase 3 layer to load after session rules and explicitly prohibiting a Phase 3 score override.
+- Full repository CI: pending Phase 3 pull request run.
+- Live acceptance: pending successful Pages deployment and accumulation of enough scheduled observations for the first forecast-ready bucket.
+- Status: in validation.

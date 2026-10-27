@@ -151,6 +151,11 @@ def main() -> int:
         default=None,
         help="Optional venue sidecar path; defaults to dublin_venue_knowledge.json beside the ledger",
     )
+    parser.add_argument(
+        "--venue-optional",
+        action="store_true",
+        help="Allow venue discovery to degrade on source timeout while still publishing core Dublin parking evidence.",
+    )
     args = parser.parse_args()
 
     raw_snapshot = json.loads(args.input.read_text(encoding="utf-8"))
@@ -162,7 +167,36 @@ def main() -> int:
 
     ledger = build_ledger(snapshot)
     audit = settlement_audit.build_audit(snapshot)
-    venues = venue_knowledge.build_knowledge(snapshot)
+    try:
+        venues = venue_knowledge.build_knowledge(snapshot)
+    except Exception as error:
+        if not args.venue_optional:
+            raise
+        coverage = snapshot.get("coverage") or {}
+        venues = {
+            "schema_version": "1.0-degraded",
+            "generated_at": snapshot.get("generated_at"),
+            "status": "degraded_source_unavailable",
+            "degraded_reason": str(error),
+            "coverage": {
+                "scope": coverage.get("scope"),
+                "coverage_claim": coverage.get("coverage_claim"),
+                "local_authority_relation_ids": coverage.get("local_authority_relation_ids") or {},
+            },
+            "summary": {
+                "venues": 0,
+                "venues_with_any_mapped_parking_nearby": 0,
+                "imagery_review_queue": 0,
+                "open_24_7_venues": 0,
+            },
+            "source_runs": {},
+            "venues": [],
+            "imagery_review_queue": [],
+            "notes": [
+                "Venue discovery is supplementary to the canonical parking inventory.",
+                "A transient Overpass/source failure must not block publication of validated Dublin parking assets.",
+            ],
+        }
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(ledger, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -201,6 +235,7 @@ def main() -> int:
     )
     print(
         "WHITEBLOCK Dublin venue knowledge sidecar:",
+        venues.get("status", "ready"), "/",
         venues["summary"]["venues"], "venues /",
         venues["summary"]["venues_with_any_mapped_parking_nearby"], "with mapped parking nearby /",
         venues["summary"]["imagery_review_queue"], "imagery candidates ->",

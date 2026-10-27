@@ -159,3 +159,13 @@
 - Safely calculable published tariffs remain comparable.
 - Reported zero availability remains a real zero and is distinct from unknown availability.
 - Status: implemented.
+\n
+## DATA-20261027-003 — Cork temporal history and baseline sidecars
+
+- Date: 2026-10-27.
+- Input: `data/cork/curated/parking_observations.jsonl` from the authoritative ingestion path.
+- Continuity input: previously published `cork_observation_history.jsonl`, when available.
+- Transformation: validate observed records, deduplicate by parking ID + observed timestamp + source key, remove invalid/stale rows, retain 90 days, aggregate in Europe/Dublin local time.
+- Outputs: observation-history JSONL plus `cork_availability_baseline.json`.
+- No canonical asset fields are mutated.
+- Status: implemented on Phase 3 branch.\n

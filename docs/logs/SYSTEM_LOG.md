@@ -159,3 +159,11 @@
 - Unknown availability/confidence/cost contributes zero positive ranking credit rather than a placeholder numeric value.
 - Rule-risk penalties remain applied independently.
 - Status: implemented.
+\n
+## SYS-20261027-003 — Add bounded observation-history and availability-baseline pipeline
+
+- Date: 2026-10-27.
+- Flow: official Cork ingestion -> current observations -> previously published observation history -> deduplication/90-day retention -> Phase 3 baseline -> browser sidecar.
+- New artifacts: `web/data/cork_observation_history.jsonl` and `web/data/cork_availability_baseline.json`.
+- Failure behavior: missing history starts a new history; missing fresh Cork observations may preserve the last published Phase 3 artifacts; no synthetic observations are created.
+- Status: implemented on Phase 3 branch.\n
