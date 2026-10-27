@@ -38,6 +38,7 @@
   function regionCard(region) {
     const summary = region.source_family_summary || {};
     const resolution = region.resolution || {};
+    const review = region.review_queue || {};
     const gaps = Object.entries(region.source_family_status || {})
       .filter(([, status]) => status !== "integrated")
       .slice(0, 5);
@@ -66,6 +67,11 @@
           <span><b>${integer(summary.ready_to_integrate)}</b> ready next</span>
           <span><b>${integer(summary.gaps)}</b> gaps</span>
         </div>
+        <div class="universe-review-strip">
+          <span><b>${integer(review.count)}</b> evidence-review tasks</span>
+          <span><b>${integer(review.unknown_access)}</b> access unresolved</span>
+          <span><b>${integer(region.candidate_count)}</b> deployed candidates</span>
+        </div>
         <div class="universe-gap-list">
           ${gaps.length ? gaps.map(([family, status]) => `
             <span class="universe-gap-tag ${esc(status)}">
@@ -86,6 +92,7 @@
       return;
     }
 
+    const evidenceReview = report.evidence_review || {};
     host.innerHTML = `
       <div class="universe-summary surface">
         <div>
@@ -93,9 +100,15 @@
           <h3>Parking Universe Coverage</h3>
           <p>Track the parking WHITEBLOCK already knows, the evidence fields still unresolved, and the source families that remain to be integrated before partnership-led expansion.</p>
         </div>
-        <div class="universe-summary-number">
-          <strong>${integer(report.known_assets_across_deployed_snapshots)}</strong>
-          <span>assets in current deployment snapshots</span>
+        <div class="universe-summary-stats">
+          <div class="universe-summary-number">
+            <strong>${integer(report.known_assets_across_deployed_snapshots)}</strong>
+            <span>assets in current deployment snapshots</span>
+          </div>
+          <div class="universe-summary-number review">
+            <strong>${integer(evidenceReview.items)}</strong>
+            <span>evidence-resolution tasks</span>
+          </div>
         </div>
       </div>
       <div class="universe-region-grid">
