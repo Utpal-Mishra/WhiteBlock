@@ -133,3 +133,10 @@
 - Product implication: WHITEBLOCK should preserve current observations while developing a separate, explicitly predicted arrival-time layer.
 - Validation implication: the simplest historical baseline must be measured before more complex ML or external context features are justified.
 - Status: accepted into Phase 3.\n
+## BIZ-20261027-004 — Physical parking evidence is not equivalent to usable parking supply
+
+- Date: 2026-10-27.
+- Learning: imagery can make WHITEBLOCK better at finding physical parking surfaces, but commercial/user value depends on a second verification layer for access, restrictions, current existence and safe use.
+- Product implication: candidate discovery and recommendation eligibility must remain separate product states.
+- Strategy implication: Phase 4 can improve inventory completeness before partnerships without making private/restricted parking look public.
+- Status: adopted.
