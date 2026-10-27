@@ -37,6 +37,7 @@
 
   function regionCard(region) {
     const summary = region.source_family_summary || {};
+    const sourceKeys = region.source_key_progress || {};
     const resolution = region.resolution || {};
     const gaps = Object.entries(region.source_family_status || {})
       .filter(([, status]) => status !== "integrated")
@@ -68,9 +69,16 @@
         </div>
         <div class="universe-source-progress">
           <span><b>${integer(summary.integrated)}</b> source families integrated</span>
-          <span><b>${integer(summary.ready_to_integrate)}</b> ready next</span>
-          <span><b>${integer(summary.gaps)}</b> gaps</span>
+          <span><b>${integer(summary.gaps)}</b> family gaps</span>
+          <span><b>${integer(sourceKeys.ready_to_integrate_count || 0)}</b> specific sources ready next</span>
         </div>
+        ${Array.isArray(sourceKeys.ready_to_integrate_sources) && sourceKeys.ready_to_integrate_sources.length ? `
+          <div class="universe-ready-sources">
+            <small>Next structured sources</small>
+            ${sourceKeys.ready_to_integrate_sources.slice(0, 4).map(source => `
+              <span>${esc(source.publisher || source.source_key)} · ${esc(familyLabel(source.family))}</span>
+            `).join("")}
+          </div>` : ""}
         <div class="universe-gap-list">
           ${gaps.length ? gaps.map(([family, status]) => `
             <span class="universe-gap-tag ${esc(status)}">
