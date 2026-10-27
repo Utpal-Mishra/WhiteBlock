@@ -19,3 +19,10 @@
 - No prediction is used to alter legal/access eligibility.
 - No weather/event/traffic claim is made before source and licence review.
 - Status: implemented as a Phase 3 guardrail.
+## GOV-20261027-004 — Automated imagery processing requires explicit rights record
+
+- Date: 2026-10-27.
+- Governance rule: a source contract must record machine_ingestion_allowed=true and an approved machine-analysis licence status before automated detections are accepted.
+- Basemap/human-review availability is insufficient evidence of ML-processing rights.
+- Candidate access remains unknown/verification-required; public_access_verified=false; recommendation_eligible=false.
+- Status: implemented as a fail-closed control.
