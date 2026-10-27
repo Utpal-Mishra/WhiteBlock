@@ -224,3 +224,11 @@
 - Feature-branch CI: PASS.
 - Phase 2 roadmap status: COMPLETE.
 - GitHub Pages deployment run #315 started from the merged commit and was rebuilding regional data at the time of this log entry.
+
+## CHANGE-20261027-002 — Phase 2 evidence-ranking hardening
+
+- Date: 2026-10-27.
+- Branch: `fix/phase2-evidence-only-ranking-2026-10-27`.
+- Changed: session ranking semantics, per-result explanation, JS cache key, regression tests and roadmap completion note.
+- Behaviour: unknown factors no longer receive positive score credit.
+- Release state: branch implementation complete; CI/merge/deployment pending.
