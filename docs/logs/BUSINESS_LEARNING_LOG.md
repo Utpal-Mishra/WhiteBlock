@@ -117,3 +117,11 @@
 - Phase 2 action: every recommendation now exposes stay fit, walk estimate, safely calculable session cost, ranking rationale, source, freshness and confidence.
 - Commercial implication: later partner integrations can enrich the same decision surface without replacing the underlying recommendation logic.
 - Status: Phase 2 complete.
+
+## BUS-20261027-002 — Unknown data must not silently improve a parking recommendation
+
+- Date: 2026-10-27.
+- Learning: a recommendation can be visually transparent yet still contain hidden assumptions if unknown inputs receive placeholder score credit.
+- Phase 2 audit finding: Best Overall gave positive default contributions to unreported availability and non-comparable price evidence.
+- Product implication: only evidenced/safely calculable factors may earn positive ranking credit.
+- Status: corrected.
