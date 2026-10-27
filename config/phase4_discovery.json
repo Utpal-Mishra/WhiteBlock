@@ -12,5 +12,9 @@
     "field_verification_required"
   ],
   "recommendation_eligibility_default": false,
-  "public_access_default": "unknown"
+  "public_access_default": "unknown",
+  "manual_review_regions": [
+    "Cork"
+  ],
+  "allow_non_pilot_detection_batches": false
 }
