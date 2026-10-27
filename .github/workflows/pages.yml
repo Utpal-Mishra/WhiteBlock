@@ -223,15 +223,43 @@ jobs:
               cp /tmp/dublin-evidence/dublin_*.json web/data/
               ARTIFACT_READY=true
             else
-              echo "::warning::Validated Dublin artifact download failed; trying a live exact-boundary rebuild"
+              echo "::warning::Validated Dublin artifact download failed"
             fi
           else
-            echo "::warning::No successful Dublin validation artifact found; trying a live exact-boundary rebuild"
+            echo "::warning::No successful Dublin validation artifact found"
+          fi
+
+          # Last-known-good publication is preferable to blocking the entire
+          # product on a transient external source outage. These are previously
+          # validated evidence artifacts, not fabricated fallback records.
+          if [[ "${ARTIFACT_READY}" != "true" || ! -s web/data/dublin_parking_snapshot.json ]]; then
+            echo "Attempting last published Dublin evidence"
+            PUBLISHED_READY=true
+            for required in \
+              dublin_parking_snapshot.json \
+              dublin_coverage_ledger.json \
+              dublin_settlement_audit.json \
+              dublin_restriction_audit.json \
+              dublin_venue_knowledge.json; do
+              if ! curl --fail --silent --show-error --location --max-time 20 \
+                "https://utpal-mishra.github.io/WhiteBlock/data/${required}" \
+                --output "web/data/${required}"; then
+                PUBLISHED_READY=false
+                rm -f "web/data/${required}"
+              fi
+            done
+            if [[ "${PUBLISHED_READY}" == "true" ]]; then
+              echo "Using last published Dublin evidence"
+              ARTIFACT_READY=true
+            fi
           fi
 
           if [[ "${ARTIFACT_READY}" != "true" || ! -s web/data/dublin_parking_snapshot.json ]]; then
-            python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
-            python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json --venue-optional
+            echo "::warning::No validated artifact or published fallback available; attempting live exact-boundary rebuild"
+            if python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json \
+              && python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json --venue-optional; then
+              ARTIFACT_READY=true
+            fi
           fi
 
           for required in \
