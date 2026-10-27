@@ -151,3 +151,11 @@
 - Runtime derivation: `sessionCost` is temporary decision context based on requested stay and is not written back to the canonical parking record.
 - Freshness source order: observed timestamp → retrieved timestamp → unknown.
 - Status: implemented.
+
+## DATA-20261027-002 — Unknown recommendation inputs remain unknown through scoring
+
+- Date: 2026-10-27.
+- Data contract: `null`/unpublished availability, confidence or non-comparable tariff evidence is not converted into a synthetic recommendation input.
+- Safely calculable published tariffs remain comparable.
+- Reported zero availability remains a real zero and is distinct from unknown availability.
+- Status: implemented.
