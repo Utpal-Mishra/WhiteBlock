@@ -79,6 +79,42 @@ class ParkingUniverseCoverageTests(unittest.TestCase):
                     self.assertLessEqual(score, 100)
                 self.assertIn("not a percentage", region["programme_readiness_note"])
 
+    def test_review_queue_prioritises_unresolved_access_and_preserves_candidates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            self.write_snapshot(directory, "cork_county_parking_snapshot.json", [{
+                "parking_id": "WB-PARK-IE-CORK-CANDIDATE",
+                "name": "Retail Parking Candidate",
+                "latitude": 51.9,
+                "longitude": -8.47,
+                "access_type": "unknown",
+                "truth_state": "unverified",
+            }])
+            self.write_snapshot(directory, "kildare_parking_snapshot.json", [])
+            self.write_snapshot(directory, "dublin_parking_snapshot.json", [])
+            self.write_snapshot(directory, "wicklow_parking_snapshot.json", [])
+
+            report = parking_universe.build_report(self.config_path, directory)
+            queue = parking_universe.build_review_queue(self.config_path, directory)
+
+            cork = report["regions"]["cork"]
+            self.assertEqual(cork["candidate_count"], 1)
+            self.assertEqual(cork["review_queue"]["count"], 1)
+            self.assertEqual(cork["review_queue"]["unknown_access"], 1)
+            self.assertEqual(report["evidence_review"]["items"], queue["review_items"])
+            item = queue["regions"]["cork"]["items"][0]
+            self.assertIn("unknown_access", item["reasons"])
+            self.assertIn("candidate_state", item["reasons"])
+            self.assertGreater(item["priority"], 0)
+
+    def test_phase_15_database_state_migration_exists(self):
+        migration = (ROOT / "db" / "migrations" / "006_parking_universe_states.sql").read_text(encoding="utf-8")
+        self.assertIn("physical_status", migration)
+        self.assertIn("recommendation_status", migration)
+        self.assertIn("partnership_status", migration)
+        self.assertIn("parking_partner_capability", migration)
+        self.assertIn("coverage_classes", migration)
+
     def test_source_registry_distinguishes_integrated_ready_and_gap(self):
         config = json.loads(self.config_path.read_text(encoding="utf-8"))
         statuses = parking_universe.source_family_status(config, "dublin")
