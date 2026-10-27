@@ -368,6 +368,8 @@ def build_report(config_path: Path, snapshot_dir: Path) -> Dict[str, Any]:
     integrated = sum(region["source_family_summary"]["integrated"] for region in regions.values())
     ready = sum(region["source_family_summary"]["ready_to_integrate"] for region in regions.values())
     gaps = sum(region["source_family_summary"]["gaps"] for region in regions.values())
+    review_items = sum(region["review_queue"]["count"] for region in regions.values())
+    unresolved_access = sum(region["review_queue"]["unknown_access"] for region in regions.values())
 
     return {
         "schema_version": 1,
@@ -376,6 +378,10 @@ def build_report(config_path: Path, snapshot_dir: Path) -> Dict[str, Any]:
         "title": "Parking Universe Coverage",
         "coverage_claim": config.get("coverage_claim"),
         "known_assets_across_deployed_snapshots": known_assets,
+        "evidence_review": {
+            "items": review_items,
+            "unknown_access": unresolved_access,
+        },
         "source_family_instances": {
             "integrated": integrated,
             "ready_to_integrate": ready,
