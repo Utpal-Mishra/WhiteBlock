@@ -143,3 +143,11 @@
 - Deployment artifact: `parking_universe_review_queue.json` contains source-backed records requiring evidence resolution.
 - No data fabrication: missing fields remain unresolved; queue generation does not infer access, capacity, rules or public eligibility.
 - Status: implemented.
+
+## DATA-20261027-002 — No new pricing truth fields created for Phase 2
+
+- Date: 2026-10-27.
+- Data rule: `pricingRaw` remains the authoritative published tariff evidence.
+- Runtime derivation: `sessionCost` is temporary decision context based on requested stay and is not written back to the canonical parking record.
+- Freshness source order: observed timestamp → retrieved timestamp → unknown.
+- Status: implemented.
