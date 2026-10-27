@@ -35,7 +35,7 @@ class ParkingSessionRuleTests(unittest.TestCase):
         self.assertIn("Not safely calculable", js)
         self.assertIn("compareSessionCost", js)
         self.assertIn("Lowest-cost mode compares only safely calculable session totals first", js)
-        self.assertIn("Best overall balances distance", js)
+        self.assertIn("Best overall balances only evidenced factors", js)
         self.assertIn("Why this ranks here", js)
         self.assertIn("freshnessInfo", js)
         self.assertIn("Source retrieved", js)
