@@ -158,3 +158,11 @@
 - Not required for Phase 2 exit: turn-by-turn navigation, parking-session timers/reminders, walking-route execution, booking/payment hand-off.
 - Reason: those capabilities act on a chosen parking decision; they do not determine whether WHITEBLOCK can make the decision.
 - Status: accepted.
+
+## DEC-20261027-002 — Close Phase 2 with evidence-only scoring
+
+- Date: 2026-10-27.
+- Decision: Phase 2 remains complete after a final audit, with one corrective hardening change.
+- Chosen behaviour: unknown factors do not earn ranking credit; known factors retain their documented weights.
+- Phase boundary unchanged: navigation execution, timers/reminders, walking-route execution and operator payment/session hand-off are not Phase 2 blockers.
+- Status: accepted.
