@@ -140,3 +140,10 @@
 - Minimum samples: 2 / 5 / 12 respectively.
 - Planned evaluation: rolling/holdout MAE and RMSE for available-space counts, empirical availability-probability calibration, error by asset/time bucket, and comparison with current-only/simple persistence baselines.
 - Current status: data collection and benchmark generation implemented; evaluation not yet complete.\n
+## EXP-20261027-004 — Cork parking-surface discovery benchmark
+
+- Date: 2026-10-27.
+- Objective: establish whether automated surface-parking detections can identify missing/changed supply at useful precision before national scale-up.
+- Routing baseline: <=25 m known-location review; 25–75 m possible geometry extension; >75 m possible new supply; detection confidence <0.65 quarantine.
+- Required evaluation: precision, recall, false-positive taxonomy, false negatives, duplicate/cross-match error rate and candidate-to-verified conversion.
+- Current state: pipeline/evaluation hooks implemented; labelled benchmark and approved automated imagery source still pending.
