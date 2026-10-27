@@ -23,3 +23,11 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Reason logged: dense parking records remain canonical regardless of future partnership state; the correction is presentation-only.
 - Future relevance: partner-provided facility segmentation can later improve physical reconciliation without changing the renderer contract.
 - Status: no action required.
+
+## MERCH-20261027-001 — Retail/customer parking enters the universe before merchant partnership
+
+- Date: 2026-10-27.
+- Rule: supermarket, shopping-centre and retail customer parking may be represented as evidence-backed assets/candidates before any merchant partnership.
+- Required separation: physical existence, customer/access restrictions, maximum stay and partnership status.
+- Partnership later adds verified rules/live/commercial capability rather than creating the parking identity.
+- Status: adopted for Phase 1.5.
