@@ -109,3 +109,11 @@
 - Action: build and validate `parking_universe_coverage.json`.
 - Failure rule: publication fails if the report loses the completeness guardrail, connected-region set or all deployed parking assets.
 - Status: implemented.
+
+## AUTO-20261027-001 — Deploy-time evidence review queue
+
+- Date: 2026-10-27.
+- Automation: every Pages build derives `parking_universe_review_queue.json` from current regional snapshots.
+- Prioritisation: missing coordinates > unknown access > candidate state > missing rules > missing capacity > missing polygon.
+- Safety: the queue is diagnostic only and does not promote, reject or alter recommendation eligibility automatically.
+- Status: implemented.
