@@ -46,6 +46,8 @@ Exit condition:
 
 ## Phase 1.5 — Parking Universe Coverage
 
+**Implementation status (2026-10-27):** ACTIVE. Foundation slice implemented: machine-readable source-family registry, deploy-time coverage audit, Discover coverage dashboard and regression guardrails. Next work is source ingestion/reconciliation and access/rules gap resolution.
+
 **Goal:** make the canonical WHITEBLOCK registry as complete as practicable before commercial partnerships become a dependency.
 
 This phase is broader than verified public parking. The registry should preserve every known or plausible parking asset/candidate, while keeping its legal/use status explicit.
