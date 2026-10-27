@@ -112,7 +112,7 @@ class ParkingUniverseCoverageTests(unittest.TestCase):
         config = json.loads(self.config_path.read_text(encoding="utf-8"))
         statuses = parking_universe.source_family_status(config, "dublin")
         self.assertEqual(statuses["open_geospatial"], "integrated")
-        self.assertEqual(statuses["official_local_authority"], "integrated")
+        self.assertEqual(statuses["official_local_authority"], "ready_to_integrate")
         self.assertEqual(statuses["accessible_parking"], "integrated")
         self.assertEqual(statuses["parking_rules_bylaws"], "integrated")
         self.assertEqual(statuses["retail_customer_parking"], "gap")
