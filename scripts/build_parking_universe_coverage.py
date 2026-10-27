@@ -22,6 +22,10 @@ REGION_FILES = {
     "wicklow": ("wicklow_parking_snapshot.json", "bray_parking_snapshot.json"),
 }
 
+REGION_EVIDENCE_FILES = {
+    "dublin": ("dublin_parking_universe_evidence.json",),
+}
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -75,6 +79,30 @@ def snapshot_records(snapshot_dir: Path, region: str) -> tuple[List[Dict[str, An
             records.extend(row for row in rows if isinstance(row, dict))
             loaded_files.append(filename)
     return dedupe(records), loaded_files
+
+
+def universe_evidence_records(snapshot_dir: Path, region: str) -> tuple[List[Dict[str, Any]], List[str]]:
+    records: List[Dict[str, Any]] = []
+    loaded_files: List[str] = []
+    for filename in REGION_EVIDENCE_FILES.get(region, ()):
+        path = snapshot_dir / filename
+        if not path.exists():
+            continue
+        payload = load_json(path)
+        rows = payload.get("records") or []
+        if isinstance(rows, list):
+            records.extend(row for row in rows if isinstance(row, dict))
+            loaded_files.append(filename)
+
+    seen = set()
+    output: List[Dict[str, Any]] = []
+    for index, record in enumerate(records):
+        key = str(record.get("evidence_id") or stable_id(record, index))
+        if key in seen:
+            continue
+        seen.add(key)
+        output.append(dict(record))
+    return output, loaded_files
 
 
 def has_coordinates(record: Mapping[str, Any]) -> bool:
@@ -235,6 +263,7 @@ def programme_readiness_score(
 
 def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) -> Dict[str, Any]:
     records, loaded_files = snapshot_records(snapshot_dir, region)
+    universe_evidence, evidence_files = universe_evidence_records(snapshot_dir, region)
     total = len(records)
     access = sum(1 for row in records if known_access(row))
     capacity = sum(1 for row in records if known_capacity(row))
@@ -249,6 +278,14 @@ def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) ->
         key = asset_class(record)
         classes[key] = classes.get(key, 0) + 1
 
+    evidence_classes: Dict[str, int] = {}
+    recommendation_eligible_evidence = 0
+    for record in universe_evidence:
+        key = str(record.get("evidence_class") or record.get("asset_class") or "other")
+        evidence_classes[key] = evidence_classes.get(key, 0) + 1
+        if record.get("recommendation_eligible") is True:
+            recommendation_eligible_evidence += 1
+
     statuses = source_family_status(config, region)
     access_pct = percentage(access, total)
     capacity_pct = percentage(capacity, total)
@@ -259,7 +296,11 @@ def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) ->
         "label": ((config.get("regions") or {}).get(region) or {}).get("label", region.title()),
         "inventory_status": ((config.get("regions") or {}).get(region) or {}).get("status", "unknown"),
         "loaded_snapshot_files": loaded_files,
+        "loaded_universe_evidence_files": evidence_files,
         "known_assets": total,
+        "universe_evidence_records": len(universe_evidence),
+        "universe_evidence_recommendation_eligible": recommendation_eligible_evidence,
+        "universe_evidence_class_counts": dict(sorted(evidence_classes.items())),
         "candidate_count": None,
         "candidate_scope_note": "Browser-local candidate queues are not part of the deployment artifact.",
         "resolution": {
@@ -294,6 +335,7 @@ def build_report(config_path: Path, snapshot_dir: Path) -> Dict[str, Any]:
     }
 
     known_assets = sum(region["known_assets"] for region in regions.values())
+    evidence_records = sum(region["universe_evidence_records"] for region in regions.values())
     integrated = sum(region["source_family_summary"]["integrated"] for region in regions.values())
     ready = sum(region["source_family_summary"]["ready_to_integrate"] for region in regions.values())
     gaps = sum(region["source_family_summary"]["gaps"] for region in regions.values())
@@ -305,6 +347,7 @@ def build_report(config_path: Path, snapshot_dir: Path) -> Dict[str, Any]:
         "title": "Parking Universe Coverage",
         "coverage_claim": config.get("coverage_claim"),
         "known_assets_across_deployed_snapshots": known_assets,
+        "universe_evidence_records_across_deployment": evidence_records,
         "source_family_instances": {
             "integrated": integrated,
             "ready_to_integrate": ready,
@@ -332,6 +375,7 @@ def main() -> int:
         "output": str(args.output),
         "regions": len(report["regions"]),
         "known_assets": report["known_assets_across_deployed_snapshots"],
+        "universe_evidence_records": report["universe_evidence_records_across_deployment"],
         "source_family_instances": report["source_family_instances"],
     }))
     return 0
