@@ -42,3 +42,10 @@
 - Browser implementation uses existing application globals and Fetch API.
 - Rationale: keep the first benchmark auditable and deployment-light before introducing ML/time-series libraries.
 - Status: accepted.
+## DEP-20261027-004 — Phase 4 foundation remains dependency-light
+
+- Date: 2026-10-27.
+- Candidate routing, geospatial proximity matching and change classification use Python standard library only.
+- No CV/segmentation framework or imagery SDK has been added to production dependencies.
+- Reason: provider licensing and labelled benchmark should be settled before selecting a heavier model/runtime stack.
+- Status: accepted.
