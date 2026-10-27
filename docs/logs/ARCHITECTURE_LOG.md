@@ -184,3 +184,11 @@
 - Baseline output uses truth state `predicted`; current source observations remain `observed`.
 - Ranking integration is a separate future promotion gate after evaluation.
 - Status: accepted/implemented on Phase 3 branch.\n
+## ARCH-20261027-004 — Candidate registry is a separate truth layer from WB-PARK
+
+- Date: 2026-10-27.
+- Decision: imagery/model detections use stable WB-CAND-* identities and must not mutate or create canonical WB-PARK-* records directly.
+- Cross-match states distinguish same-location review, possible geometry extension and possible new supply.
+- Candidate records carry inferred/unverified truth, access unknown/verification-required and recommendation_eligible=false.
+- Promotion into canonical inventory remains a separately governed operation.
+- Status: accepted/implemented.
