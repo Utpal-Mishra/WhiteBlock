@@ -107,3 +107,11 @@
 - User-visible labels were correct, but ordering could still be biased by unsupported values.
 - Corrective action: remove placeholder score contributions and disclose missing factors in ranking explanation.
 - Status: corrected on feature branch.
+
+## INC-20261027-003 — Main Pages deployment blocked by Dublin evidence acquisition
+
+- Date: 2026-10-27.
+- Observed state before Phase 3 branch: repository tests passed for main commit `b2cdc128b25cef482bb20a27e9e9c0f2590de141`, while the Pages deployment failed at “Acquire validated County Dublin network evidence”.
+- Related open work: PR #48 contains Phase 1.5 Dublin evidence/resilience changes; its test workflow is green but an immediate merge attempt was rejected because the branch now conflicts with newer main work.
+- Action: do not force-merge or overwrite Phase 2; keep the Phase 1.5 reconciliation as a separate follow-up while Phase 3 starts from current main.
+- Status: open integration issue; not a Phase 3 modelling blocker.
