@@ -175,3 +175,12 @@
 - Added contract: `rankingEvidence()` determines whether availability, distance, confidence and cost are eligible to contribute.
 - Benefit: evidence semantics remain consistent from source ingestion through recommendation.
 - Status: accepted.
+\n
+## ARCH-20261027-003 — Keep observed history and predicted availability separate from canonical inventory
+
+- Date: 2026-10-27.
+- Decision: Phase 3 temporal intelligence is an observation/prediction layer and must not overwrite stable `WB-PARK-*` asset facts.
+- Historical state is carried forward as a bounded published artifact for the current static Pages deployment.
+- Baseline output uses truth state `predicted`; current source observations remain `observed`.
+- Ranking integration is a separate future promotion gate after evaluation.
+- Status: accepted/implemented on Phase 3 branch.\n
