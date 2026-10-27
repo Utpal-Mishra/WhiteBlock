@@ -89,6 +89,11 @@ class ParkingUniverseCoverageTests(unittest.TestCase):
                 report["regions"]["dublin"]["universe_evidence_class_counts"]["accessible_parking_space"],
                 1,
             )
+            self.assertEqual(report["regions"]["dublin"]["source_key_progress"]["ready_to_integrate_count"], 3)
+            self.assertIn(
+                "dublin_city_multistorey_live",
+                report["regions"]["dublin"]["source_key_progress"]["ready_to_integrate_source_keys"],
+            )
             self.assertEqual(report["regions"]["cork"]["known_assets"], 1)
             self.assertEqual(report["regions"]["cork"]["resolution"]["capacity"]["count"], 1)
             self.assertEqual(report["regions"]["dublin"]["resolution"]["access"]["count"], 0)
