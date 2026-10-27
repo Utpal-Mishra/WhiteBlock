@@ -45,3 +45,40 @@
   .universe-summary-number { min-width:0; text-align:left; }
   .universe-resolution-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+
+.universe-summary-stats {
+  display:flex;
+  align-items:flex-end;
+  gap:18px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.universe-summary-number.review strong { color:var(--amber); }
+
+.universe-review-strip {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin:10px 0;
+}
+.universe-review-strip span {
+  border:1px solid rgba(241,196,107,.18);
+  background:rgba(241,196,107,.035);
+  border-radius:10px;
+  padding:8px;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.35;
+}
+.universe-review-strip b {
+  display:block;
+  color:#F1C46B;
+  font-size:12px;
+  margin-bottom:2px;
+}
+
+@media (max-width:520px) {
+  .universe-summary-stats { justify-content:flex-start; }
+  .universe-review-strip { grid-template-columns:1fr; }
+}
+

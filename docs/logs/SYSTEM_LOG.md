@@ -133,3 +133,12 @@
 - Behaviour: every Pages build measures deployed known assets, access/capacity/rules/geometry resolution and source-family progress for Cork, Kildare, Dublin and Wicklow.
 - Guardrail: the report is programme progress, not literal percentage of real-world parking supply.
 - Status: implemented on Phase 1.5 branch.
+
+## SYS-20261027-001 — Phase 1.5 Parking Universe core state and review pipeline
+
+- Date: 2026-10-27.
+- System change: canonical parking assets now support independent physical, recommendation, partnership and live-data states.
+- Deployment change: `build_parking_universe_coverage.py` now also builds a shared source-backed evidence-review queue.
+- Review reasons: missing coordinates, unknown access, missing rules, missing capacity, missing polygon and explicit candidate/unverified state.
+- Browser-local proposals remain separate from the shared deployment queue because GitHub Pages has no authenticated shared write service.
+- Status: implementation branch.

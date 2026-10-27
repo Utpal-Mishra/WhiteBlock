@@ -141,3 +141,12 @@
 - Reason: parking discovery work must be measurable before large-scale source ingestion; otherwise “complete coverage” becomes an untestable claim.
 - Next decision boundary: integrate official ready sources and reconcile them into canonical identities without weakening existing evidence/access rules.
 - Status: accepted/implemented.
+
+## DEC-20261027-001 — Make evidence-resolution backlog a first-class Phase 1.5 artifact
+
+- Date: 2026-10-27.
+- Decision: do not manage Parking Universe completeness only through aggregate percentages.
+- Chosen approach: generate a durable, source-backed review queue on every deployment and surface its counts in the UI.
+- Rationale: Phase 1.5 needs an actionable list of unresolved access/rules/capacity/geometry/candidate work.
+- Rejected: treating browser-local candidate storage as a shared project queue.
+- Status: accepted/implemented.

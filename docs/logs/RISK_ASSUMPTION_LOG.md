@@ -176,3 +176,16 @@
 
 - Assumption: tracking official/open/access/rules/transport/retail/operator/EV/imagery source families is a useful way to identify material blind spots.
 - Validation: revise families when a new region/source class reveals a systematic gap.
+
+## RISK-20261027-001 — Evidence-review count could be mistaken for missing parking count
+
+- Date: 2026-10-27.
+- Risk: a large review queue could be misread as the number of undiscovered parking locations.
+- Impact: misleading completeness claims.
+- Mitigation: review items are explicitly described as evidence-resolution tasks for already deployed source-backed records; they are not a real-world completeness denominator.
+- Status: controlled.
+
+## ASM-20261027-001 — Source-backed unresolved assets should be retained
+
+- Assumption: when physical parking evidence exists but access/rules are unresolved, retaining the record as unresolved is safer and more useful than dropping it.
+- Validation path: resolve through official/operator/rule/field evidence before recommendation promotion.

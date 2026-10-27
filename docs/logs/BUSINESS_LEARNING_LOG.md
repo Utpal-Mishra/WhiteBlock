@@ -101,3 +101,11 @@
 - Learning: WHITEBLOCK's strategic value increases when the platform knows the parking landscape before commercial integration. Partner status should enrich an asset, not determine whether the asset is known.
 - Implication: Phase 1.5 is now an active programme with measurable source-family and evidence-resolution gaps.
 - Status: adopted.
+
+## BUS-20261027-001 — Parking coverage and commercial coverage must remain independent
+
+- Date: 2026-10-27.
+- Learning: a comprehensive parking product cannot depend on commercial partnerships to define its inventory.
+- Implication: WHITEBLOCK must preserve every source-backed asset/candidate independently, then let partnerships add booking, payment, verified rules or live data later.
+- Phase 1.5 action: canonical states now explicitly separate physical existence, recommendation eligibility, live-data state and partnership state.
+- Status: implemented in Phase 1.5 tranche 1.

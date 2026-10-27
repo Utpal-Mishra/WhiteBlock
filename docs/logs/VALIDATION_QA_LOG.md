@@ -261,3 +261,15 @@
 - Tests cover snapshot de-duplication, capacity zero as known capacity, unknown access handling, retail classification, source-family integrated/ready/gap states and readiness-score bounds.
 - Deployment validates connected region set, non-empty deployed asset population and completeness disclaimer.
 - Status: CI pending.
+
+## QA-20261027-001 — Phase 1.5 core validation
+
+- Date: 2026-10-27.
+- Added regression coverage for:
+  - source-backed candidate counting;
+  - unknown-access review prioritisation;
+  - report/review-queue total consistency;
+  - existence of canonical physical/recommendation/partnership/live-data states;
+  - partner capability table and coverage-class field.
+- Deployment validation additionally requires the review queue to contain the same connected-region set as the coverage report.
+- Status: tests authored; CI pending.

@@ -150,3 +150,12 @@
 - Architecture: source registry → regional source ingestion/staging → canonical reconciliation → evidence/access/rules resolution → recommendation eligibility → partnership enrichment.
 - Deployment report is derived from current source-backed snapshots and never creates parking records.
 - Status: accepted/implemented.
+
+## ARCH-20261027-001 — Parking Universe identity is independent from recommendation and partnership
+
+- Date: 2026-10-27.
+- Decision: `WB-PARK-*` remains the durable asset identity regardless of whether an asset is currently recommendable or partnered.
+- Added state dimensions: `physical_status`, `recommendation_status`, `partnership_status`, `live_data_status`, `coverage_classes`.
+- Added relationship table: `parking_partner_capability` enriches an existing canonical parking record with booking/payment/live/session capabilities.
+- Consequence: partnership creation/removal cannot create/delete the underlying parking identity.
+- Status: accepted and implemented.

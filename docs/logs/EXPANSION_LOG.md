@@ -91,3 +91,11 @@
 - Galway City official structured parking data has been added to the registry as a future-region ready source, but Galway is not yet a connected WHITEBLOCK region.
 - Expansion rule: new counties reuse the Parking Universe source registry/report rather than bespoke completeness claims.
 - Status: implemented.
+
+## EXPAND-20261027-001 — Phase 1.5 coverage workflow begins with current four counties
+
+- Date: 2026-10-27.
+- Initial geography: Cork, Kildare, Dublin and Wicklow, with Bray retained as a Wicklow locality/source.
+- Expansion rule: new counties must use the same source-family assessment, canonical state separation and evidence-review queue.
+- Gate: county partnership-readiness requires material source families and geographic gaps to be assessed, with unresolved assets retained explicitly.
+- Status: active.

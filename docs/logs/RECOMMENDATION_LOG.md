@@ -115,3 +115,11 @@
 - First ready queue: Dublin City multistorey inventory/live feed, Dublin accessible parking, Dublin City parking meters, South Dublin parking meters and DLR parking runs.
 - Parallel priority: resolve access/max-stay/customer restrictions for known physical parking.
 - Status: adopted.
+
+## REC-20261027-001 — Resolve access before optimising lower-risk metadata gaps
+
+- Date: 2026-10-27.
+- Recommendation: Phase 1.5 review work should prioritise unknown legal/customer/private access above missing capacity or polygon geometry.
+- Rationale: access uncertainty directly affects whether WHITEBLOCK may safely recommend an asset for a driver's stay.
+- Operationalisation: shared review queue weights unknown access more heavily than missing capacity/geometry.
+- Status: adopted.

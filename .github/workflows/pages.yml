@@ -22,6 +22,8 @@ on:
       - "scripts/ingest_dublin_county_parking_stable.py"
       - "scripts/build_dublin_coverage_ledger.py"
       - "scripts/apply_imagery_review_evidence.py"
+      - "scripts/build_parking_universe_coverage.py"
+      - "config/parking_universe_sources.json"
       - "config/imagery_review_evidence.json"
       - ".github/workflows/pages.yml"
   schedule:
@@ -251,7 +253,8 @@ jobs:
           python scripts/build_parking_universe_coverage.py \
             --config config/parking_universe_sources.json \
             --snapshot-dir web/data \
-            --output web/data/parking_universe_coverage.json
+            --output web/data/parking_universe_coverage.json \
+            --review-output web/data/parking_universe_review_queue.json
           python - <<'PY'
           import json
           from pathlib import Path
@@ -264,7 +267,19 @@ jobs:
               raise SystemExit("Parking Universe report lost its completeness guardrail")
           if int(report.get("known_assets_across_deployed_snapshots") or 0) <= 0:
               raise SystemExit("Parking Universe report contains no deployed parking assets")
-          print("Phase 1.5 Parking Universe coverage report validated:", report["known_assets_across_deployed_snapshots"], "assets")
+          review_path = Path("web/data/parking_universe_review_queue.json")
+          if not review_path.exists():
+              raise SystemExit("Parking Universe review queue was not generated")
+          review = json.loads(review_path.read_text())
+          if set(review.get("regions", {})) != expected:
+              raise SystemExit("Parking Universe review queue region set mismatch")
+          if int(report.get("evidence_review", {}).get("items") or 0) != int(review.get("review_items") or 0):
+              raise SystemExit("Parking Universe report/review queue totals disagree")
+          print(
+              "Phase 1.5 Parking Universe coverage report validated:",
+              report["known_assets_across_deployed_snapshots"], "assets /",
+              review["review_items"], "evidence-review tasks"
+          )
           PY
 
       - name: Validate regional snapshots

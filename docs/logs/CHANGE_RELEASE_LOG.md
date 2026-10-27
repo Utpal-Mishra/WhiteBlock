@@ -201,3 +201,11 @@
 - Branch: `phase-1-5/parking-universe-foundation-2026-10-27`.
 - Added: source registry, coverage builder, deploy validation, Discover coverage UI, operating-model documentation and tests.
 - Release state: branch implementation; CI/merge/deployment pending.
+
+## CHANGE-20261027-001 — Start Phase 1.5 Parking Universe core
+
+- Date: 2026-10-27.
+- Branch: `phase1.5/parking-universe-core-2026-10-27`.
+- Added: Parking Universe state migration, partner-capability enrichment table, deploy-time evidence-review queue, aggregate review metrics, UI review workload and regression tests.
+- Workflow: Pages build now publishes and validates both the coverage report and evidence-review queue.
+- Release state: feature branch; CI/merge/deployment pending.
