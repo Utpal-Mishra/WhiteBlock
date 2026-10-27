@@ -215,3 +215,21 @@ A geography is partnership-ready only when:
 - the remaining uncertainty is documented.
 
 Partnerships then enrich the existing parking universe with booking, payment, trusted live data, verified rules and commercial access instead of defining basic coverage.
+
+## Implementation tranche 1 — canonical state + shared review queue
+
+Started 2026-10-27.
+
+The first operational tranche moves Phase 1.5 beyond a coverage dashboard:
+
+- `db/migrations/006_parking_universe_states.sql` separates physical state, recommendation state, partnership state and live-data state on canonical parking assets.
+- `parking_partner_capability` attaches future booking/payment/live/session capabilities to an existing `WB-PARK-*` asset rather than creating a second commercial identity.
+- The deploy-time builder emits `web/data/parking_universe_review_queue.json`.
+- Review items are derived from source-backed deployed records with unresolved coordinates, access, rules, capacity, polygon geometry or explicit candidate/unverified state.
+- Review priority is operational only; it does not change canonical truth or recommendation eligibility.
+- Browser-local user proposals remain separate from the shared deployment queue until a write-backed review service exists.
+
+The operating loop is now:
+
+`discover → retain → reconcile → review evidence gaps → classify → recommend when eligible → enrich through partnership later`.
+
