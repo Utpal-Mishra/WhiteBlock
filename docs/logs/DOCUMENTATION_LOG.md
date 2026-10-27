@@ -66,3 +66,10 @@
 - Added `docs/PARKING_UNIVERSE_COVERAGE.md`.
 - Updated `docs/DATA_SOURCES.md` and roadmap to mark Phase 1.5 ACTIVE and connect the machine-readable source registry.
 - Status: complete for foundation slice.
+
+## DOC-20261027-001 — Phase 1.5 implementation status expanded
+
+- Date: 2026-10-27.
+- Updated: `docs/ROADMAP.md` and `docs/PARKING_UNIVERSE_COVERAGE.md`.
+- Documented: canonical state separation, partner enrichment boundary, shared evidence-review artifact and Phase 1.5 operating loop.
+- Status: complete for tranche 1.
