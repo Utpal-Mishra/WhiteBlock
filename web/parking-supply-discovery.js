@@ -90,7 +90,33 @@
       if (!reportResponse.ok) throw new Error(`discovery report HTTP ${reportResponse.status}`);
       const report = await reportResponse.json();
       const changes = changeResponse.ok ? await changeResponse.json() : { status: "unavailable", summary: {} };
+
+      state.phase4SupplyCandidates = (report.candidates || []).map(candidate => {
+        const evidence = (candidate.evidence || [])[0] || {};
+        const confidence = Number(evidence.confidence);
+        return {
+          id: candidate.candidate_id,
+          name: candidate.name || "Parking supply candidate",
+          area: candidate.region || report.pilot_region || "Cork",
+          lat: Number(candidate.centroid?.latitude),
+          lng: Number(candidate.centroid?.longitude),
+          accessType: "unknown",
+          capacity: Number.isFinite(Number(candidate.estimated_capacity)) ? Number(candidate.estimated_capacity) : null,
+          available: null,
+          confidence: Number.isFinite(confidence) ? Math.round(confidence * 100) : null,
+          sourceKey: evidence.source_key || "phase4_candidate_registry",
+          truthState: candidate.truth_state || "inferred",
+          networkRole: "imagery_candidate",
+          candidateState: candidate.candidate_state,
+          phase4Candidate: true,
+          recommendationEligible: false
+        };
+      });
+
       render(report, changes);
+      document.dispatchEvent(new CustomEvent("whiteblock:phase4-candidates-ready", {
+        detail: { candidates: state.phase4SupplyCandidates.length }
+      }));
     } catch (error) {
       console.warn("WHITEBLOCK Phase 4 discovery status unavailable", error);
       host.innerHTML = '<div class="surface universe-empty">Phase 4 discovery status will appear after the next data build.</div>';
