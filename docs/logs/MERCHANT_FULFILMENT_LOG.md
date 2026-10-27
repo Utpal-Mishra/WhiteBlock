@@ -39,3 +39,11 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Capability fields: booking, payment, live occupancy, session management and partner-specific access support.
 - Business rule: a partner relationship enriches a parking asset; it does not define whether the physical parking exists in WHITEBLOCK.
 - Status: schema foundation implemented; no live partner integration activated.
+
+## MERCH-20261027-002 — Phase 2 remains operator-neutral
+
+- Date: 2026-10-27.
+- Impact: no payment, booking or merchant fulfilment capability added.
+- Price UX: published operator/source tariff evidence is shown; WHITEBLOCK only derives a conservative requested-session estimate where safe.
+- Future fit: operator APIs can later replace/augment tariff evidence and payment hand-off without changing the Phase 2 result contract.
+- Status: no merchant dependency.
