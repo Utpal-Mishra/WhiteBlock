@@ -181,3 +181,12 @@
 - Driver-facing behaviour: Best Overall explanation states that unknown ranking factors receive no ranking credit.
 - Existing Phase 2 capabilities remain unchanged: destination/stay controls, closest/lowest-cost/best modes, EV/accessibility constraints, session fit, walk/cost estimates, evidence metadata and excluded-option transparency.
 - Status: Phase 2 fully closed after audit.
+
+## PROD-20261027-003 — Future-arrival historical availability annotation
+
+- Date: 2026-10-27.
+- Find behavior: when the selected arrival is at least 20 minutes in the future and sufficient history exists, a recommendation card can show historically free spaces, empirical chance of at least one space, supporting sample count, bucket method and history-strength indicator.
+- Network behavior: the former forecast card reports actual Phase 3 history/baseline coverage instead of presenting an unsupported forecast.
+- Guardrail: the card explicitly states that the experimental baseline is not yet used to rank.
+- Cold-start behavior: insufficient history shows no forecast value.
+- Status: implemented on Phase 3 branch.
