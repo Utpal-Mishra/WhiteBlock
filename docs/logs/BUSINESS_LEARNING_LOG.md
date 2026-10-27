@@ -94,3 +94,10 @@
 - Learning: WHITEBLOCK's strategic value increases when the platform knows the parking landscape before commercial integration. Partner status should enrich an asset, not determine whether the asset is known.
 - Implication: Phase 1.5 is now an active programme with measurable source-family and evidence-resolution gaps.
 - Status: adopted.
+
+## BUS-20261027-001 — Parking-universe coverage is an asset independent of partnerships
+
+- Date: 2026-10-27.
+- Learning: WHITEBLOCK's strategic value increases when the platform knows the parking landscape before commercial integration. Partner status should enrich an asset, not determine whether the asset is known.
+- Implication: Phase 1.5 is now an active programme with measurable source-family and evidence-resolution gaps.
+- Status: adopted.
