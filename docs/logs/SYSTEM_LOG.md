@@ -151,3 +151,11 @@
 - Cheapest mode: safely calculable session totals rank first; ambiguous/unpublished tariffs are not assigned fabricated totals.
 - Result cards: source, freshness, truth state and per-result ranking explanation are rendered alongside walk/cost/confidence.
 - Status: implemented.
+
+## SYS-20261027-002 — Evidence-only Best Overall ranking
+
+- Date: 2026-10-27.
+- Change: Phase 2 ranking now computes positive score contributions only from known destination distance, reported availability, published confidence and safely comparable session cost.
+- Unknown availability/confidence/cost contributes zero positive ranking credit rather than a placeholder numeric value.
+- Rule-risk penalties remain applied independently.
+- Status: implemented.
