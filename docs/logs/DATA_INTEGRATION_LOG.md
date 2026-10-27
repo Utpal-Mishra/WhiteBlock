@@ -133,3 +133,13 @@
 - Initial Dublin ready queue includes official multistorey/live, accessible and meter/run datasets.
 - Data rule: the registry records source opportunity/status only; it does not promote records into canonical inventory.
 - Status: implemented.
+
+## DATA-20261027-001 — Parking Universe state separation and shared review artifact
+
+- Date: 2026-10-27.
+- Migration: `006_parking_universe_states.sql`.
+- Canonical additions: physical/recommendation/partnership/live-data states plus multi-valued coverage classes.
+- Partnership data: `parking_partner_capability` links commercial capabilities to an existing canonical parking ID.
+- Deployment artifact: `parking_universe_review_queue.json` contains source-backed records requiring evidence resolution.
+- No data fabrication: missing fields remain unresolved; queue generation does not infer access, capacity, rules or public eligibility.
+- Status: implemented.
