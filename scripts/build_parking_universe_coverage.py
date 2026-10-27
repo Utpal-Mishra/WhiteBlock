@@ -209,6 +209,34 @@ def percentage(count: int, total: int) -> float | None:
     return round(100.0 * count / total, 1)
 
 
+def source_key_progress(config: Mapping[str, Any], region: str) -> Dict[str, Any]:
+    region_cfg = (config.get("regions") or {}).get(region) or {}
+    sources = config.get("sources") or {}
+    integrated_keys = [
+        key for key in (region_cfg.get("integrated_source_keys") or [])
+        if key in sources
+    ]
+    ready_keys = [
+        key for key in (region_cfg.get("ready_to_integrate") or [])
+        if key in sources
+    ]
+    return {
+        "integrated_count": len(integrated_keys),
+        "ready_to_integrate_count": len(ready_keys),
+        "integrated_source_keys": integrated_keys,
+        "ready_to_integrate_source_keys": ready_keys,
+        "ready_to_integrate_sources": [
+            {
+                "source_key": key,
+                "publisher": sources[key].get("publisher"),
+                "family": sources[key].get("family"),
+                "role": sources[key].get("role") or [],
+            }
+            for key in ready_keys
+        ],
+    }
+
+
 def source_family_status(config: Mapping[str, Any], region: str) -> Dict[str, str]:
     required = list(config.get("required_source_families") or [])
     region_cfg = (config.get("regions") or {}).get(region) or {}
@@ -287,6 +315,7 @@ def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) ->
             recommendation_eligible_evidence += 1
 
     statuses = source_family_status(config, region)
+    source_progress = source_key_progress(config, region)
     access_pct = percentage(access, total)
     capacity_pct = percentage(capacity, total)
     rules_pct = percentage(rules, total)
@@ -313,6 +342,7 @@ def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) ->
             "ev_evidence": {"count": ev, "percent": percentage(ev, total)},
         },
         "asset_class_counts": dict(sorted(classes.items())),
+        "source_key_progress": source_progress,
         "source_family_status": statuses,
         "source_family_summary": {
             "integrated": sum(1 for value in statuses.values() if value == "integrated"),
