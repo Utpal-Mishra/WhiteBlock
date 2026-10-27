@@ -99,3 +99,10 @@
 - Expansion rule: new counties must use the same source-family assessment, canonical state separation and evidence-review queue.
 - Gate: county partnership-readiness requires material source families and geographic gaps to be assessed, with unresolved assets retained explicitly.
 - Status: active.
+
+## EXPAND-20261027-002 — Phase 2 decision contract is region-independent
+
+- Date: 2026-10-27.
+- Expansion rule: every new region should populate the same destination-result fields (coordinates, rules, pricing evidence, source/freshness/confidence) so the Phase 2 driver experience works without county-specific UI.
+- Missing fields remain explicit unknowns; regional rollout does not require fabricated defaults.
+- Status: adopted.
