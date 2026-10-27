@@ -190,3 +190,10 @@
 - Guardrail: the card explicitly states that the experimental baseline is not yet used to rank.
 - Cold-start behavior: insufficient history shows no forecast value.
 - Status: implemented on Phase 3 branch.
+## PROD-20261027-004 — Discover · Phase 4 Parking Supply Discovery
+
+- Date: 2026-10-27.
+- Discover now exposes candidate/review workload, known assets available for cross-match, automated-detection adapter status and imagery-change review status.
+- Driver-facing recommendations remain unchanged.
+- Product language explicitly states that candidate items are not recommendable parking and visual change does not equal a verified opening/closure.
+- Status: implemented on Phase 4 branch.
