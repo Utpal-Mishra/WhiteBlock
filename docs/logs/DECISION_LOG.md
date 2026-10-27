@@ -141,3 +141,11 @@
 - Reason: parking discovery work must be measurable before large-scale source ingestion; otherwise “complete coverage” becomes an untestable claim.
 - Next decision boundary: integrate official ready sources and reconcile them into canonical identities without weakening existing evidence/access rules.
 - Status: accepted/implemented.
+
+## DEC-20261027-002 — First Phase 1.5 source integration stays outside Find
+
+- Date: 2026-10-27.
+- Decision: ingest DCC accessible spaces and parking-meter locations into the Parking Universe evidence tier, not the normal driver recommendation inventory.
+- Reason: accessible spaces require entitlement handling; a parking meter is evidence of controlled parking, not an exact bay.
+- Promotion rule: only canonical reconciliation plus access/rule evidence can move these records toward recommendation eligibility.
+- Status: accepted/implemented.
