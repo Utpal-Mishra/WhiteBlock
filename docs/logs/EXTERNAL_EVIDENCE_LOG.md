@@ -112,3 +112,11 @@
 - Licences: the referenced data.gov.ie records are published under CC BY 4.0; OpenStreetMap remains ODbL.
 - Important source caveats are retained, including Kildare accessible parking not representing all accessible spaces and Dublin accessible parking being a living dataset affected by temporary road/event changes.
 - Status: recorded in `config/parking_universe_sources.json`.
+
+## EXT-20261027-001 — Phase 1.5 review queue uses only deployed source-backed evidence
+
+- Date: 2026-10-27.
+- Evidence basis: current Cork, Kildare, Dublin, Wicklow/Bray deployment snapshots plus the registered source-family programme.
+- Exclusion: browser-local user proposals are not counted as shared deployed candidates.
+- Reason: localStorage is device-specific and cannot be treated as a durable multi-user evidence source.
+- Status: evidence boundary established.
