@@ -128,3 +128,10 @@
 - No new external claim source is introduced by the UI completion.
 - Display rule: observation timestamp takes precedence; otherwise source retrieval timestamp is shown; if neither is published, freshness remains explicitly unknown.
 - Status: evidence contract implemented.
+
+## EXT-20261027-002 — Phase 2 completion audit used repository implementation evidence
+
+- Date: 2026-10-27.
+- Evidence reviewed: roadmap, session-rule engine, destination focus, result-card rendering, filters, cost logic, evidence metadata and regression tests.
+- Conclusion: no external source was required for the Phase 2 completion audit; the only gap identified was internal ranking semantics.
+- Status: recorded.

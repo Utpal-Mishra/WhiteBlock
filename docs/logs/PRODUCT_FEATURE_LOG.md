@@ -174,3 +174,10 @@
   - ineligible-option transparency.
 - Phase boundary: navigation/session reminders/operator hand-off remain trip-execution work, not Phase 2 blockers.
 - Status: complete.
+
+## PROD-20261027-002 — Phase 2 ranking explanation now identifies missing evidence
+
+- Date: 2026-10-27.
+- Driver-facing behaviour: Best Overall explanation states that unknown ranking factors receive no ranking credit.
+- Existing Phase 2 capabilities remain unchanged: destination/stay controls, closest/lowest-cost/best modes, EV/accessibility constraints, session fit, walk/cost estimates, evidence metadata and excluded-option transparency.
+- Status: Phase 2 fully closed after audit.

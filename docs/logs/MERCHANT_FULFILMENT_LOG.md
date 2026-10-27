@@ -47,3 +47,10 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Price UX: published operator/source tariff evidence is shown; WHITEBLOCK only derives a conservative requested-session estimate where safe.
 - Future fit: operator APIs can later replace/augment tariff evidence and payment hand-off without changing the Phase 2 result contract.
 - Status: no merchant dependency.
+
+## MERCH-20261027-002 — Phase 2 audit does not introduce payment/operator dependency
+
+- Date: 2026-10-27.
+- Impact: none on merchants, payments, booking or fulfilment.
+- Boundary retained: native payment/session hand-off remains outside Phase 2 and belongs to later trip-execution/commercial integration work.
+- Status: no action required.

@@ -80,3 +80,11 @@
 - Updated: `docs/ROADMAP.md`.
 - Clarified: Phase 2 completion criteria, conservative cost-estimation guardrail and boundary between parking decision and later trip-execution capabilities.
 - Status: complete.
+
+## DOC-20261027-002 — Phase 2 marked complete after re-audit
+
+- Date: 2026-10-27.
+- Updated: `docs/ROADMAP.md`.
+- Clarified: Phase 2 is complete and re-audited; evidence-only ranking removes the last hidden scoring assumption.
+- Phase boundary remains unchanged for trip-execution capabilities.
+- Status: updated.

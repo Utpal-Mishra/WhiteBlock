@@ -131,3 +131,10 @@
 - Adopted rule: compare only safely calculable session totals; unresolved tariff structures remain visible but are not treated as numeric.
 - Best-overall: retain availability/distance/confidence/rule-risk weighting and incorporate safely calculable session cost.
 - Status: adopted.
+
+## REC-20261027-002 — Rank on known evidence, not neutral placeholders
+
+- Date: 2026-10-27.
+- Recommendation: unknown availability, unknown confidence and unsafe/non-comparable pricing should receive no positive ranking credit.
+- Rationale: a neutral-looking placeholder can still materially change ordering and imply evidence that does not exist.
+- Status: adopted.

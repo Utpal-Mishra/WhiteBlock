@@ -125,3 +125,11 @@
 - Automated effects: re-evaluate session eligibility, recalculate walking/session-cost factors, re-rank results and refresh explanations.
 - Safety: ambiguous pricing stays non-comparable instead of receiving an inferred numeric cost.
 - Status: implemented.
+
+## AUTO-20261027-002 — Automatic exclusion of unknown factors from ranking credit
+
+- Date: 2026-10-27.
+- Automation: every ranking pass now checks evidence availability before applying factor weights.
+- No manual region-specific handling is required.
+- Scope: all current and future regions using the shared Phase 2 session/ranking engine.
+- Status: implemented.

@@ -198,3 +198,11 @@
 - Mitigation: compute only from explicit free or unambiguous single hourly-rate tariffs; display complex tariff text without a numeric total.
 - Residual risk: simple hourly estimates may differ from real operator billing increments/caps, so the UI labels them approximate and preserves the source tariff.
 - Status: mitigated.
+
+## RISK-20261027-002 — Hidden placeholder values can bias Best Overall ranking
+
+- Date: 2026-10-27.
+- Risk: missing availability or price evidence could improve a parking option's score through hard-coded defaults.
+- Impact: recommendation order could imply unsupported knowledge.
+- Mitigation: explicit evidence-state check; unknown factors now earn zero positive score and are disclosed in the ranking explanation.
+- Status: mitigated.

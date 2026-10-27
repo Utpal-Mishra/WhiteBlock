@@ -106,3 +106,10 @@
 - Expansion rule: every new region should populate the same destination-result fields (coordinates, rules, pricing evidence, source/freshness/confidence) so the Phase 2 driver experience works without county-specific UI.
 - Missing fields remain explicit unknowns; regional rollout does not require fabricated defaults.
 - Status: adopted.
+
+## EXPAND-20261027-002 — Evidence-only Phase 2 ranking applies universally
+
+- Date: 2026-10-27.
+- Expansion rule: every newly connected county inherits the same no-placeholder ranking semantics automatically.
+- No county-specific scoring defaults are permitted.
+- Status: adopted.

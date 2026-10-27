@@ -300,3 +300,14 @@
 - Python test suite including Phase 2 cost/explanation/evidence assertions: PASS.
 - Merge commit: `d7fcabbaed320d85a331708c2e5aa943cebdd6d3`.
 - Pages run #315: regional rebuild in progress at the time of validation logging.
+
+## QA-20261027-002 — Phase 2 completion audit regression
+
+- Date: 2026-10-27.
+- Validation coverage:
+  - Phase 2 session/cost/ranking/evidence contracts remain present;
+  - `rankingEvidence` is required;
+  - hidden 0.3 availability fallback is forbidden;
+  - hidden 0.4 cost fallback is forbidden;
+  - ranking explanation must disclose that missing factors receive no credit.
+- Status: tests updated; CI pending.

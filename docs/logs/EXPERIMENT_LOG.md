@@ -122,3 +122,12 @@
 - UX result: cards distinguish estimated session cost from the original published tariff and show the calculation basis.
 - Evaluation target: preserve decision usefulness without creating false price precision.
 - Status: implemented.
+
+## EXP-20261027-002 — Phase 2 ranking-assumption audit
+
+- Date: 2026-10-27.
+- Audit: reviewed destination search, session rules, filters, cost estimation, walk estimates, evidence display and ranking.
+- Finding: all Phase 2 deliverables were integrated; one hidden scoring assumption remained.
+- Previous behaviour: unknown availability used a 0.3 score surrogate and non-comparable cost used a 0.4 surrogate.
+- New behaviour: unknown factors receive no positive contribution; explanation explicitly states which factors were unavailable.
+- Status: resolved.
