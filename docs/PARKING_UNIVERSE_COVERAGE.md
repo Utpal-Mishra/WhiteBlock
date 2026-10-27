@@ -215,3 +215,52 @@ A geography is partnership-ready only when:
 - the remaining uncertainty is documented.
 
 Partnerships then enrich the existing parking universe with booking, payment, trusted live data, verified rules and commercial access instead of defining basic coverage.
+
+## First integrated Phase 1.5 evidence slice — Dublin
+
+The first source-integration slice adds two official Dublin City Council evidence sources during deployment:
+
+### Accessible parking spaces
+
+Source-reported accessible bays are stored in the Phase 1.5 evidence sidecar as exact parking-space evidence.
+
+They are **not** placed into the normal Find recommendation pool yet because:
+
+- use depends on Disabled Person's Parking Card entitlement;
+- the source warns that bays may be suspended or relocated because of road works, development projects and events;
+- entitlement-aware recommendation behaviour must be explicit before these spaces can be offered as a normal recommendation.
+
+### Parking-meter locations
+
+Official Dublin parking-meter coordinates are stored as **on-street controlled-parking evidence anchors**.
+
+A parking meter is not treated as:
+
+- one parking bay;
+- one canonical `WB-PARK-*` asset;
+- proof that a specific nearby space is currently available;
+- proof of unrestricted public access.
+
+Meter evidence can later support street/zone reconciliation, tariffs, controlled-parking areas and canonical on-street parking runs.
+
+### Evidence sidecar
+
+Deployment artifact:
+
+`web/data/dublin_parking_universe_evidence.json`
+
+The sidecar is deliberately separate from the driver inventory.
+
+The Parking Universe dashboard reports:
+
+- canonical known assets; and
+- additional official source-evidence records awaiting reconciliation/eligibility resolution.
+
+This prevents Phase 1.5 coverage work from inflating canonical parking totals or weakening recommendation safety.
+
+## Deployment resilience
+
+Dublin venue-discovery knowledge is supplementary to the canonical parking inventory. If its Overpass source times out during a Pages fallback rebuild, the deployment may publish a clearly degraded venue sidecar while preserving the validated Dublin parking snapshot, settlement ledger and restriction audit.
+
+The stricter independent Dublin validation workflow remains free to require complete venue discovery before publishing its reusable validation artifact.
+

@@ -104,3 +104,11 @@
 - Guardrail: score is explicitly prohibited from being described as percent of all real-world parking.
 - Evaluation: use score movement to measure effect of each source integration and evidence-cleanup batch.
 - Status: implemented for measurement.
+
+## EXP-20261027-002 — Evidence-tier ingestion without recommendation leakage
+
+- Date: 2026-10-27.
+- Experiment: add official source records to Phase 1.5 while enforcing `recommendation_eligible=false`.
+- Test cases: accessible bay is exact source-reported parking but entitlement-sensitive; meter is a parking-context anchor rather than a bay.
+- Success criterion: coverage report gains evidence records while canonical asset count and Find eligibility remain unchanged.
+- Status: automated tests implemented.

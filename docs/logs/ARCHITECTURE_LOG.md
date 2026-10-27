@@ -150,3 +150,11 @@
 - Architecture: source registry → regional source ingestion/staging → canonical reconciliation → evidence/access/rules resolution → recommendation eligibility → partnership enrichment.
 - Deployment report is derived from current source-backed snapshots and never creates parking records.
 - Status: accepted/implemented.
+
+## ARCH-20261027-002 — Introduce a non-canonical source-evidence tier
+
+- Date: 2026-10-27.
+- Decision: Phase 1.5 needs a tier between raw external source and canonical `WB-PARK-*` inventory for useful but not yet safely recommendable records.
+- First use: Dublin accessible spaces and parking-meter anchors.
+- Invariant: source-evidence records cannot enter Find merely because they have coordinates; reconciliation/access/rule logic must explicitly promote them.
+- Status: accepted/implemented.

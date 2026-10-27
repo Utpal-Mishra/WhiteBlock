@@ -45,3 +45,35 @@
   .universe-summary-number { min-width:0; text-align:left; }
   .universe-resolution-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+
+
+.universe-summary-metrics { display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap; }
+.universe-summary-evidence strong { color:var(--green); }
+.universe-evidence-stat {
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin:-3px 0 12px;
+  padding:8px 10px;
+  border:1px solid rgba(120,230,170,.18);
+  border-radius:10px;
+  background:rgba(120,230,170,.035);
+}
+.universe-evidence-stat strong { color:var(--green); font:800 16px/1 var(--font-display); }
+.universe-evidence-stat span { color:var(--muted); font-size:9px; line-height:1.35; }
+
+@media (max-width:520px) {
+  .universe-summary-metrics { align-items:flex-start; }
+}
+
+
+.universe-ready-sources {
+  display:grid;
+  gap:5px;
+  margin:8px 0 10px;
+  padding:9px 10px;
+  border-left:2px solid rgba(120,230,170,.35);
+  background:rgba(120,230,170,.025);
+}
+.universe-ready-sources small { color:var(--muted); font-size:8px; text-transform:uppercase; letter-spacing:.08em; }
+.universe-ready-sources span { color:var(--text); font-size:9px; line-height:1.3; }

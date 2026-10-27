@@ -132,8 +132,13 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn('parking-universe.js?v=20261027-1', html)
         self.assertIn("./data/parking_universe_coverage.json", js)
         self.assertIn("programme_readiness_score", js)
+        self.assertIn("universe_evidence_records", js)
+        self.assertIn("ready_to_integrate_sources", js)
+        self.assertIn("specific sources ready next", js)
+        self.assertIn("source evidence records not yet canonical/recommendable", js)
         self.assertIn("not literal real-world completeness", js)
         self.assertIn(".universe-region-grid", css)
+        self.assertIn(".universe-evidence-stat", css)
 
     def test_mobile_alignment_contracts(self):
         discover_css = (WEB / "discover.css").read_text(encoding="utf-8")

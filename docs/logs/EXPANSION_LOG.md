@@ -91,3 +91,10 @@
 - Galway City official structured parking data has been added to the registry as a future-region ready source, but Galway is not yet a connected WHITEBLOCK region.
 - Expansion rule: new counties reuse the Parking Universe source registry/report rather than bespoke completeness claims.
 - Status: implemented.
+
+## EXPAND-20261027-002 — Evidence-tier contract is reusable for new counties
+
+- Date: 2026-10-27.
+- Expansion rule: future county sources that indicate parking but are not safe one-to-one canonical assets may enter the same non-recommendable evidence tier.
+- Examples: meter anchors, accessible-space inventories requiring entitlement, imagery candidates and venue-associated customer parking.
+- Status: adopted.

@@ -66,3 +66,10 @@
 - Added `docs/PARKING_UNIVERSE_COVERAGE.md`.
 - Updated `docs/DATA_SOURCES.md` and roadmap to mark Phase 1.5 ACTIVE and connect the machine-readable source registry.
 - Status: complete for foundation slice.
+
+## DOC-20261027-002 — Document official Dublin Phase 1.5 evidence tier
+
+- Date: 2026-10-27.
+- Updated `docs/PARKING_UNIVERSE_COVERAGE.md` and `docs/DATA_SOURCES.md`.
+- Clarified accessible-space entitlement, meter-anchor semantics, canonical promotion boundary and degraded venue-sidecar deployment behaviour.
+- Status: complete for this source slice.

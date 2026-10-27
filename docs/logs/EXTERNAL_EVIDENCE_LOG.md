@@ -112,3 +112,12 @@
 - Licences: the referenced data.gov.ie records are published under CC BY 4.0; OpenStreetMap remains ODbL.
 - Important source caveats are retained, including Kildare accessible parking not representing all accessible spaces and Dublin accessible parking being a living dataset affected by temporary road/event changes.
 - Status: recorded in `config/parking_universe_sources.json`.
+
+## EXT-20261027-002 — DCC accessible bays and parking meters selected for first ingestion
+
+- Date: 2026-10-27.
+- Accessible source: Dublin City Council Accessible Parking Spaces; roughly 501 general accessible spaces are described, with a living-dataset warning about temporary relocation/suspension.
+- Meter source: Dublin City Council Parking Meter Locations, updated in 2025; fields include terminal code, zone description, address and WGS84 latitude/longitude.
+- Licence: Creative Commons Attribution.
+- Interpretation: accessible records are entitlement-sensitive spaces; meters are controlled-parking evidence anchors, not one-to-one parking bays.
+- Status: integrated into the Phase 1.5 evidence pipeline.

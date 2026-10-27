@@ -265,3 +265,14 @@ Every Pages build converts the registry plus deployed parking snapshots into `we
 
 Source-family progress is an operational work metric only. It is not a claim that every real-world parking asset has been discovered.
 
+## 12. First Phase 1.5 official Dublin evidence integration
+
+The deployment now attempts to acquire two Dublin City Council sources for the Parking Universe evidence layer:
+
+- Accessible Parking Spaces DCC — exact source-reported accessible spaces, retained as entitlement-sensitive non-recommendable evidence until accessibility/parking-card eligibility is handled explicitly.
+- Parking Meter Locations DCC — current meter coordinates used as controlled-parking evidence anchors. A meter is not treated as a parking bay or canonical asset.
+
+Both remain separate from the normal driver inventory until canonical reconciliation and access/rule verification support promotion.
+
+Source failure is isolated: the deployment can reuse the last published Phase 1.5 sidecar or continue without the optional evidence file rather than fabricate records.
+

@@ -37,6 +37,7 @@
 
   function regionCard(region) {
     const summary = region.source_family_summary || {};
+    const sourceKeys = region.source_key_progress || {};
     const resolution = region.resolution || {};
     const gaps = Object.entries(region.source_family_status || {})
       .filter(([, status]) => status !== "integrated")
@@ -53,8 +54,13 @@
         </div>
         <div class="universe-main-stat">
           <strong>${integer(region.known_assets)}</strong>
-          <span>known mapped/evidence-backed assets</span>
+          <span>canonical mapped/evidence-backed assets</span>
         </div>
+        ${Number(region.universe_evidence_records || 0) > 0 ? `
+          <div class="universe-evidence-stat">
+            <strong>+${integer(region.universe_evidence_records)}</strong>
+            <span>official Phase 1.5 evidence records awaiting reconciliation / eligibility resolution</span>
+          </div>` : ""}
         <div class="universe-resolution-grid">
           <span><small>Access resolved</small><b>${pct(resolution.access?.percent)}</b></span>
           <span><small>Capacity known</small><b>${pct(resolution.capacity?.percent)}</b></span>
@@ -63,9 +69,16 @@
         </div>
         <div class="universe-source-progress">
           <span><b>${integer(summary.integrated)}</b> source families integrated</span>
-          <span><b>${integer(summary.ready_to_integrate)}</b> ready next</span>
-          <span><b>${integer(summary.gaps)}</b> gaps</span>
+          <span><b>${integer(summary.gaps)}</b> family gaps</span>
+          <span><b>${integer(sourceKeys.ready_to_integrate_count || 0)}</b> specific sources ready next</span>
         </div>
+        ${Array.isArray(sourceKeys.ready_to_integrate_sources) && sourceKeys.ready_to_integrate_sources.length ? `
+          <div class="universe-ready-sources">
+            <small>Next structured sources</small>
+            ${sourceKeys.ready_to_integrate_sources.slice(0, 4).map(source => `
+              <span>${esc(source.publisher || source.source_key)} · ${esc(familyLabel(source.family))}</span>
+            `).join("")}
+          </div>` : ""}
         <div class="universe-gap-list">
           ${gaps.length ? gaps.map(([family, status]) => `
             <span class="universe-gap-tag ${esc(status)}">
@@ -93,9 +106,15 @@
           <h3>Parking Universe Coverage</h3>
           <p>Track the parking WHITEBLOCK already knows, the evidence fields still unresolved, and the source families that remain to be integrated before partnership-led expansion.</p>
         </div>
-        <div class="universe-summary-number">
-          <strong>${integer(report.known_assets_across_deployed_snapshots)}</strong>
-          <span>assets in current deployment snapshots</span>
+        <div class="universe-summary-metrics">
+          <div class="universe-summary-number">
+            <strong>${integer(report.known_assets_across_deployed_snapshots)}</strong>
+            <span>canonical assets in current deployment</span>
+          </div>
+          <div class="universe-summary-number universe-summary-evidence">
+            <strong>+${integer(report.universe_evidence_records_across_deployment || 0)}</strong>
+            <span>source evidence records not yet canonical/recommendable</span>
+          </div>
         </div>
       </div>
       <div class="universe-region-grid">

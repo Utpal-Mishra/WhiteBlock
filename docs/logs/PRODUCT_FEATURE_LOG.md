@@ -148,3 +148,10 @@
 - Displays per connected region: deployed known assets, access/capacity/rules/polygon resolution, integrated source families, ready-next sources and remaining gaps.
 - Product copy explicitly distinguishes programme progress from literal parking completeness.
 - Status: implemented on Phase 1.5 branch.
+
+## PROD-20261027-002 — Separate canonical assets from official evidence backlog
+
+- Date: 2026-10-27.
+- Parking Universe cards now display canonical assets and additional official evidence records as distinct numbers.
+- Reason: broaden source coverage without implying that every evidence anchor is an individually recommendable parking location.
+- Status: implemented.

@@ -97,3 +97,13 @@
   - mobile map height constrained the usable spatial canvas.
 - Corrective action: detailed collision fan-out, connector lines, null-availability guard and larger mobile map.
 - Status: implemented on feature branch; release validation pending.
+
+## INC-20261027-001 — Pages deployment blocked by supplementary Dublin venue timeout
+
+- Date: 2026-10-27.
+- Severity: medium.
+- Detection: first Phase 1.5 main deployment failed before the new coverage-report step.
+- Root cause: reusable Dublin validation artifact was unavailable; live Dublin parking rebuild succeeded, but `build_dublin_coverage_ledger.py` then made venue discovery a hard dependency and both Overpass endpoints timed out.
+- Impact: valid 9,420-location Dublin parking snapshot was not published even though the failure was in supplementary venue knowledge.
+- Correction: Pages fallback now uses `--venue-optional`, which preserves core parking/settlement/restriction evidence and emits a clearly degraded venue sidecar when venue discovery is unavailable. The dedicated Dublin validation workflow remains strict.
+- Status: fixed on Phase 1.5 Dublin evidence branch; CI/deployment validation pending.

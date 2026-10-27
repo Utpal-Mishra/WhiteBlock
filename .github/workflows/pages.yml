@@ -190,7 +190,10 @@ jobs:
 
           if [[ "${ARTIFACT_READY}" != "true" || ! -s web/data/dublin_parking_snapshot.json ]]; then
             python scripts/ingest_dublin_county_parking_stable.py --output web/data/dublin_parking_snapshot.json
-            python scripts/build_dublin_coverage_ledger.py --input web/data/dublin_parking_snapshot.json --output web/data/dublin_coverage_ledger.json
+            python scripts/build_dublin_coverage_ledger.py \
+              --input web/data/dublin_parking_snapshot.json \
+              --output web/data/dublin_coverage_ledger.json \
+              --venue-optional
           fi
 
           for required in \
@@ -245,6 +248,25 @@ jobs:
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/cork_county_parking_snapshot.json --region Cork
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/kildare_parking_snapshot.json --region Kildare
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/bray_parking_snapshot.json --region Bray
+
+      - name: Acquire official Dublin Phase 1.5 evidence
+        run: |
+          rm -f web/data/dublin_parking_universe_evidence.json
+          if timeout 100s python scripts/ingest_dublin_parking_universe_evidence.py \
+            --output web/data/dublin_parking_universe_evidence.json; then
+            echo "Official Dublin Phase 1.5 evidence refreshed"
+          else
+            echo "::warning::Official Dublin Phase 1.5 evidence refresh unavailable; attempting last published sidecar"
+            rm -f web/data/dublin_parking_universe_evidence.json
+            if curl --fail --silent --show-error --location --max-time 20 \
+              "https://utpal-mishra.github.io/WhiteBlock/data/dublin_parking_universe_evidence.json" \
+              --output web/data/dublin_parking_universe_evidence.json; then
+              echo "Reused last published Dublin Phase 1.5 evidence"
+            else
+              echo "::warning::No prior Dublin Phase 1.5 evidence sidecar available; core deployment will continue"
+              rm -f web/data/dublin_parking_universe_evidence.json
+            fi
+          fi
 
       - name: Build Phase 1.5 parking universe coverage report
         run: |
