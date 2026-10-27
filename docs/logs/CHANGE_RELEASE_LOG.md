@@ -201,3 +201,11 @@
 - Branch: `phase-1-5/parking-universe-foundation-2026-10-27`.
 - Added: source registry, coverage builder, deploy validation, Discover coverage UI, operating-model documentation and tests.
 - Release state: branch implementation; CI/merge/deployment pending.
+
+## CHANGE-20261027-002 — First official Phase 1.5 source ingestion
+
+- Date: 2026-10-27.
+- Branch: `phase-1-5/dublin-official-evidence-2026-10-27`.
+- Added: DCC accessible-space and parking-meter evidence ingestion, evidence-sidecar metrics/UI separation, tests and resilient Pages fallback for supplementary Dublin venue discovery.
+- Canonical driver inventory: unchanged by the new evidence records.
+- Release state: branch implementation; CI/merge/deployment pending.
