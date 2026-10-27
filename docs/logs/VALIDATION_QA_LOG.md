@@ -254,3 +254,10 @@
 - Full Python test suite: PASS.
 - GitHub Pages deployment #283: PASS, including Cork, Kildare, Dublin and Wicklow snapshot validation.
 - Status: deployed successfully; mobile visual re-check can now be performed against the live build.
+
+## QA-20261027-001 — Phase 1.5 coverage guardrails
+
+- Date: 2026-10-27.
+- Tests cover snapshot de-duplication, capacity zero as known capacity, unknown access handling, retail classification, source-family integrated/ready/gap states and readiness-score bounds.
+- Deployment validates connected region set, non-empty deployed asset population and completeness disclaimer.
+- Status: CI pending.
