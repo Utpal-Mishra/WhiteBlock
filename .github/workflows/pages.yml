@@ -8,7 +8,7 @@ on:
       - "scripts/ingest_cork_parking.py"
       - "scripts/ingest_cork_county_parking.py"
       - "scripts/ingest_cork_county_parking_stable.py"
-      - "scripts/export_web_snapshot.py"
+      - "scripts/export_web_snapshot.py"\n      - "scripts/build_cork_availability_baseline.py"\n      - "web/availability-intelligence.js"
       - "scripts/ingest_wicklow_county_parking.py"
       - "scripts/build_ireland_region_boundaries.py"
       - "config/ireland_region_boundaries.json"
@@ -150,6 +150,39 @@ jobs:
               rm -f web/data/parking_snapshot.json
             fi
           fi
+
+      - name: Build Phase 3 Cork observation history and naive availability baseline
+        run: |
+          set +e
+          rm -f /tmp/cork_observation_history.jsonl
+
+          if [[ -s data/cork/curated/parking_observations.jsonl ]]; then
+            if curl --fail --silent --show-error --location --max-time 20 \
+              "https://utpal-mishra.github.io/WhiteBlock/data/cork_observation_history.jsonl" \
+              --output /tmp/cork_observation_history.jsonl; then
+              echo "Loaded previously published Cork observation history"
+              python scripts/build_cork_availability_baseline.py \
+                --current data/cork/curated/parking_observations.jsonl \
+                --previous /tmp/cork_observation_history.jsonl \
+                --history-output web/data/cork_observation_history.jsonl \
+                --baseline-output web/data/cork_availability_baseline.json
+            else
+              echo "::notice::No prior Phase 3 history available; starting a new bounded history"
+              python scripts/build_cork_availability_baseline.py \
+                --current data/cork/curated/parking_observations.jsonl \
+                --history-output web/data/cork_observation_history.jsonl \
+                --baseline-output web/data/cork_availability_baseline.json
+            fi
+          else
+            echo "::warning::No fresh Cork observations available; attempting to preserve last published Phase 3 artifacts"
+            curl --fail --silent --show-error --location --max-time 20 \
+              "https://utpal-mishra.github.io/WhiteBlock/data/cork_observation_history.jsonl" \
+              --output web/data/cork_observation_history.jsonl || rm -f web/data/cork_observation_history.jsonl
+            curl --fail --silent --show-error --location --max-time 20 \
+              "https://utpal-mishra.github.io/WhiteBlock/data/cork_availability_baseline.json" \
+              --output web/data/cork_availability_baseline.json || rm -f web/data/cork_availability_baseline.json
+          fi
+          set -e
 
       # Publishing and evidence refresh are deliberately separated. The Dublin
       # validation workflow can spend several minutes traversing exact authority
