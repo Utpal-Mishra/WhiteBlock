@@ -145,6 +145,8 @@ Exit condition:
 
 ## Phase 3 — Availability & Demand Intelligence
 
+**Implementation status (2026-10-27):** ACTIVE — first slice persists bounded/deduplicated official Cork occupancy history across scheduled deployments, builds a transparent hierarchical historical-mean baseline, and exposes future-arrival baseline estimates for evaluation. Forecast-driven ranking remains disabled until backtesting/calibration show measurable value over current-only evidence.
+
 **Goal:** move from static inventory to time-aware parking intelligence.
 
 Build:
