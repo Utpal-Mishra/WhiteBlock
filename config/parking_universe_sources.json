@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "programme": "WHITEBLOCK Phase 1.5 Parking Universe Coverage",
+  "updated_at": "2026-10-27",
+  "coverage_claim": "source_and_geography_completeness_progress_not_literal_real_world_completeness",
+  "asset_classes": [
+    "public_off_street",
+    "on_street",
+    "accessible",
+    "ev",
+    "park_and_ride",
+    "station_transport",
+    "hospital",
+    "university",
+    "airport",
+    "retail_customer",
+    "private_shared",
+    "permit_restricted",
+    "temporary_event",
+    "imagery_candidate",
+    "closed_historical"
+  ],
+  "required_source_families": [
+    "official_local_authority",
+    "open_geospatial",
+    "accessible_parking",
+    "parking_rules_bylaws",
+    "transport_park_and_ride",
+    "retail_customer_parking",
+    "operator_facility",
+    "ev_parking",
+    "licensed_imagery"
+  ],
+  "regions": {
+    "cork": {
+      "label": "County Cork",
+      "status": "active",
+      "integrated_source_keys": [
+        "cork_city_parking_live",
+        "openstreetmap_cork_county",
+        "licensed_imagery_review"
+      ],
+      "priority_gaps": [
+        "accessible_parking",
+        "parking_rules_bylaws",
+        "transport_park_and_ride",
+        "retail_customer_parking",
+        "operator_facility",
+        "ev_parking"
+      ]
+    },
+    "kildare": {
+      "label": "County Kildare",
+      "status": "active_partial",
+      "integrated_source_keys": [
+        "kildare_accessible_parking",
+        "openstreetmap_kildare_county",
+        "licensed_imagery_review"
+      ],
+      "priority_gaps": [
+        "parking_rules_bylaws",
+        "transport_park_and_ride",
+        "retail_customer_parking",
+        "operator_facility",
+        "ev_parking"
+      ]
+    },
+    "dublin": {
+      "label": "County Dublin",
+      "status": "active",
+      "integrated_source_keys": [
+        "openstreetmap_dublin_county",
+        "licensed_imagery_review"
+      ],
+      "ready_to_integrate": [
+        "dublin_city_multistorey_live",
+        "dublin_city_accessible_parking",
+        "dublin_city_parking_meters",
+        "south_dublin_parking_meters",
+        "dlr_parking_runs"
+      ],
+      "priority_gaps": [
+        "transport_park_and_ride",
+        "retail_customer_parking",
+        "operator_facility",
+        "ev_parking"
+      ]
+    },
+    "wicklow": {
+      "label": "County Wicklow",
+      "status": "active_partial",
+      "integrated_source_keys": [
+        "openstreetmap_wicklow_county",
+        "bray_curated_evidence"
+      ],
+      "priority_gaps": [
+        "official_local_authority",
+        "accessible_parking",
+        "parking_rules_bylaws",
+        "transport_park_and_ride",
+        "retail_customer_parking",
+        "operator_facility",
+        "ev_parking",
+        "licensed_imagery"
+      ]
+    }
+  },
+  "sources": {
+    "cork_city_parking_live": {
+      "family": "official_local_authority",
+      "publisher": "Cork City Council",
+      "status": "integrated",
+      "licence": "CC BY 4.0",
+      "role": ["canonical_inventory", "live_availability"],
+      "url": "https://data.gov.ie/dataset/parking"
+    },
+    "kildare_accessible_parking": {
+      "family": "accessible_parking",
+      "publisher": "Kildare County Council",
+      "status": "integrated",
+      "licence": "CC BY 4.0",
+      "role": ["accessible_inventory"],
+      "url": "https://data.gov.ie/dataset/kildare-accessible-parking"
+    },
+    "dublin_city_multistorey_live": {
+      "family": "official_local_authority",
+      "publisher": "Dublin City Council",
+      "status": "ready_to_integrate",
+      "licence": "CC BY 4.0",
+      "role": ["facility_inventory", "live_availability"],
+      "url": "https://data.gov.ie/dataset/multi-story-car-parking-space-availability"
+    },
+    "dublin_city_accessible_parking": {
+      "family": "accessible_parking",
+      "publisher": "Dublin City Council",
+      "status": "ready_to_integrate",
+      "licence": "CC BY 4.0",
+      "role": ["accessible_inventory"],
+      "url": "https://data.gov.ie/dataset/accessible-parking-spaces-dcc"
+    },
+    "dublin_city_parking_meters": {
+      "family": "parking_rules_bylaws",
+      "publisher": "Dublin City Council",
+      "status": "ready_to_integrate",
+      "licence": "CC BY 4.0",
+      "role": ["on_street_inventory", "tariff_evidence", "zone_evidence"],
+      "url": "https://data.gov.ie/dataset/parking-meters-location-tariffs-and-zones-in-dublin-city"
+    },
+    "south_dublin_parking_meters": {
+      "family": "parking_rules_bylaws",
+      "publisher": "South Dublin County Council",
+      "status": "ready_to_integrate",
+      "licence": "CC BY 4.0",
+      "role": ["on_street_inventory", "meter_evidence"],
+      "url": "https://data.gov.ie/dataset/parking-meters-sdcc1"
+    },
+    "dlr_parking_runs": {
+      "family": "parking_rules_bylaws",
+      "publisher": "Dun Laoghaire-Rathdown County Council",
+      "status": "ready_to_integrate",
+      "licence": "CC BY 4.0",
+      "role": ["on_street_inventory", "capacity_evidence", "tariff_evidence"],
+      "url": "https://data.gov.ie/dataset/parking-meters-dlr"
+    },
+    "openstreetmap_cork_county": {
+      "family": "open_geospatial",
+      "publisher": "OpenStreetMap contributors",
+      "status": "integrated",
+      "licence": "ODbL",
+      "role": ["broad_inventory", "geometry", "access_tags"]
+    },
+    "openstreetmap_kildare_county": {
+      "family": "open_geospatial",
+      "publisher": "OpenStreetMap contributors",
+      "status": "integrated_or_fallback",
+      "licence": "ODbL",
+      "role": ["broad_inventory", "geometry", "access_tags"]
+    },
+    "openstreetmap_dublin_county": {
+      "family": "open_geospatial",
+      "publisher": "OpenStreetMap contributors",
+      "status": "integrated",
+      "licence": "ODbL",
+      "role": ["broad_inventory", "geometry", "access_tags"]
+    },
+    "openstreetmap_wicklow_county": {
+      "family": "open_geospatial",
+      "publisher": "OpenStreetMap contributors",
+      "status": "integrated_when_source_available",
+      "licence": "ODbL",
+      "role": ["broad_inventory", "geometry", "access_tags"]
+    },
+    "bray_curated_evidence": {
+      "family": "official_local_authority",
+      "publisher": "WHITEBLOCK curated from source-backed evidence",
+      "status": "integrated",
+      "role": ["locality_inventory", "rules_evidence"]
+    },
+    "licensed_imagery_review": {
+      "family": "licensed_imagery",
+      "publisher": "configured imagery evidence providers",
+      "status": "integrated_review_workflow",
+      "role": ["physical_parking_confirmation", "geometry_candidate"]
+    },
+    "galway_city_car_parking": {
+      "family": "official_local_authority",
+      "publisher": "Galway City Council",
+      "status": "future_region_ready_source",
+      "licence": "CC BY 4.0",
+      "role": ["facility_inventory"],
+      "url": "https://data.gov.ie/dataset/carparkingopendata3"
+    }
+  },
+  "rules": [
+    "A source can discover a candidate without making it recommendable.",
+    "Unknown legal access remains unknown.",
+    "No source absence is evidence that parking does not exist.",
+    "Partnership status is independent of canonical parking identity.",
+    "Imagery may support physical existence but not public-access or live-availability claims.",
+    "Coverage progress must never be presented as literal percentage of all real-world parking."
+  ]
+}
