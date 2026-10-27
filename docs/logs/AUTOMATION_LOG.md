@@ -133,3 +133,12 @@
 - No manual region-specific handling is required.
 - Scope: all current and future regions using the shared Phase 2 session/ranking engine.
 - Status: implemented.
+\n
+## AUTO-20261027-003 — Accumulate Cork observations during scheduled Pages deployments
+
+- Date: 2026-10-27.
+- Trigger: existing hourly Pages schedule and relevant main-branch pushes.
+- Action: retrieve the last published Cork history when available, merge the current official observations, deduplicate, retain 90 days, and rebuild the Phase 3 baseline.
+- Resilience: absence of prior history creates a new history; absence of fresh observations attempts to preserve the last published Phase 3 artifacts.
+- Guardrail: automation never fabricates occupancy rows or forecast-ready status.
+- Status: implemented on Phase 3 branch.\n
