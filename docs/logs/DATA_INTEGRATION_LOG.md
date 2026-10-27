@@ -123,3 +123,13 @@
 - Rendering: temporary display coordinates exist only in the generated MapLibre feature collection.
 - Availability correction: raw `null`/empty availability is checked before numeric conversion, preventing JavaScript `Number(null) === 0` from producing a false `0 FREE` label.
 - Status: implemented.
+
+## DATA-20261027-001 — Machine-readable Parking Universe source registry
+
+- Date: 2026-10-27.
+- Added: `config/parking_universe_sources.json`.
+- Current connected regions: Cork, Kildare, Dublin, Wicklow.
+- Source states: integrated, ready_to_integrate, gap.
+- Initial Dublin ready queue includes official multistorey/live, accessible and meter/run datasets.
+- Data rule: the registry records source opportunity/status only; it does not promote records into canonical inventory.
+- Status: implemented.
