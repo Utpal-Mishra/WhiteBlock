@@ -261,3 +261,16 @@
 - Tests cover snapshot de-duplication, capacity zero as known capacity, unknown access handling, retail classification, source-family integrated/ready/gap states and readiness-score bounds.
 - Deployment validates connected region set, non-empty deployed asset population and completeness disclaimer.
 - Status: CI pending.
+
+## QA-20261027-002 — Dublin Phase 1.5 evidence safety tests
+
+- Date: 2026-10-27.
+- Automated assertions:
+  - accessible source records are exact source-reported spaces but remain non-recommendable;
+  - meter records are anchors, not exact parking spaces;
+  - source evidence stays separate from canonical asset counts;
+  - no evidence record is recommendation-eligible by default;
+  - Dublin source-family progress updates to integrated for accessible/rules evidence;
+  - Discover UI labels source evidence as non-canonical/non-recommendable.
+- Deployment recovery also isolates supplementary venue-source timeout from the canonical parking publication path.
+- Status: CI pending.
