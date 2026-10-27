@@ -175,3 +175,11 @@
 - Decision: do not use the benchmark in ranking until measured performance supports that change.
 - Reason: preserve Phase 2 recommendation safety while beginning the data accumulation needed for time-aware intelligence.
 - Status: accepted/implemented on Phase 3 branch.
+## DEC-20261027-004 — Activate Phase 4 with a governed candidate layer
+
+- Date: 2026-10-27.
+- Decision: Phase 4 starts in parallel with Phase 3 data accumulation, using Cork as the first automated-discovery pilot.
+- Decision: all imagery/model results are WB-CAND-* evidence objects until separately promoted.
+- Decision: machine imagery ingestion is fail-closed unless a registered source explicitly permits automated analysis.
+- Decision: imagery disappearance cannot automatically retire parking because source differences, occlusion and model error are plausible alternatives.
+- Status: accepted/implemented on Phase 4 branch.
