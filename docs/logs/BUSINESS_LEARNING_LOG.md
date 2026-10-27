@@ -125,3 +125,11 @@
 - Phase 2 audit finding: Best Overall gave positive default contributions to unreported availability and non-comparable price evidence.
 - Product implication: only evidenced/safely calculable factors may earn positive ranking credit.
 - Status: corrected.
+\n
+## BIZ-20261027-003 — Arrival availability is a different product question from current availability
+
+- Date: 2026-10-27.
+- Learning: a driver choosing parking for a future arrival needs an estimate for arrival time, not merely the latest free-space count.
+- Product implication: WHITEBLOCK should preserve current observations while developing a separate, explicitly predicted arrival-time layer.
+- Validation implication: the simplest historical baseline must be measured before more complex ML or external context features are justified.
+- Status: accepted into Phase 3.\n
