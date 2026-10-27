@@ -31,3 +31,11 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Required separation: physical existence, customer/access restrictions, maximum stay and partnership status.
 - Partnership later adds verified rules/live/commercial capability rather than creating the parking identity.
 - Status: adopted for Phase 1.5.
+
+## MERCH-20261027-001 — Partnership capabilities attach to existing parking assets
+
+- Date: 2026-10-27.
+- Data contract: future partner/operator capability records reference an existing canonical `parking_id`.
+- Capability fields: booking, payment, live occupancy, session management and partner-specific access support.
+- Business rule: a partner relationship enriches a parking asset; it does not define whether the physical parking exists in WHITEBLOCK.
+- Status: schema foundation implemented; no live partner integration activated.
