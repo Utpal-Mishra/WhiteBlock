@@ -97,3 +97,13 @@
   - mobile map height constrained the usable spatial canvas.
 - Corrective action: detailed collision fan-out, connector lines, null-availability guard and larger mobile map.
 - Status: implemented on feature branch; release validation pending.
+
+## INC-20261027-002 — Hidden defaults in Best Overall recommendation score
+
+- Date: 2026-10-27.
+- Severity: medium.
+- Detection: Phase 2 completion audit.
+- Symptoms: unreported availability contributed as 0.3 and non-comparable session cost contributed as 0.4 to internal ranking.
+- User-visible labels were correct, but ordering could still be biased by unsupported values.
+- Corrective action: remove placeholder score contributions and disclose missing factors in ranking explanation.
+- Status: corrected on feature branch.
