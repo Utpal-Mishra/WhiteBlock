@@ -31,3 +31,10 @@ This log records merchant, operator, permit-holder and fulfilment dependencies o
 - Required separation: physical existence, customer/access restrictions, maximum stay and partnership status.
 - Partnership later adds verified rules/live/commercial capability rather than creating the parking identity.
 - Status: adopted for Phase 1.5.
+
+## MERCH-20261027-002 — Dublin official evidence integration has no partnership dependency
+
+- Date: 2026-10-27.
+- The first Phase 1.5 source ingestion uses licensed public-authority evidence and introduces no operator/merchant commercial dependency.
+- Commercial relationships remain a later enrichment layer for booking/payment/live data rather than a prerequisite for knowing the physical/control parking landscape.
+- Status: no merchant action required.
