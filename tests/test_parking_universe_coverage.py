@@ -58,6 +58,23 @@ class ParkingUniverseCoverageTests(unittest.TestCase):
                 "capacity": 50,
                 "access_type": "public",
             }])
+            (directory / "dublin_parking_universe_evidence.json").write_text(
+                json.dumps({
+                    "records": [
+                        {
+                            "evidence_id": "WB-EVID-IE-DUB-ACCESS-1",
+                            "evidence_class": "accessible_parking_space",
+                            "recommendation_eligible": False,
+                        },
+                        {
+                            "evidence_id": "WB-EVID-IE-DUB-METER-1",
+                            "evidence_class": "on_street_parking_meter_anchor",
+                            "recommendation_eligible": False,
+                        },
+                    ]
+                }),
+                encoding="utf-8",
+            )
 
             report = parking_universe.build_report(self.config_path, directory)
             self.assertEqual(
@@ -65,6 +82,13 @@ class ParkingUniverseCoverageTests(unittest.TestCase):
                 "source_and_geography_completeness_progress_not_literal_real_world_completeness",
             )
             self.assertEqual(report["known_assets_across_deployed_snapshots"], 4)
+            self.assertEqual(report["universe_evidence_records_across_deployment"], 2)
+            self.assertEqual(report["regions"]["dublin"]["universe_evidence_records"], 2)
+            self.assertEqual(report["regions"]["dublin"]["universe_evidence_recommendation_eligible"], 0)
+            self.assertEqual(
+                report["regions"]["dublin"]["universe_evidence_class_counts"]["accessible_parking_space"],
+                1,
+            )
             self.assertEqual(report["regions"]["cork"]["known_assets"], 1)
             self.assertEqual(report["regions"]["cork"]["resolution"]["capacity"]["count"], 1)
             self.assertEqual(report["regions"]["dublin"]["resolution"]["access"]["count"], 0)
@@ -83,8 +107,9 @@ class ParkingUniverseCoverageTests(unittest.TestCase):
         config = json.loads(self.config_path.read_text(encoding="utf-8"))
         statuses = parking_universe.source_family_status(config, "dublin")
         self.assertEqual(statuses["open_geospatial"], "integrated")
-        self.assertEqual(statuses["official_local_authority"], "ready_to_integrate")
-        self.assertEqual(statuses["accessible_parking"], "ready_to_integrate")
+        self.assertEqual(statuses["official_local_authority"], "integrated")
+        self.assertEqual(statuses["accessible_parking"], "integrated")
+        self.assertEqual(statuses["parking_rules_bylaws"], "integrated")
         self.assertEqual(statuses["retail_customer_parking"], "gap")
 
 
