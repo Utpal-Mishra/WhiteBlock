@@ -133,3 +133,12 @@
 - Initial Dublin ready queue includes official multistorey/live, accessible and meter/run datasets.
 - Data rule: the registry records source opportunity/status only; it does not promote records into canonical inventory.
 - Status: implemented.
+
+## DATA-20261027-002 — Dublin Phase 1.5 evidence contract
+
+- Date: 2026-10-27.
+- New sidecar records use stable `WB-EVID-IE-DUB-*` identifiers and retain source URL/licence/raw properties.
+- Accessible records: exact source-reported space coordinates, asset_class=accessible, access_type=disabled_parking_card, recommendation_eligible=false.
+- Meter records: on-street evidence anchors, represents_exact_parking_space=false, access unknown, recommendation_eligible=false.
+- Coverage report counts these separately from canonical `WB-PARK-*` assets.
+- Status: implemented.
