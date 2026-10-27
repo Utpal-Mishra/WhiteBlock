@@ -148,3 +148,12 @@
 - Displays per connected region: deployed known assets, access/capacity/rules/polygon resolution, integrated source families, ready-next sources and remaining gaps.
 - Product copy explicitly distinguishes programme progress from literal parking completeness.
 - Status: implemented on Phase 1.5 branch.
+
+## PROD-20261027-001 — Phase 1.5 evidence-resolution workload in product
+
+- Date: 2026-10-27.
+- Feature: Parking Universe cards now expose evidence-review task count, unresolved-access count and deployed source-backed candidate count per region.
+- Programme summary: shows total assets and total evidence-resolution workload side by side.
+- Purpose: make coverage work operationally visible instead of presenting only a readiness percentage.
+- Guardrail: review-task counts are not missing-parking counts or real-world completeness percentages.
+- Status: implemented on Phase 1.5 branch.
