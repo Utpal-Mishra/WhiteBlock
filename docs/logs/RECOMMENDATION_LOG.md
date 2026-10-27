@@ -123,3 +123,11 @@
 - Rationale: access uncertainty directly affects whether WHITEBLOCK may safely recommend an asset for a driver's stay.
 - Operationalisation: shared review queue weights unknown access more heavily than missing capacity/geometry.
 - Status: adopted.
+
+## REC-20261027-002 — Rank on session cost, not isolated tariff number
+
+- Date: 2026-10-27.
+- Recommendation: "Lowest cost" should compare the cost of the requested stay, not the first euro value found in source text.
+- Adopted rule: compare only safely calculable session totals; unresolved tariff structures remain visible but are not treated as numeric.
+- Best-overall: retain availability/distance/confidence/rule-risk weighting and incorporate safely calculable session cost.
+- Status: adopted.

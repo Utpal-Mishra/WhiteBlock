@@ -73,3 +73,10 @@
 - Updated: `docs/ROADMAP.md` and `docs/PARKING_UNIVERSE_COVERAGE.md`.
 - Documented: canonical state separation, partner enrichment boundary, shared evidence-review artifact and Phase 1.5 operating loop.
 - Status: complete for tranche 1.
+
+## DOC-20261027-002 — Phase 2 closure documented
+
+- Date: 2026-10-27.
+- Updated: `docs/ROADMAP.md`.
+- Clarified: Phase 2 completion criteria, conservative cost-estimation guardrail and boundary between parking decision and later trip-execution capabilities.
+- Status: complete.

@@ -273,3 +273,17 @@
   - partner capability table and coverage-class field.
 - Deployment validation additionally requires the review queue to contain the same connected-region set as the coverage report.
 - Status: tests authored; CI pending.
+
+## QA-20261027-002 — Phase 2 completion regression coverage
+
+- Date: 2026-10-27.
+- Assertions added for:
+  - conservative session-cost estimator;
+  - explicit non-calculable tariff state;
+  - cost-aware cheapest comparison;
+  - best-overall and filter-specific explanation text;
+  - source/freshness rendering;
+  - session-cost and published-tariff separation;
+  - responsive decision/evidence UI.
+- Existing session-rule, access-window, max-stay and ineligible transparency tests remain active.
+- Status: tests authored; CI pending.

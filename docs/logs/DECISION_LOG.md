@@ -150,3 +150,11 @@
 - Rationale: Phase 1.5 needs an actionable list of unresolved access/rules/capacity/geometry/candidate work.
 - Rejected: treating browser-local candidate storage as a shared project queue.
 - Status: accepted/implemented.
+
+## DEC-20261027-002 — Close Phase 2; keep trip execution outside its exit gate
+
+- Date: 2026-10-27.
+- Decision: Phase 2 is complete once WHITEBLOCK can return an evidence-backed ranked parking answer with visible stay compatibility, walking estimate, conservative session cost, explanation and provenance.
+- Not required for Phase 2 exit: turn-by-turn navigation, parking-session timers/reminders, walking-route execution, booking/payment hand-off.
+- Reason: those capabilities act on a chosen parking decision; they do not determine whether WHITEBLOCK can make the decision.
+- Status: accepted.

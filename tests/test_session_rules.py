@@ -9,8 +9,8 @@ WEB = ROOT / "web"
 class ParkingSessionRuleTests(unittest.TestCase):
     def test_rule_assets_are_wired_into_find_view(self):
         html = (WEB / "index.html").read_text(encoding="utf-8")
-        self.assertIn('href="./session-rules.css"', html)
-        self.assertIn('<script src="./session-rules.js"></script>', html)
+        self.assertIn('href="./session-rules.css?v=20261027-2"', html)
+        self.assertIn('<script src="./session-rules.js?v=20261027-2"></script>', html)
         self.assertIn('id="parking-ineligible"', html)
         self.assertIn('<option value="120" selected>2 hours</option>', html)
         self.assertIn('<option value="180">3 hours</option>', html)
@@ -26,6 +26,24 @@ class ParkingSessionRuleTests(unittest.TestCase):
         self.assertIn("Does not fit your stay", js)
         self.assertIn("Customers only", js)
         self.assertIn("customer parking rules", js)
+
+    def test_phase_2_session_cost_ranking_explanation_and_evidence_are_present(self):
+        js = (WEB / "session-rules.js").read_text(encoding="utf-8")
+        css = (WEB / "session-rules.css").read_text(encoding="utf-8")
+        self.assertIn("estimateSessionCost", js)
+        self.assertIn("Simple hourly estimate", js)
+        self.assertIn("Not safely calculable", js)
+        self.assertIn("compareSessionCost", js)
+        self.assertIn("Lowest-cost mode compares only safely calculable session totals first", js)
+        self.assertIn("Best overall balances distance", js)
+        self.assertIn("Why this ranks here", js)
+        self.assertIn("freshnessInfo", js)
+        self.assertIn("Source retrieved", js)
+        self.assertIn("Est. session cost", js)
+        self.assertIn("Published tariff", js)
+        self.assertIn("phase2-ranking-explanation", css)
+        self.assertIn("phase2-evidence-meta", css)
+        self.assertIn("phase2-decision-metrics", css)
 
     def test_ineligible_options_remain_visible_for_transparency(self):
         js = (WEB / "session-rules.js").read_text(encoding="utf-8")

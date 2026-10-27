@@ -159,3 +159,11 @@
 - Added relationship table: `parking_partner_capability` enriches an existing canonical parking record with booking/payment/live/session capabilities.
 - Consequence: partnership creation/removal cannot create/delete the underlying parking identity.
 - Status: accepted and implemented.
+
+## ARCH-20261027-002 — Phase 2 recommendation explanation is derived, not separately stored
+
+- Date: 2026-10-27.
+- Decision: ranking explanations and session-cost estimates are derived at request time from canonical parking evidence + current destination/arrival/stay/filter state.
+- Rationale: avoids persisting stale user-context-specific decisions into the canonical parking asset.
+- Tariff boundary: only simple published free/hourly tariffs are converted to a session estimate; complex tariff text remains evidence, not inferred pricing.
+- Status: accepted.

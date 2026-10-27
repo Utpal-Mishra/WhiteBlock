@@ -111,24 +111,37 @@ This is a **coverage-complete objective, not a claim of literal 100% real-world 
 
 ## Phase 2 — Destination-First Experience
 
+**Implementation status (2026-10-27):** ✅ COMPLETE.
+
 **Goal:** prove that WHITEBLOCK can make a better parking decision than a static parking map.
 
-Build:
+Integrated:
 
-- destination search;
-- arrival time and stay duration;
-- closest/cheapest/best-overall modes;
+- destination search across connected Ireland coverage;
+- arrival time and stay duration controls;
+- closest / lowest-cost / best-overall modes;
 - accessibility and EV constraints;
-- cost and walking estimates;
-- rules compatibility;
-- transparent ranking explanation;
-- source freshness/confidence display.
+- destination-distance and walking-time estimates;
+- session-cost estimates only where a simple published tariff can be calculated safely;
+- explicit non-calculable state for tiered/ambiguous/unpublished tariffs;
+- access, maximum-stay and opening-window compatibility before recommendation;
+- transparent per-result ranking explanation;
+- source, truth-state, freshness and evidence-confidence display;
+- excluded/ineligible nearby parking retained for transparency rather than silently hidden.
+
+Cost guardrail:
+
+> WHITEBLOCK calculates a session total only from an unambiguous published free/hourly tariff. Complex or unclear tariffs remain visible as published evidence but are not converted into a fabricated total.
 
 Do not build native payments yet; use permitted links/integrations where useful.
 
+Phase boundary:
+
+- turn-by-turn navigation, parking-session timers/reminders, walking-route execution and operator payment/session hand-off are **trip-execution capabilities**, not blockers for Phase 2 completion.
+
 Exit condition:
 
-> A driver can ask where to park for a real trip and receive an evidence-backed ranked answer.
+> ✅ Met — a driver can ask where to park for a real trip and receive an evidence-backed ranked answer whose stay fit, walk estimate, safely calculable cost, ranking rationale, source, freshness and confidence are visible.
 
 ## Phase 3 — Availability & Demand Intelligence
 

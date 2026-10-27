@@ -142,3 +142,12 @@
 - Review reasons: missing coordinates, unknown access, missing rules, missing capacity, missing polygon and explicit candidate/unverified state.
 - Browser-local proposals remain separate from the shared deployment queue because GitHub Pages has no authenticated shared write service.
 - Status: implementation branch.
+
+## SYS-20261027-002 — Phase 2 decision explanation and session-cost completion
+
+- Date: 2026-10-27.
+- System change: session eligibility enrichment now also calculates a session-cost object where the published tariff is unambiguous.
+- Ranking change: best-overall score uses the current requested-session cost rather than the first euro value parsed from a tariff string.
+- Cheapest mode: safely calculable session totals rank first; ambiguous/unpublished tariffs are not assigned fabricated totals.
+- Result cards: source, freshness, truth state and per-result ranking explanation are rendered alongside walk/cost/confidence.
+- Status: implemented.

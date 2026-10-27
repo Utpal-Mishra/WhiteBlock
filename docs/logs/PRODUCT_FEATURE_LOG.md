@@ -157,3 +157,20 @@
 - Purpose: make coverage work operationally visible instead of presenting only a readiness percentage.
 - Guardrail: review-task counts are not missing-parking counts or real-world completeness percentages.
 - Status: implemented on Phase 1.5 branch.
+
+## PROD-20261027-002 — Phase 2 Destination-First Experience completed
+
+- Date: 2026-10-27.
+- Completed driver capabilities:
+  - destination search;
+  - arrival/stay controls;
+  - closest / lowest-cost / best-overall modes;
+  - accessible and EV constraints;
+  - walking estimate;
+  - safely calculable session-cost estimate;
+  - rules/stay compatibility;
+  - transparent ranking explanation;
+  - source/freshness/truth-state/confidence display;
+  - ineligible-option transparency.
+- Phase boundary: navigation/session reminders/operator hand-off remain trip-execution work, not Phase 2 blockers.
+- Status: complete.

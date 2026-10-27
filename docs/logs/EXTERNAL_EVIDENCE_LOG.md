@@ -120,3 +120,11 @@
 - Exclusion: browser-local user proposals are not counted as shared deployed candidates.
 - Reason: localStorage is device-specific and cannot be treated as a durable multi-user evidence source.
 - Status: evidence boundary established.
+
+## EXT-20261027-002 — Phase 2 source/freshness display uses existing parking provenance
+
+- Date: 2026-10-27.
+- Inputs: canonical `sourceKey/source_url`, `observedAt`, `retrievedAt`, truth state and evidence-derived confidence already carried by connected regional adapters.
+- No new external claim source is introduced by the UI completion.
+- Display rule: observation timestamp takes precedence; otherwise source retrieval timestamp is shown; if neither is published, freshness remains explicitly unknown.
+- Status: evidence contract implemented.

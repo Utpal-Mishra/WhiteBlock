@@ -113,3 +113,12 @@
 - Objective: make Phase 1.5 work queue inspectable and repeatable rather than manually choosing records.
 - Evaluation: monitor whether this ordering improves recommendation-safety resolution and candidate promotion throughput.
 - Status: initial implementation.
+
+## EXP-20261027-002 — Conservative tariff parsing for Phase 2
+
+- Date: 2026-10-27.
+- Experiment: parse only explicit free or single hourly-rate tariffs into a requested-session estimate.
+- Rejected behaviour: infer totals from tiered, capped, daily, mixed or unit-ambiguous tariff text.
+- UX result: cards distinguish estimated session cost from the original published tariff and show the calculation basis.
+- Evaluation target: preserve decision usefulness without creating false price precision.
+- Status: implemented.

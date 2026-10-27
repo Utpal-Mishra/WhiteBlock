@@ -117,3 +117,11 @@
 - Prioritisation: missing coordinates > unknown access > candidate state > missing rules > missing capacity > missing polygon.
 - Safety: the queue is diagnostic only and does not promote, reject or alter recommendation eligibility automatically.
 - Status: implemented.
+
+## AUTO-20261027-002 — Recompute Phase 2 decision factors on arrival/stay changes
+
+- Date: 2026-10-27.
+- Trigger: existing arrival and duration change events.
+- Automated effects: re-evaluate session eligibility, recalculate walking/session-cost factors, re-rank results and refresh explanations.
+- Safety: ambiguous pricing stays non-comparable instead of receiving an inferred numeric cost.
+- Status: implemented.
