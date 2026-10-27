@@ -133,6 +133,8 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("./data/parking_universe_coverage.json", js)
         self.assertIn("programme_readiness_score", js)
         self.assertIn("universe_evidence_records", js)
+        self.assertIn("ready_to_integrate_sources", js)
+        self.assertIn("specific sources ready next", js)
         self.assertIn("source evidence records not yet canonical/recommendable", js)
         self.assertIn("not literal real-world completeness", js)
         self.assertIn(".universe-region-grid", css)
