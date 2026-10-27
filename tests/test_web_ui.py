@@ -123,6 +123,18 @@ class WhiteBlockWebUITests(unittest.TestCase):
         self.assertIn("#map { height:460px; }", css)
         self.assertIn("#map { height:480px; }", css)
 
+    def test_parking_universe_phase_15_is_exposed_in_discover(self):
+        html = (WEB / "index.html").read_text(encoding="utf-8")
+        js = (WEB / "parking-universe.js").read_text(encoding="utf-8")
+        css = (WEB / "parking-universe.css").read_text(encoding="utf-8")
+        self.assertIn('id="parking-universe-coverage"', html)
+        self.assertIn('parking-universe.css?v=20261027-1', html)
+        self.assertIn('parking-universe.js?v=20261027-1', html)
+        self.assertIn("./data/parking_universe_coverage.json", js)
+        self.assertIn("programme_readiness_score", js)
+        self.assertIn("not literal real-world completeness", js)
+        self.assertIn(".universe-region-grid", css)
+
     def test_mobile_alignment_contracts(self):
         discover_css = (WEB / "discover.css").read_text(encoding="utf-8")
         settlement = (WEB / "dublin-settlement-integration.js").read_text(encoding="utf-8")
