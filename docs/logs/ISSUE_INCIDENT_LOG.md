@@ -122,3 +122,10 @@
 - Action: replaced literal sequences with real line breaks before PR/CI.
 - Impact: no Phase 4 code was merged while malformed; regression test added for the affected web script boundary.
 - Status: resolved on Phase 4 branch.
+## INC-20261027-005 — Dublin source outage must not block unrelated Phase 4 publication
+
+- Date: 2026-10-27.
+- Finding: repeated Pages runs failed before Phase 4 because County Dublin evidence acquisition depended on a fresh successful validation artifact/live rebuild.
+- Fix: Pages now tries the latest validated workflow artifact, then the last published validated Dublin evidence set, then a live exact-boundary rebuild.
+- Guardrail: fallback reuses previously published evidence files; it does not synthesize Dublin parking.
+- Status: fix branch implemented.
