@@ -133,3 +133,12 @@
 - Behaviour: every Pages build measures deployed known assets, access/capacity/rules/geometry resolution and source-family progress for Cork, Kildare, Dublin and Wicklow.
 - Guardrail: the report is programme progress, not literal percentage of real-world parking supply.
 - Status: implemented on Phase 1.5 branch.
+
+## SYS-20261027-002 — Dublin official Parking Universe evidence sidecar
+
+- Date: 2026-10-27.
+- Added deployment ingestion for Dublin City Council accessible parking spaces and parking-meter locations.
+- Output: `web/data/dublin_parking_universe_evidence.json`.
+- Safety: all records are non-recommendable by default; accessible bays require entitlement handling and meter anchors are not canonical parking bays.
+- Coverage UI now displays official evidence records separately from canonical asset totals.
+- Status: implemented on source-integration branch.
