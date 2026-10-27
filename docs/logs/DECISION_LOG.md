@@ -166,3 +166,12 @@
 - Chosen behaviour: unknown factors do not earn ranking credit; known factors retain their documented weights.
 - Phase boundary unchanged: navigation execution, timers/reminders, walking-route execution and operator payment/session hand-off are not Phase 2 blockers.
 - Status: accepted.
+
+## DEC-20261027-003 — Start Phase 3 in parallel with continuing Phase 1.5 coverage
+
+- Date: 2026-10-27.
+- Decision: Phase 0 and the Phase 1 core are sufficiently established, and Phase 2 is complete; Phase 1.5 remains a continuous coverage/reconciliation programme rather than a blocker for Phase 3.
+- Phase 3 first slice: build history + a transparent naive availability benchmark from official Cork observations.
+- Decision: do not use the benchmark in ranking until measured performance supports that change.
+- Reason: preserve Phase 2 recommendation safety while beginning the data accumulation needed for time-aware intelligence.
+- Status: accepted/implemented on Phase 3 branch.
