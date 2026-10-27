@@ -217,3 +217,10 @@
 - Secondary risk: static-site history continuity depends on retrieving the last published artifact.
 - Secondary mitigation: bounded artifact fallback is explicit and failures do not create synthetic history.
 - Owner/status: Phase 3 engineering / open-monitoring.\n
+## RISK-20261027-004 — Imagery licensing, false positives and unsafe promotion
+
+- Date: 2026-10-27.
+- Risks: basemap availability may be mistaken for ML processing rights; models may detect forecourts/roads/private yards as parking; imagery may be stale/occluded; proximity matching may incorrectly associate neighbouring assets.
+- Impact: legal/licensing exposure or unsafe/unreliable driver recommendations.
+- Mitigation: fail-closed source registry; no raw-image storage by default; Cork-only pilot; explicit confidence quarantine; candidate layer separated from WB-PARK; access verification required; no automatic retirements from disappearance detections.
+- Status: open/controlled.
