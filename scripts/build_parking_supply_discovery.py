@@ -130,6 +130,10 @@ def source_contract(sources: Dict[str, Any], source_key: str) -> Dict[str, Any]:
             f"Detection source {source_key!r} is fail-closed: machine_ingestion_allowed is not true "
             f"(licence_status={row.get('licence_status')!r})"
         )
+    if row.get("licence_status") not in {"approved", "verified_for_automated_analysis"}:
+        raise ValueError(
+            f"Detection source {source_key!r} has not recorded an approved machine-analysis licence status"
+        )
     return row
 
 
@@ -141,6 +145,7 @@ def manual_candidates(
     created_at: str,
 ) -> List[Dict[str, Any]]:
     actions = set(config.get("manual_followup_actions") or [])
+    allowed_regions = {str(value).lower() for value in (config.get("manual_review_regions") or [config.get("pilot_region")]) if value}
     by_id = {item["parking_id"]: item for item in known_assets}
     country = str(config.get("candidate_country") or "IE")
     output = []
@@ -148,6 +153,8 @@ def manual_candidates(
     for row in evidence.get("records") or []:
         action = str(row.get("geometry_action") or "")
         if action not in actions:
+            continue
+        if allowed_regions and str(row.get("region") or "").lower() not in allowed_regions:
             continue
         parking_id = str(row.get("parking_id") or "")
         known = by_id.get(parking_id)
@@ -213,6 +220,15 @@ def automated_candidates(
 
     country = str(config.get("candidate_country") or "IE")
     region = str(batch.get("region") or config.get("pilot_region") or "UNKNOWN")
+    pilot_region = str(config.get("pilot_region") or "")
+    if (
+        config.get("allow_non_pilot_detection_batches") is not True
+        and pilot_region
+        and region.lower() != pilot_region.lower()
+    ):
+        raise ValueError(
+            f"Detection batch region {region!r} is outside the active Phase 4 pilot {pilot_region!r}"
+        )
     minimum = float(config.get("minimum_detection_confidence") or 0.65)
     same_radius = float(config.get("same_location_radius_m") or 25)
     match_radius = float(config.get("known_asset_match_radius_m") or 75)
