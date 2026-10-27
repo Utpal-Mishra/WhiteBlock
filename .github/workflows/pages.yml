@@ -23,7 +23,10 @@ on:
       - "scripts/ingest_dublin_county_parking.py"
       - "scripts/ingest_dublin_county_parking_stable.py"
       - "scripts/build_dublin_coverage_ledger.py"
-      - "scripts/apply_imagery_review_evidence.py"
+      - "scripts/apply_imagery_review_evidence.py"\n      - "scripts/build_parking_supply_discovery.py"
+      - "scripts/build_parking_supply_change_report.py"
+      - "config/phase4_discovery.json"
+      - "config/phase4_imagery_sources.json"
       - "scripts/build_parking_universe_coverage.py"
       - "config/parking_universe_sources.json"
       - "config/imagery_review_evidence.json"
@@ -282,6 +285,57 @@ jobs:
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/cork_county_parking_snapshot.json --region Cork
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/kildare_parking_snapshot.json --region Kildare
           python scripts/apply_imagery_review_evidence.py --snapshot web/data/bray_parking_snapshot.json --region Bray
+
+      - name: Build Phase 4 parking supply discovery artifacts
+        run: |
+          DETECTION_ARGS=()
+          if [[ -s web/data/phase4_detections_current.json ]]; then
+            DETECTION_ARGS+=(--detections web/data/phase4_detections_current.json)
+          fi
+          python scripts/build_parking_supply_discovery.py \
+            --config config/phase4_discovery.json \
+            --imagery-sources config/phase4_imagery_sources.json \
+            --imagery-evidence config/imagery_review_evidence.json \
+            --snapshot-dir web/data \
+            --output web/data/parking_supply_discovery.json \
+            --review-output web/data/parking_supply_review_queue.json \
+            "${DETECTION_ARGS[@]}"
+
+          if [[ -s web/data/phase4_detections_previous.json && -s web/data/phase4_detections_current.json ]]; then
+            python scripts/build_parking_supply_change_report.py \
+              --previous web/data/phase4_detections_previous.json \
+              --current web/data/phase4_detections_current.json \
+              --output web/data/parking_supply_change_report.json
+          else
+            python scripts/build_parking_supply_change_report.py \
+              --output web/data/parking_supply_change_report.json
+          fi
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          discovery = json.loads(Path("web/data/parking_supply_discovery.json").read_text())
+          review = json.loads(Path("web/data/parking_supply_review_queue.json").read_text())
+          changes = json.loads(Path("web/data/parking_supply_change_report.json").read_text())
+
+          if discovery.get("status") != "active_foundation":
+              raise SystemExit("Phase 4 discovery artifact lost active foundation status")
+          if discovery.get("pilot_region") != "Cork":
+              raise SystemExit("Phase 4 pilot must remain Cork until explicitly expanded")
+          if int(discovery.get("candidate_count") or 0) != int(review.get("review_items") or 0):
+              raise SystemExit("Phase 4 candidate/review queue totals disagree")
+          if any(item.get("recommendation_eligible") is not False for item in discovery.get("candidates") or []):
+              raise SystemExit("Phase 4 candidate became recommendation eligible without verification")
+          if changes.get("status") not in {"ready", "awaiting_versioned_detection_snapshots"}:
+              raise SystemExit("Unexpected Phase 4 change-report status")
+          print(
+              "Phase 4 discovery validated:",
+              discovery["candidate_count"], "candidates /",
+              discovery["automated_detection"]["status"], "/",
+              changes["status"]
+          )
+          PY
 
       - name: Build Phase 1.5 parking universe coverage report
         run: |
