@@ -167,3 +167,11 @@
 - Rationale: avoids persisting stale user-context-specific decisions into the canonical parking asset.
 - Tariff boundary: only simple published free/hourly tariffs are converted to a session estimate; complex tariff text remains evidence, not inferred pricing.
 - Status: accepted.
+
+## ARCH-20261027-002 — Ranking engine consumes evidence states explicitly
+
+- Date: 2026-10-27.
+- Decision: the ranking layer must distinguish known from unknown factors before scoring.
+- Added contract: `rankingEvidence()` determines whether availability, distance, confidence and cost are eligible to contribute.
+- Benefit: evidence semantics remain consistent from source ingestion through recommendation.
+- Status: accepted.
