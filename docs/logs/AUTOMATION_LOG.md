@@ -109,3 +109,11 @@
 - Action: build and validate `parking_universe_coverage.json`.
 - Failure rule: publication fails if the report loses the completeness guardrail, connected-region set or all deployed parking assets.
 - Status: implemented.
+
+## AUTO-20261027-002 — Refresh official Dublin Phase 1.5 evidence during Pages deployment
+
+- Date: 2026-10-27.
+- Trigger: Pages deployment.
+- Action: fetch DCC accessible parking GeoJSON and current meter-location CSV, normalize them to the Parking Universe evidence contract and update the coverage audit.
+- Failure mode: reuse the last published evidence sidecar where possible; otherwise continue core deployment with no fabricated fallback records.
+- Status: implemented.
