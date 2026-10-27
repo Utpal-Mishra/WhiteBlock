@@ -59,3 +59,10 @@
 - Document: `docs/UNIVERSAL_MARKER_POLICY.md`.
 - Added: detailed collision check, display-only spider fan, connector-line semantics and canonical-coordinate immutability.
 - Status: updated.
+
+## DOC-20261027-001 — Parking Universe operating model
+
+- Date: 2026-10-27.
+- Added `docs/PARKING_UNIVERSE_COVERAGE.md`.
+- Updated `docs/DATA_SOURCES.md` and roadmap to mark Phase 1.5 ACTIVE and connect the machine-readable source registry.
+- Status: complete for foundation slice.
