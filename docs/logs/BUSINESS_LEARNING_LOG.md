@@ -109,3 +109,11 @@
 - Implication: WHITEBLOCK must preserve every source-backed asset/candidate independently, then let partnerships add booking, payment, verified rules or live data later.
 - Phase 1.5 action: canonical states now explicitly separate physical existence, recommendation eligibility, live-data state and partnership state.
 - Status: implemented in Phase 1.5 tranche 1.
+
+## BUS-20261027-002 — Decision transparency completes the driver-value proposition
+
+- Date: 2026-10-27.
+- Learning: destination search and filtering are not enough to differentiate WHITEBLOCK from a static parking directory; the driver must be able to see why a result ranks where it does and what evidence supports it.
+- Phase 2 action: every recommendation now exposes stay fit, walk estimate, safely calculable session cost, ranking rationale, source, freshness and confidence.
+- Commercial implication: later partner integrations can enrich the same decision surface without replacing the underlying recommendation logic.
+- Status: Phase 2 complete.
