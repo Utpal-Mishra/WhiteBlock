@@ -121,3 +121,11 @@
 - County expansion remains data-dependent: regions without comparable time-series ground truth stay inventory/rules evidence only.
 - Phase 1.5 source coverage continues across Cork, Kildare, Dublin and Wicklow in parallel.
 - Status: accepted.
+## EXPAND-20261027-004 — Phase 4 restricted to Cork until benchmark gate
+
+- Date: 2026-10-27.
+- Current automated-discovery pilot region: Cork.
+- Non-Cork automated detection batches are rejected by default.
+- Expansion to Dublin/Kildare/Wicklow should reuse the same candidate contract and pipeline only after Cork precision/recall, cross-match error and verification workflow are acceptable.
+- Existing non-Cork human imagery metadata remains historical evidence but is not part of the active automated pilot queue.
+- Status: accepted.
