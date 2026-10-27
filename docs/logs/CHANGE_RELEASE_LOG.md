@@ -194,3 +194,10 @@
 - Feature-branch regression suite: PASS after updating the stale overlay cache-version assertion.
 - GitHub Pages deployment run #283: PASS.
 - Release state: live.
+
+## CHANGE-20261027-001 — Phase 1.5 Parking Universe foundation
+
+- Date: 2026-10-27.
+- Branch: `phase-1-5/parking-universe-foundation-2026-10-27`.
+- Added: source registry, coverage builder, deploy validation, Discover coverage UI, operating-model documentation and tests.
+- Release state: branch implementation; CI/merge/deployment pending.
