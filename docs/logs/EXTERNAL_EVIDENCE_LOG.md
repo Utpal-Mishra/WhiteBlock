@@ -104,3 +104,11 @@
 - Dense examples: St Brigid's Square records have effectively identical coordinates; Top Nolan's source/canonical records sit within approximately 1–9 m of one another.
 - Interpretation: the overlap is not only a viewport issue; it is a valid dense-record rendering case.
 - Use: supports the universal collision-aware renderer rather than Kildare-specific marker offsets.
+
+## EXT-20261027-001 — Official open datasets identified for Phase 1.5 ingestion
+
+- Date: 2026-10-27.
+- Verified source register additions: Cork City real-time parking; Kildare accessible parking; Dublin multistorey availability; Dublin accessible parking; Dublin City parking meters; South Dublin parking meters; DLR parking meters/runs; Galway City structured car parking.
+- Licences: the referenced data.gov.ie records are published under CC BY 4.0; OpenStreetMap remains ODbL.
+- Important source caveats are retained, including Kildare accessible parking not representing all accessible spaces and Dublin accessible parking being a living dataset affected by temporary road/event changes.
+- Status: recorded in `config/parking_universe_sources.json`.
