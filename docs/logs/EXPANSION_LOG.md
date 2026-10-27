@@ -113,3 +113,11 @@
 - Expansion rule: every newly connected county inherits the same no-placeholder ranking semantics automatically.
 - No county-specific scoring defaults are permitted.
 - Status: adopted.
+
+## EXPAND-20261027-003 — Phase 3 starts with Cork before cross-region forecasting
+
+- Date: 2026-10-27.
+- Scope decision: use Cork's existing official live occupancy feed to establish the observation-history, baseline and evaluation pattern first.
+- County expansion remains data-dependent: regions without comparable time-series ground truth stay inventory/rules evidence only.
+- Phase 1.5 source coverage continues across Cork, Kildare, Dublin and Wicklow in parallel.
+- Status: accepted.
