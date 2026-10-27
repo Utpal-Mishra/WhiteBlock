@@ -88,3 +88,10 @@
 - Clarified: Phase 2 is complete and re-audited; evidence-only ranking removes the last hidden scoring assumption.
 - Phase boundary remains unchanged for trip-execution capabilities.
 - Status: updated.
+
+## DOC-20261027-003 — Document Phase 3 availability-intelligence foundation
+
+- Date: 2026-10-27.
+- Added `docs/PHASE3_AVAILABILITY_INTELLIGENCE.md` covering data flow, model hierarchy, cold-start behavior, guardrails, evaluation gates and next increments.
+- Updated the roadmap to mark Phase 3 active without marking its exit condition complete.
+- Status: implemented on Phase 3 branch.
