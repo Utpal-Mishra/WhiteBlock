@@ -175,6 +175,63 @@ def asset_class(record: Mapping[str, Any]) -> str:
     return "public_off_street"
 
 
+def candidate_state(record: Mapping[str, Any]) -> bool:
+    values = [
+        first_value(record, ("inventory_status", "inventoryStatus")),
+        first_value(record, ("lifecycle_status", "lifecycleStatus")),
+        first_value(record, ("truth_state", "truthState")),
+    ]
+    normalized = {str(value).strip().lower() for value in values if value not in (None, "")}
+    return bool(normalized & {"candidate", "detected", "unverified", "physical_confirmed"})
+
+
+def review_reasons(record: Mapping[str, Any]) -> List[str]:
+    reasons: List[str] = []
+    if not has_coordinates(record):
+        reasons.append("missing_coordinates")
+    if not known_access(record):
+        reasons.append("unknown_access")
+    if not known_rules(record):
+        reasons.append("missing_rules")
+    if not known_capacity(record):
+        reasons.append("missing_capacity")
+    if not has_polygon(record):
+        reasons.append("missing_polygon")
+    if candidate_state(record):
+        reasons.append("candidate_state")
+    return reasons
+
+
+def review_priority(reasons: Sequence[str]) -> int:
+    weights = {
+        "missing_coordinates": 100,
+        "unknown_access": 80,
+        "candidate_state": 70,
+        "missing_rules": 55,
+        "missing_capacity": 30,
+        "missing_polygon": 20,
+    }
+    return sum(weights.get(reason, 0) for reason in reasons)
+
+
+def review_item(record: Mapping[str, Any], region: str, index: int) -> Dict[str, Any] | None:
+    reasons = review_reasons(record)
+    if not reasons:
+        return None
+    return {
+        "parking_id": stable_id(record, index),
+        "name": str(record.get("name") or "Unnamed parking"),
+        "region": region,
+        "area": first_value(record, ("area", "settlement", "local_authority", "localAuthority")),
+        "latitude": first_value(record, ("latitude", "lat")),
+        "longitude": first_value(record, ("longitude", "lng", "lon")),
+        "asset_class": asset_class(record),
+        "reasons": reasons,
+        "priority": review_priority(reasons),
+        "source_key": first_value(record, ("source_key", "sourceKey")),
+    }
+
+
 def percentage(count: int, total: int) -> float | None:
     if total <= 0:
         return None
@@ -243,6 +300,13 @@ def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) ->
     polygons = sum(1 for row in records if has_polygon(row))
     accessible = sum(1 for row in records if has_accessible_evidence(row))
     ev = sum(1 for row in records if has_ev_evidence(row))
+    candidate_count = sum(1 for row in records if candidate_state(row))
+    review_items = [
+        item
+        for index, row in enumerate(records)
+        if (item := review_item(row, region, index)) is not None
+    ]
+    review_items.sort(key=lambda item: (-int(item["priority"]), str(item["parking_id"])))
 
     classes: Dict[str, int] = {}
     for record in records:
@@ -260,8 +324,15 @@ def region_report(config: Mapping[str, Any], snapshot_dir: Path, region: str) ->
         "inventory_status": ((config.get("regions") or {}).get(region) or {}).get("status", "unknown"),
         "loaded_snapshot_files": loaded_files,
         "known_assets": total,
-        "candidate_count": None,
-        "candidate_scope_note": "Browser-local candidate queues are not part of the deployment artifact.",
+        "candidate_count": candidate_count,
+        "candidate_scope_note": "Count is derived only from deployed source-backed records explicitly marked candidate/unverified; browser-local proposals remain excluded.",
+        "review_queue": {
+            "count": len(review_items),
+            "unknown_access": sum(1 for item in review_items if "unknown_access" in item["reasons"]),
+            "missing_rules": sum(1 for item in review_items if "missing_rules" in item["reasons"]),
+            "missing_capacity": sum(1 for item in review_items if "missing_capacity" in item["reasons"]),
+            "missing_polygon": sum(1 for item in review_items if "missing_polygon" in item["reasons"]),
+        },
         "resolution": {
             "coordinates": {"count": coordinates, "percent": percentage(coordinates, total)},
             "polygon_geometry": {"count": polygons, "percent": polygon_pct},
@@ -315,23 +386,60 @@ def build_report(config_path: Path, snapshot_dir: Path) -> Dict[str, Any]:
     }
 
 
+def build_review_queue(config_path: Path, snapshot_dir: Path) -> Dict[str, Any]:
+    config = load_json(config_path)
+    regions: Dict[str, Any] = {}
+    total = 0
+    for region in (config.get("regions") or {}):
+        records, loaded_files = snapshot_records(snapshot_dir, region)
+        items = [
+            item
+            for index, row in enumerate(records)
+            if (item := review_item(row, region, index)) is not None
+        ]
+        items.sort(key=lambda item: (-int(item["priority"]), str(item["parking_id"])))
+        total += len(items)
+        regions[region] = {
+            "label": ((config.get("regions") or {}).get(region) or {}).get("label", region.title()),
+            "loaded_snapshot_files": loaded_files,
+            "review_count": len(items),
+            "items": items,
+        }
+
+    return {
+        "schema_version": 1,
+        "generated_at": utc_now(),
+        "phase": "1.5",
+        "title": "Parking Universe Evidence Review Queue",
+        "review_items": total,
+        "regions": regions,
+        "guardrail": "A review item is an evidence-resolution task, not proof that the parking asset is invalid or unusable.",
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build Phase 1.5 parking-universe coverage report.")
     parser.add_argument("--config", type=Path, default=Path("config/parking_universe_sources.json"))
     parser.add_argument("--snapshot-dir", type=Path, default=Path("web/data"))
     parser.add_argument("--output", type=Path, default=Path("web/data/parking_universe_coverage.json"))
+    parser.add_argument("--review-output", type=Path, default=Path("web/data/parking_universe_review_queue.json"))
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
     report = build_report(args.config, args.snapshot_dir)
+    review_queue = build_review_queue(args.config, args.snapshot_dir)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.review_output.parent.mkdir(parents=True, exist_ok=True)
+    args.review_output.write_text(json.dumps(review_queue, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "output": str(args.output),
+        "review_output": str(args.review_output),
         "regions": len(report["regions"]),
         "known_assets": report["known_assets_across_deployed_snapshots"],
+        "review_items": review_queue["review_items"],
         "source_family_instances": report["source_family_instances"],
     }))
     return 0
