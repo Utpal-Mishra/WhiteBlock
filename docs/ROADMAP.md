@@ -111,7 +111,7 @@ This is a **coverage-complete objective, not a claim of literal 100% real-world 
 
 ## Phase 2 — Destination-First Experience
 
-**Implementation status (2026-10-27):** ✅ COMPLETE.
+**Implementation status (2026-10-27):** ✅ COMPLETE — re-audited and evidence-ranking hardened. Unknown availability, confidence or non-comparable pricing no longer receive hidden placeholder score credit.
 
 **Goal:** prove that WHITEBLOCK can make a better parking decision than a static parking map.
 
