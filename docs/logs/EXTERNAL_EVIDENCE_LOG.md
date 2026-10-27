@@ -135,3 +135,12 @@
 - Evidence reviewed: roadmap, session-rule engine, destination focus, result-card rendering, filters, cost logic, evidence metadata and regression tests.
 - Conclusion: no external source was required for the Phase 2 completion audit; the only gap identified was internal ranking semantics.
 - Status: recorded.
+\n
+## EXT-20261027-003 — Phase 3 baseline uses only official Cork occupancy observations
+
+- Date: 2026-10-27.
+- Evidence source: existing Cork City Council parking live feed already integrated into WHITEBLOCK.
+- Use: repeated source-reported capacity/free-space observations become the ground-truth history for the first availability benchmark.
+- Not yet integrated: event, weather or traffic features.
+- Guardrail: no external contextual feature is claimed in the Phase 3 model until separately sourced, licensed, timestamp-aligned and evaluated.
+- Status: active evidence stream.\n
