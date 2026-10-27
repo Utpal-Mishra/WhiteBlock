@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "pilot_region": "Cork",
+  "candidate_country": "IE",
+  "minimum_detection_confidence": 0.65,
+  "same_location_radius_m": 25,
+  "known_asset_match_radius_m": 75,
+  "change_match_radius_m": 45,
+  "surface_area_change_ratio": 0.2,
+  "manual_followup_actions": [
+    "candidate_polygon_allowed",
+    "field_verification_required"
+  ],
+  "recommendation_eligibility_default": false,
+  "public_access_default": "unknown"
+}
