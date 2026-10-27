@@ -142,3 +142,11 @@
 - Architecture: source registry → regional source ingestion/staging → canonical reconciliation → evidence/access/rules resolution → recommendation eligibility → partnership enrichment.
 - Deployment report is derived from current source-backed snapshots and never creates parking records.
 - Status: accepted/implemented.
+
+## ARCH-20261027-001 — Parking Universe is a source-family + canonical-asset layer
+
+- Date: 2026-10-27.
+- Decision: Phase 1.5 operates above heterogeneous source snapshots and below partnership features.
+- Architecture: source registry → regional source ingestion/staging → canonical reconciliation → evidence/access/rules resolution → recommendation eligibility → partnership enrichment.
+- Deployment report is derived from current source-backed snapshots and never creates parking records.
+- Status: accepted/implemented.
