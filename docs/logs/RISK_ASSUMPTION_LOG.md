@@ -163,3 +163,16 @@
 - Impact: medium-high for spatial trust.
 - Mitigation: source coordinates and polygons remain unchanged; display-only points retain canonical IDs; connector lines visibly anchor each fanned marker to its real coordinate; fan-out occurs only when screen collisions make exact rendering unreadable.
 - Status: controlled.
+
+## RISK-20261027-001 — Coverage score could be mistaken for real-world completeness
+
+- Date: 2026-10-27.
+- Risk: a numeric readiness score may be interpreted as “WHITEBLOCK knows X% of all parking”.
+- Impact: high trust/reputational risk.
+- Mitigation: metric name is programme readiness; JSON/UI/documentation carry an explicit non-completeness guardrail; source absence is never treated as evidence of no parking.
+- Status: controlled.
+
+## ASM-20261027-001 — Source-family coverage is a useful operational proxy
+
+- Assumption: tracking official/open/access/rules/transport/retail/operator/EV/imagery source families is a useful way to identify material blind spots.
+- Validation: revise families when a new region/source class reveals a systematic gap.
