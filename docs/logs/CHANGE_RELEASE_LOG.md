@@ -209,3 +209,11 @@
 - Added: Parking Universe state migration, partner-capability enrichment table, deploy-time evidence-review queue, aggregate review metrics, UI review workload and regression tests.
 - Workflow: Pages build now publishes and validates both the coverage report and evidence-review queue.
 - Release state: feature branch; CI/merge/deployment pending.
+
+## CHANGE-20261027-002 — Close remaining Phase 2 gaps
+
+- Date: 2026-10-27.
+- Branch: `phase2/close-destination-experience-2026-10-27`.
+- Changes: session-cost estimation, cost-aware ranking, cheapest-mode session comparison, ranking explanation, source/freshness/truth-state display, responsive result-card styling, cache refresh and regression tests.
+- Roadmap: Phase 2 marked complete.
+- Release state: feature branch; CI/merge/deployment pending.
