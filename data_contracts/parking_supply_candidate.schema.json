@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://whiteblock.local/schemas/parking_supply_candidate.schema.json",
+  "title": "WHITEBLOCK Parking Supply Candidate",
+  "type": "object",
+  "required": [
+    "candidate_id",
+    "candidate_type",
+    "candidate_state",
+    "truth_state",
+    "recommendation_eligible",
+    "access_state",
+    "evidence"
+  ],
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^WB-CAND-[A-Z]{2}-[A-Z0-9_-]+-[0-9A-F]{12}$"
+    },
+    "candidate_type": {
+      "type": "string",
+      "enum": [
+        "new_supply",
+        "known_asset_match",
+        "geometry_extension",
+        "field_verification",
+        "change_candidate"
+      ]
+    },
+    "candidate_state": {
+      "type": "string",
+      "enum": [
+        "new_supply_candidate",
+        "matched_known_asset_review",
+        "possible_geometry_extension",
+        "needs_geometry_verification",
+        "needs_field_verification",
+        "low_confidence_quarantine",
+        "change_review_required",
+        "rejected",
+        "promoted"
+      ]
+    },
+    "region": {"type": ["string", "null"]},
+    "name": {"type": ["string", "null"]},
+    "centroid": {
+      "type": ["object", "null"],
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+      },
+      "required": ["latitude", "longitude"],
+      "additionalProperties": false
+    },
+    "geometry": {"type": ["object", "null"]},
+    "estimated_capacity": {"type": ["integer", "null"], "minimum": 0},
+    "estimated_surface_area_m2": {"type": ["number", "null"], "minimum": 0},
+    "truth_state": {
+      "type": "string",
+      "enum": ["inferred", "unverified"]
+    },
+    "recommendation_eligible": {"const": false},
+    "access_state": {
+      "type": "string",
+      "enum": ["unknown", "verification_required"]
+    },
+    "public_access_verified": {"const": false},
+    "match": {
+      "type": ["object", "null"],
+      "properties": {
+        "parking_id": {"type": ["string", "null"]},
+        "distance_m": {"type": ["number", "null"], "minimum": 0},
+        "relation": {
+          "type": ["string", "null"],
+          "enum": [
+            "same_location_review",
+            "possible_geometry_extension",
+            "no_known_asset_within_match_radius",
+            "existing_asset_imagery_followup",
+            null
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["evidence_type", "source_key"],
+        "properties": {
+          "evidence_type": {"type": "string"},
+          "source_key": {"type": "string"},
+          "imagery_acquisition_date": {"type": ["string", "null"], "format": "date"},
+          "model_name": {"type": ["string", "null"]},
+          "model_version": {"type": ["string", "null"]},
+          "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "review_id": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "created_at": {"type": ["string", "null"], "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"}
+  },
+  "additionalProperties": true
+}
