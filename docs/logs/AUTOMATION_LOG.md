@@ -150,3 +150,10 @@
 - If previous/current versioned detection batches exist, deployment produces a change-review report; otherwise it publishes an explicit awaiting-snapshots state.
 - Deployment validates that every candidate remains recommendation_eligible=false.
 - Status: implemented on Phase 4 branch.
+## AUTO-20261027-005 — Add last-known-good Dublin publication fallback
+
+- Date: 2026-10-27.
+- Deployment order for Dublin evidence: latest successful validation artifact -> previously published evidence set -> live exact-boundary rebuild.
+- Purpose: external-source outages should not suppress unrelated Cork/Phase 4 application releases.
+- Required Dublin artifact set remains unchanged and is validated later in the same Pages workflow.
+- Status: implemented on fix branch.
