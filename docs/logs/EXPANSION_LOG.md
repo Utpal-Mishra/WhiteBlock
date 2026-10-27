@@ -83,3 +83,11 @@
 - Expansion implication: new counties do not need bespoke marker spacing logic when several parking records share an entrance or lie close together.
 - Shared rule: broad-scale cluster → detailed collision check → display-only fan-out when required.
 - Status: adopted as universal behaviour.
+
+## EXPAND-20261027-001 — Phase 1.5 expansion gate is now measurable
+
+- Date: 2026-10-27.
+- Each connected/future county must assess the same required source families and expose unresolved gaps.
+- Galway City official structured parking data has been added to the registry as a future-region ready source, but Galway is not yet a connected WHITEBLOCK region.
+- Expansion rule: new counties reuse the Parking Universe source registry/report rather than bespoke completeness claims.
+- Status: implemented.
