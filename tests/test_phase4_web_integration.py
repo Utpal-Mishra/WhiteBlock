@@ -12,6 +12,9 @@ class Phase4WebIntegrationTests(unittest.TestCase):
         self.assertIn('id="parking-supply-discovery"', html)
         self.assertIn("parking-supply-discovery.js", html)
         self.assertNotIn('parking-universe.js?v=20261027-2"></script>\\n', html)
+        discover = (ROOT / "web" / "discover.js").read_text(encoding="utf-8")
+        self.assertIn("whiteblock:phase4-candidates-ready", discover)
+        self.assertIn("phase4SupplyCandidates", discover)
 
     def test_production_imagery_sources_are_fail_closed_by_default(self):
         config = json.loads((ROOT / "config" / "phase4_imagery_sources.json").read_text(encoding="utf-8"))
