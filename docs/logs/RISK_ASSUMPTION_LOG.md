@@ -176,3 +176,16 @@
 
 - Assumption: tracking official/open/access/rules/transport/retail/operator/EV/imagery source families is a useful way to identify material blind spots.
 - Validation: revise families when a new region/source class reveals a systematic gap.
+
+## RISK-20261027-002 — Evidence anchors could inflate parking supply if counted as assets
+
+- Date: 2026-10-27.
+- Risk: a parking meter or entitlement-specific accessible record could be misread as an ordinary canonical parking option.
+- Impact: high for inventory accuracy and driver trust.
+- Mitigation: dedicated `WB-EVID-*` identity, separate deployment sidecar, `recommendation_eligible=false`, separate UI counts and explicit source semantics.
+- Status: controlled.
+
+## ASM-20261027-002 — Official meter coordinates are useful reconciliation anchors
+
+- Assumption: current meter locations provide useful evidence for controlled on-street parking areas even though they do not identify exact bays.
+- Validation: reconcile meter anchors against street/zone/runs and source-published space counts before canonical promotion.
