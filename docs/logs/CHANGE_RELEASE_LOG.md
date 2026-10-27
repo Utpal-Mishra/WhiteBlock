@@ -217,3 +217,10 @@
 - Changes: session-cost estimation, cost-aware ranking, cheapest-mode session comparison, ranking explanation, source/freshness/truth-state display, responsive result-card styling, cache refresh and regression tests.
 - Roadmap: Phase 2 marked complete.
 - Release state: feature branch; CI/merge/deployment pending.
+
+### Phase 2 merge update — 2026-10-27
+
+- PR #50 merged to `main` as `d7fcabbaed320d85a331708c2e5aa943cebdd6d3`.
+- Feature-branch CI: PASS.
+- Phase 2 roadmap status: COMPLETE.
+- GitHub Pages deployment run #315 started from the merged commit and was rebuilding regional data at the time of this log entry.
