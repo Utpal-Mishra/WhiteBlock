@@ -183,3 +183,10 @@
 - Decision: machine imagery ingestion is fail-closed unless a registered source explicitly permits automated analysis.
 - Decision: imagery disappearance cannot automatically retire parking because source differences, occlusion and model error are plausible alternatives.
 - Status: accepted/implemented on Phase 4 branch.
+## DEC-20261027-005 — Prefer validated stale evidence over total deployment failure
+
+- Date: 2026-10-27.
+- Decision: when fresh Dublin evidence cannot be acquired, WHITEBLOCK may reuse the last published validated Dublin evidence set rather than block the entire site deployment.
+- Constraint: stale evidence must retain its source timestamps/freshness; no values are rewritten to appear current.
+- Reason: data freshness degradation is transparent and recoverable, while preventing unrelated product updates from publishing is unnecessary coupling.
+- Status: accepted.
