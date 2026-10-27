@@ -320,3 +320,10 @@
 - Full repository CI: pending Phase 3 pull request run.
 - Live acceptance: pending successful Pages deployment and accumulation of enough scheduled observations for the first forecast-ready bucket.
 - Status: in validation.
+## QA-20261027-004 — Phase 4 candidate and change-pipeline tests
+
+- Date: 2026-10-27.
+- Added tests for source-licence rejection, known-asset cross-match, new-supply routing, manual imagery follow-up seeding, snapshot de-duplication, appeared/disappeared change handling, area expansion and persistence.
+- Added web/config regression checks ensuring Phase 4 assets load and production imagery sources remain fail-closed.
+- Pages build includes candidate/review count parity and recommendation_eligible=false validation.
+- Status: branch CI pending.

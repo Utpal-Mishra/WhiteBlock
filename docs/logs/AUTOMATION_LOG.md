@@ -142,3 +142,11 @@
 - Resilience: absence of prior history creates a new history; absence of fresh observations attempts to preserve the last published Phase 3 artifacts.
 - Guardrail: automation never fabricates occupancy rows or forecast-ready status.
 - Status: implemented on Phase 3 branch.\n
+## AUTO-20261027-004 — Build Phase 4 discovery artifacts during Pages publication
+
+- Date: 2026-10-27.
+- Existing reviewed Cork imagery metadata automatically seeds geometry/field-verification work.
+- If an approved current detection batch exists, deployment routes it through licence validation and inventory cross-match.
+- If previous/current versioned detection batches exist, deployment produces a change-review report; otherwise it publishes an explicit awaiting-snapshots state.
+- Deployment validates that every candidate remains recommendation_eligible=false.
+- Status: implemented on Phase 4 branch.

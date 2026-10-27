@@ -115,3 +115,10 @@
 - Related open work: PR #48 contains Phase 1.5 Dublin evidence/resilience changes; its test workflow is green but an immediate merge attempt was rejected because the branch now conflicts with newer main work.
 - Action: do not force-merge or overwrite Phase 2; keep the Phase 1.5 reconciliation as a separate follow-up while Phase 3 starts from current main.
 - Status: open integration issue; not a Phase 3 modelling blocker.
+## INC-20261027-004 — Normalise literal newline artifacts during Phase 4 integration
+
+- Date: 2026-10-27.
+- Finding: branch validation exposed literal backslash-n text in newly edited Pages path filters and in script/style separators in web/index.html; one index artifact pre-dated Phase 4.
+- Action: replaced literal sequences with real line breaks before PR/CI.
+- Impact: no Phase 4 code was merged while malformed; regression test added for the affected web script boundary.
+- Status: resolved on Phase 4 branch.

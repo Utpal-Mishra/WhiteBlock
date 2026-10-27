@@ -95,3 +95,10 @@
 - Added `docs/PHASE3_AVAILABILITY_INTELLIGENCE.md` covering data flow, model hierarchy, cold-start behavior, guardrails, evaluation gates and next increments.
 - Updated the roadmap to mark Phase 3 active without marking its exit condition complete.
 - Status: implemented on Phase 3 branch.
+## DOC-20261027-004 — Add Phase 4 parking-supply discovery specification
+
+- Date: 2026-10-27.
+- Added docs/PHASE4_PARKING_SUPPLY_DISCOVERY.md.
+- Documentation covers licensing gate, detection contract, WB-CAND lifecycle, cross-match thresholds, change detection, promotion boundary and evaluation requirements.
+- Roadmap marks Phase 4 active but not complete.
+- Status: implemented.

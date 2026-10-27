@@ -240,3 +240,10 @@
 - Added: bounded Cork observation history, hierarchical historical availability baseline, future-arrival UI annotation, Network baseline coverage status, tests and documentation.
 - Safety boundary: experimental forecast values do not affect recommendation ranking.
 - Status: implemented on Phase 3 branch; CI/deployment validation pending.\n
+## REL-20261027-004 — Phase 4 parking-supply discovery foundation
+
+- Date: 2026-10-27.
+- Scope: activate Phase 4 for the Cork pilot without changing driver recommendation eligibility.
+- Added: WB-CAND candidate contract, automated detection-batch contract, imagery-source licensing registry, detection/cross-match pipeline, change-review pipeline, verification queue, Discover status surface, deployment integration and tests.
+- Guardrail: no imagery-derived candidate is recommendable or public-access verified by default.
+- Status: implemented on Phase 4 branch; CI/live deployment pending.

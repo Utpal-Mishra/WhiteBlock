@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "policy": {
+    "automatic_candidate_promotion": false,
+    "automatic_public_access_inference": false,
+    "automatic_live_occupancy_inference": false,
+    "machine_detection_requires_explicit_licence_approval": true,
+    "raw_imagery_storage_default": false,
+    "note": "A provider being usable as a basemap or human-review reference does not imply permission to download/store pixels or run automated ML analysis."
+  },
+  "sources": {
+    "esri_world_imagery_review": {
+      "provider": "Esri World Imagery",
+      "role": "human_review_metadata_only",
+      "licence_status": "not_verified_for_automated_ml",
+      "machine_ingestion_allowed": false,
+      "pixel_storage_allowed": false,
+      "current_evidence_file": "config/imagery_review_evidence.json",
+      "note": "Existing WHITEBLOCK review conclusions may be retained as metadata. Automated pixel ingestion is disabled until terms for the intended ML workflow are explicitly verified."
+    },
+    "licensed_detection_feed": {
+      "provider": "To be configured",
+      "role": "automated_detection_input",
+      "licence_status": "requires_explicit_configuration",
+      "machine_ingestion_allowed": false,
+      "pixel_storage_allowed": false,
+      "required_before_enable": [
+        "provider_and_product_identified",
+        "machine_analysis_rights_verified",
+        "storage_and_retention_terms_verified",
+        "attribution_requirements_recorded",
+        "acquisition_date_and_resolution_available"
+      ],
+      "note": "The Phase 4 adapter is implemented but remains fail-closed until a licensed imagery/detection source is configured."
+    }
+  }
+}

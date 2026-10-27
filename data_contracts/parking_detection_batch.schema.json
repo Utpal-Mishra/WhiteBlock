@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://whiteblock.local/schemas/parking_detection_batch.schema.json",
+  "title": "WHITEBLOCK Parking Detection Batch",
+  "type": "object",
+  "required": [
+    "type",
+    "source_key",
+    "imagery_acquisition_date",
+    "model_name",
+    "model_version",
+    "features"
+  ],
+  "properties": {
+    "type": {"const": "FeatureCollection"},
+    "source_key": {"type": "string", "minLength": 1},
+    "imagery_id": {"type": ["string", "null"]},
+    "imagery_acquisition_date": {"type": "string", "format": "date"},
+    "model_name": {"type": "string", "minLength": 1},
+    "model_version": {"type": "string", "minLength": 1},
+    "region": {"type": ["string", "null"]},
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "geometry", "properties"],
+        "properties": {
+          "type": {"const": "Feature"},
+          "geometry": {
+            "type": "object",
+            "required": ["type", "coordinates"],
+            "properties": {
+              "type": {"enum": ["Point", "Polygon", "MultiPolygon"]},
+              "coordinates": {}
+            },
+            "additionalProperties": true
+          },
+          "properties": {
+            "type": "object",
+            "required": ["detection_confidence"],
+            "properties": {
+              "detection_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+              "estimated_capacity": {"type": ["integer", "null"], "minimum": 0},
+              "surface_area_m2": {"type": ["number", "null"], "minimum": 0},
+              "detector_class": {"type": ["string", "null"]}
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

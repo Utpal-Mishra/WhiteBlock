@@ -167,3 +167,10 @@
 - New artifacts: `web/data/cork_observation_history.jsonl` and `web/data/cork_availability_baseline.json`.
 - Failure behavior: missing history starts a new history; missing fresh Cork observations may preserve the last published Phase 3 artifacts; no synthetic observations are created.
 - Status: implemented on Phase 3 branch.\n
+## SYS-20261027-004 — Add Phase 4 detection-to-verification system path
+
+- Date: 2026-10-27.
+- Flow: licensed detection batch or existing human imagery review -> canonical inventory cross-match -> WB-CAND registry -> priority verification queue -> promote/reject/retain decision.
+- Separate flow: versioned detection batches -> appeared/expanded/contracted/disappeared-or-obscured change report -> human verification.
+- Production default: no automated imagery source enabled until licensing contract is explicitly approved.
+- Status: implemented on Phase 4 branch.

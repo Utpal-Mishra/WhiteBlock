@@ -144,3 +144,11 @@
 - Not yet integrated: event, weather or traffic features.
 - Guardrail: no external contextual feature is claimed in the Phase 3 model until separately sourced, licensed, timestamp-aligned and evaluated.
 - Status: active evidence stream.\n
+## EXT-20261027-004 — Existing aerial-review evidence becomes Phase 4 seed evidence
+
+- Date: 2026-10-27.
+- Existing source: WHITEBLOCK's 2026-10-03 human imagery-review metadata, including Cork physical-parking visibility and geometry-follow-up conclusions.
+- Allowed current use: retained metadata conclusions and manual follow-up queue seeding.
+- Not established by that evidence: public/legal access, live occupancy, current capacity, or permission for automated pixel/model processing.
+- Automated provider integration remains disabled until a machine-analysis licence record is approved.
+- Status: active manual seed evidence.

@@ -146,3 +146,10 @@
 - Promotion gate: require sufficient history, backtesting, error metrics, probability calibration review and degradation monitoring before forecast availability can replace/currently supplement the ranking availability factor.
 - Reason: a naive baseline is the benchmark a later forecast model must beat, not evidence that ranking has improved.
 - Status: adopted.\n
+## REC-20261027-004 — Use fail-closed imagery ingestion and Cork-first evaluation
+
+- Date: 2026-10-27.
+- Recommendation: do not download/store/process provider imagery automatically until provider/product machine-analysis and retention rights are explicitly recorded.
+- Recommendation: keep Phase 4 automated detection limited to Cork until labelled precision/recall and cross-match performance are measured.
+- Recommendation: treat capacity estimates as estimated evidence only and never overwrite source-verified capacity.
+- Status: adopted.

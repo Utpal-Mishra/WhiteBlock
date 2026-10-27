@@ -20,3 +20,11 @@
 - Classification: benchmark / naive baseline, not a validated ML model.
 - Ranking use: disabled.
 - Status: implemented; evaluation pending.
+## MODEL-20261027-004 — Parking-surface detector adapter and benchmark controls
+
+- Date: 2026-10-27.
+- Added a model-output contract for Point/Polygon/MultiPolygon parking detections with model name/version, acquisition date, confidence, estimated capacity and optional surface area.
+- No production segmentation model is claimed or enabled yet.
+- Detection confidence <0.65 is routed to quarantine in the current Cork benchmark configuration.
+- Evaluation gate: labelled Cork precision/recall and cross-match error measurement before model-driven expansion.
+- Status: adapter implemented; model/source validation pending.

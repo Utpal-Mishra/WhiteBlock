@@ -172,6 +172,8 @@ Exit condition:
 
 ## Phase 4 — Parking Supply Discovery
 
+**Implementation status (2026-10-27):** ACTIVE — foundation integrated for the Cork pilot. WHITEBLOCK now has a governed `WB-CAND-*` candidate contract, fail-closed imagery-source/licensing registry, optional automated detection-batch adapter, canonical inventory cross-match, existing-imagery follow-up seeding, change-detection review pipeline, verification queue and Discover programme status. Automated imagery analysis remains disabled until an explicitly licensed machine-analysis source is configured; labelled Cork precision/recall evaluation remains required before Phase 4 completion.
+
 **Goal:** discover missing, changed and underused parking supply.
 
 Build:

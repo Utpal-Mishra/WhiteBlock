@@ -169,3 +169,11 @@
 - Outputs: observation-history JSONL plus `cork_availability_baseline.json`.
 - No canonical asset fields are mutated.
 - Status: implemented on Phase 3 branch.\n
+## DATA-20261027-004 — Phase 4 detection, candidate and change artifacts
+
+- Date: 2026-10-27.
+- New contracts: parking_detection_batch.schema.json and parking_supply_candidate.schema.json.
+- Inputs: existing reviewed imagery metadata plus optional licensed detection FeatureCollections; canonical regional parking snapshots provide cross-match references.
+- Outputs: parking_supply_discovery.json, parking_supply_review_queue.json and parking_supply_change_report.json.
+- Data separation: candidate geometry/capacity estimates remain inferred and cannot overwrite canonical verified fields.
+- Status: implemented on Phase 4 branch.

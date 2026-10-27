@@ -164,6 +164,11 @@
     const bray = Array.isArray(inventories.bray) ? inventories.bray : [];
     if (bray.length) mergeUnique(output, bray.map(item => enrichForDiscover(item, "bray")));
 
+    const phase4Candidates = Array.isArray(state.phase4SupplyCandidates) ? state.phase4SupplyCandidates : [];
+    if (phase4Candidates.length) {
+      mergeUnique(output, phase4Candidates.map(item => enrichForDiscover(item, "cork")));
+    }
+
     // Static startup fallback before regional adapters finish. It is replaced as
     // soon as canonical regional inventories become available.
     if (!output.length && Array.isArray(parkingData) && parkingData.length) {
@@ -415,6 +420,7 @@
   document.addEventListener("whiteblock:region-inventory-ready", () => refreshDiscoveryInventory());
   document.addEventListener("whiteblock:dublin-settlement-audit-ready", () => refreshDiscoveryInventory());
   document.addEventListener("whiteblock:dublin-restriction-audit-ready", () => refreshDiscoveryInventory());
+  document.addEventListener("whiteblock:phase4-candidates-ready", () => refreshDiscoveryInventory({ resetPage: true }));
 
   document.querySelectorAll('[data-view="discover"]').forEach(button => {
     button.addEventListener("click", () => refreshDiscoveryInventory());
