@@ -206,3 +206,14 @@
 - Impact: recommendation order could imply unsupported knowledge.
 - Mitigation: explicit evidence-state check; unknown factors now earn zero positive score and are disclosed in the ranking explanation.
 - Status: mitigated.
+\n
+## RISK-20261027-003 — Phase 3 history cold start and representativeness
+
+- Date: 2026-10-27.
+- Risk: the initial history is sparse and covers only facilities exposed by the official Cork live feed; early historical means may not generalise to other parking classes or unusual days.
+- Evidence: the new pipeline begins with the observations available after deployment and only marks buckets usable after explicit sample thresholds.
+- Impact: premature forecast ranking could mislead drivers.
+- Mitigation: ranking remains disabled; show sample count/method; retain current observed values separately; backtest before promotion; later test events/weather/traffic as explicit features.
+- Secondary risk: static-site history continuity depends on retrieving the last published artifact.
+- Secondary mitigation: bounded artifact fallback is explicit and failures do not create synthetic history.
+- Owner/status: Phase 3 engineering / open-monitoring.\n
