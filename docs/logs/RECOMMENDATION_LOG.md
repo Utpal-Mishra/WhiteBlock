@@ -115,3 +115,10 @@
 - First ready queue: Dublin City multistorey inventory/live feed, Dublin accessible parking, Dublin City parking meters, South Dublin parking meters and DLR parking runs.
 - Parallel priority: resolve access/max-stay/customer restrictions for known physical parking.
 - Status: adopted.
+
+## REC-20261027-002 — Reconcile accessible spaces and meter anchors before driver use
+
+- Date: 2026-10-27.
+- Recommendation: retain new DCC records in the evidence tier until accessible-entitlement handling and on-street meter/run reconciliation are explicit.
+- Next source work: DCC multistorey live feed, then South Dublin/DLR on-street evidence and broader transport/retail source discovery.
+- Status: adopted.
